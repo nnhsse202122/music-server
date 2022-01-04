@@ -1,0 +1,73 @@
+<head>
+  <meta name="google-signin-client_id" content="430954870897-nqat6i8u9fbhsl4kdctnni162isherhh.apps.googleusercontent.com">
+  <link rel="stylesheet" type="text/css" href="/static/style.css" />
+  <script src="https://apis.google.com/js/client.js?onload=onClientLoad"></script>
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script src="https://apis.google.com/js/platform.js" async defer></script>
+  <style>
+  body {
+    background-image: url('/static/images/background.png');
+    background-attachment: scroll;
+    background-size: cover;
+    background-size: 40%;
+  }
+  </style>
+</head>
+
+<body>
+	<div class="signInBox" id="signInBox">
+    <div id="signInTitle" >Please Sign in</div>
+    <div>
+      <p>To access the website you are required to sign in with Google.</p>
+      <!-- Google sign in button -->
+      <button id="loginButton">
+        <div id="googleIcon"></div>
+        <div id="signInOutText">Login</div>
+      </button>
+    </div>
+	</div>
+
+	<script>
+		//load up that authy boi
+		gapi.load("auth2", () => {
+			gapi.auth2.init()
+		});
+
+		document.getElementById("loginButton").addEventListener("click", googleLogin);
+
+		async function googleLogin() {
+			var googleUser = await gapi.auth2.getAuthInstance().signIn(); // <- this one gonna open the google window
+			let res = await fetch(`/authenticate`, {
+				method: "POST",
+				body: JSON.stringify({
+					token: googleUser.getAuthResponse().id_token
+				}),
+				headers: {
+					"Content-Type": "application/json"
+				}
+			})
+				.then(response => response.json())
+				.then(data => {
+					let email = data.email;
+					if (email.includes("@naperville203.org")) {
+						// setLogin(window.location.origin + "/static/teacher.html");
+						window.location.href = window.location.origin + "/static/teacher.html";
+					}
+					else if (["kittendub@gmail.com", "evman142@gmail.com", "geoffrey.feifei@gmail.com",
+					"bizzlebozzlebuzzle@gmail.com",
+          "bzlbzlbzl2000iscool@gmail.com",
+          "bzli@stu.naperville203.org"].includes(email)) {
+						// setLogin(window.location.origin + "/static/teacher.html");
+						window.location.href = window.location.origin + "/static/teacher.html";
+					}
+					else if (email.includes("@stu.naperville203.org")){
+						// setLogin(window.location.origin + "/static/student.html");
+						window.location.href = window.location.origin + "/static/student.html";
+					}
+          else {
+            window.alert("Please sign in with a school email account.");
+          }
+				});
+		}
+	</script>
+</body>
