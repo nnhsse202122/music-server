@@ -34,7 +34,7 @@ app.get("/ytapi", (req, res) => {
   })
     .then(response => {
       // iterating through the JSON and getting the data we want from it
-      for (var i = 0; i < response.data.items.length; i++) {
+      for (let i = 0; i < response.data.items.length; i++) {
         item = response.data.items[i];
         console.log("[%s] Title: %s", item.id.videoId, item.snippet.title.replace("&#39;", "'"));
       }
@@ -73,7 +73,7 @@ app.get("/videoidtotitle", (req, res) => {
     });
 });
 
-var classEnabledMap = {};
+let classEnabledMap = {};
 app.get("/sendclassenabled", (req, res) => {
 	let classCode = req.query.code;
 	let canJoin = req.query.canjoin;
@@ -83,7 +83,7 @@ app.get("/sendclassenabled", (req, res) => {
 }); // send from teacher if submitting is enabled
 
 
-var canSubmitMap = {};
+let canSubmitMap = {};
 app.get("/sendsubmitenabled", (req, res) => {
 	let classCode = req.query.code;
   let canSubmit = (req.query.canSubmit === "true");
@@ -178,7 +178,7 @@ app.get("/addsong", async (req, res) => {
   let playlistID = req.query.playlist;
   let value = vidID;
 
-  var alreadyContainsSong = false;
+  let alreadyContainsSong = false;
 
   playlistIDList = await db.list(); // getting the list of keys
   if (playlistIDList.indexOf(playlistID) > -1) { // check for whether the key is already in the database
@@ -228,7 +228,7 @@ app.get("/renamecode", async (req, res) => {
 	let newName = req.query.name;
 
 	let database = await db.list();
-	var codeToName = {};
+	let codeToName = {};
 	if (database.indexOf("codeToName") > -1) {
 		codeToName = await db.get("codeToName");
 	}
@@ -300,13 +300,13 @@ app.get("/joinclass", async (req, res) => {
 	}
 
   let codeList = await db.list();
-  var classroom = [];
+  let classroom = [];
 
   if (codeList.indexOf(code) > -1) {
     classroom = await db.get(code);
   }
 
-  var studentAlreadyHere;
+  let studentAlreadyHere;
 
   if (classroom.includes(email)) {
     studentAlreadyHere = true;
@@ -315,7 +315,7 @@ app.get("/joinclass", async (req, res) => {
     classroom.push(email);
     db.set(code, classroom);
     
-    var studentsToCodes = {};
+    let studentsToCodes = {};
 
     if (codeList.indexOf("studentsToCodes") > -1) {
       studentsToCodes = await db.get("studentsToCodes");
