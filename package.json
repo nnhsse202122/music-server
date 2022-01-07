@@ -28,7 +28,7 @@
     "expect.js": "^0.3.1",
     "express": "^4.17.1",
     "express-session": "^1.17.2",
-    "google-auth-library": "^7.1.0",
+    "google-auth-library": "^7.11.0",
     "gulp": "^4.0.2",
     "gulp-eslint": "^6.0.0",
     "gulp-mocha": "^7.0.2",
@@ -58,5 +58,8 @@
     "ws": "^7.4.6",
     "xmlhttprequest-ssl": "^1.6.2",
     "yargs-parser": "^5.0.1"
+  },
+  "devDependencies": {
+    "@types/express-session": "^1.17.4"
   }
 }

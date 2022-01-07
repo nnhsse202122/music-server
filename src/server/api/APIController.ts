@@ -7,22 +7,24 @@ export default class APIController extends Controller<APIController> {
 
     private _authClient: OAuth2Client;
     private _latestAPIVersion: uint; // unsigned integer (0 - 2^32)
+    private _authClientID: string;
 
-    public constructor(app: express.Express, latestAPIVersion: number);
-    public constructor(app: express.Express, latestAPIVersion: uint);
-    public constructor(app: express.Express, latestAPIVersion: number) {
+    public constructor(app: express.Express, authClientID: string, latestAPIVersion: number);
+    public constructor(app: express.Express, authClientID: string, latestAPIVersion: uint);
+    public constructor(app: express.Express, authClientID: string, latestAPIVersion: number) {
         super(app, null);
+        this._authClientID = authClientID;
+        this._authClient = new OAuth2Client(authClientID);
         this._latestAPIVersion = uint(latestAPIVersion);
-        // todo: create auth client
     }
 
     /** The latest API Version available */
     public get latestAPIVersion(): uint {
-        return this.latestAPIVersion;
+        return this._latestAPIVersion;
     }
 
     public get authClientID(): string {
-        // todo
+        return this._authClientID;
     }
 
     public get authClient(): OAuth2Client {

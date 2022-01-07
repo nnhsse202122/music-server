@@ -19,13 +19,13 @@
         "resolveJsonModule": true,
         "target": "ES2020",
         "typeRoots": [
-            "./type-definitions/yt-api.d.ts"
+            "types/sessions.d.ts"
         ]
     },
     "exclude": [
         "dist",
         "index.js",
         "static",
-        "type-definitions"
+        "types"
     ]
 }

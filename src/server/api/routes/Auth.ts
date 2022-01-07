@@ -92,6 +92,9 @@ export default class AuthModel extends APIModel<AuthModel> {
                 "email": email
             };
 
+            // todo: move tokens away from sessions, and have that handled on the client.
+            req.session.token = token;
+
             // send a success response. Success api responses are a JSON object, that have 2 fields.
             // The first is the 'data' field, that contains the result of the request, and the second
             // field is the 'success' field, which would be true because it was successful.
