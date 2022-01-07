@@ -40,6 +40,30 @@ export default class SimpleJSONDataBase<TKey, TValue> implements DataBase<TKey, 
         return Promise.resolve(this._data.delete(key));
     }
 
+    public get(key: TKey): Promise<TValue> {
+        if (!this._data.has(key)) {
+            return Promise.reject("Object with specified key not found!");
+        }
+
+        return Promise.resolve(this._data.get(key)!);
+    }
+
+    public getOrDefault(key: TKey, defaultValue: TValue): Promise<TValue> {
+        if (!this._data.has(key)) {
+            return Promise.resolve(defaultValue);
+        }
+
+        return Promise.resolve(this._data.get(key)!);
+    }
+
+    public keys(): Promise<Iterable<TKey>> {
+        return Promise.resolve(this._data.keys());
+    }
+
+    public values(): Promise<Iterable<TValue>> {
+        return Promise.resolve(this._data.values());
+    }
+
     public toJSON(): string {
         let jsonOBJ = {};
         for (let key of this._data.keys()) {

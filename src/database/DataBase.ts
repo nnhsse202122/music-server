@@ -40,4 +40,24 @@ export default interface DataBase<TKey, TValue> {
      * @returns A promise when resolved, is whether or not the database was cleared successfully.
      */
     clear(): Promise<boolean>
+
+    /**
+     * Gets an item in the dictionary.
+     * @param key The key of the object to get
+     * @returns A promise that when resolved, is the value that's for the given key.
+     * A promise rejection may occur if for example no such item exists in the database.
+     */
+    get(key: TKey): Promise<TValue>;
+
+    /**
+     * Gets an item in the dictionary, or returns a default value.
+     * @param key The key of the object to get
+     * @param defaultValue The default value to return if the key doesn't exist.
+     * @returns A promise that when resolved, is the value that's for the given key, or if
+     * no such key/value pair exists, contains the value passed by the default parameter
+     */
+    getOrDefault(key: TKey, defaultValue: TValue): Promise<TValue>;
+
+    keys(): Promise<Iterable<TKey>>
+    values(): Promise<Iterable<TValue>>
 }
