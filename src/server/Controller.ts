@@ -59,6 +59,7 @@ export default abstract class Controller<TController extends Controller<TControl
     public init(): void {
         this.loadModels();
 
+        // call init on each model
         this._models.forEach((model) => {
             model.init();
         });
