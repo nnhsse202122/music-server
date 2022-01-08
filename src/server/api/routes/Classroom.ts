@@ -6,42 +6,419 @@ import { APIModel } from "../APIModel";
 
 // to be honest, this will be the type that will need to be refactored the most.
 
-// temp container types to hold classroom information until we set up
-// replit database
-type Classroom = {
-    /** The class code */
-    code: string,
-    /** The list of students by email */
-    students: string[],
-    /** Classroom settings */
-    settings: ClassroomSettings,
-}
-
-type ClassroomSettings = {
-    allowSongSubmission: boolean,
-    enabled: boolean,
-    code: string,
-    students: string[]
-};
-
 export default class ClassroomModel extends APIModel<ClassroomModel> {
 
-    private _classroomDB: DataBase<string, Classroom>;
+    private _classroomDB: DataBase<string, SongServer.Data.Classroom>;
+    private _userDB: DataBase<string, SongServer.Data.User>;
 
     public constructor(controller: APIController) {
         // api version 1
-        super(controller, "/classroom", 1);
+        super(controller, "/classrooms", 1);
 
         this._classroomDB = new SimpleJSONDataBase();
+        this._userDB = new SimpleJSONDataBase();
     }
 
     protected override initRoutes(router: Router): void {
-        
+        // get classroom list from teacher email
+        router.get("/", async (req, res) => {
+            // query string of email is required
+            let email = req.query.email;
+            if (email == null) {
+
+                // send fail api response
+                res.status(400).send({
+                    "message": "An email query parameter is required for this endpoint",
+                    "success": false
+                });
+                return; // prevent other code from running
+            }
+            if (typeof email !== "string") {
+                // send fail api response
+                res.status(400).send({
+                    "message": "The email query parameter must be a string.",
+                    "success": false
+                });
+                return; // prevent other code from running
+            }
+
+            this.logger.debug("Received request for all classrooms from email " + email);
+
+            let user: SongServer.Data.User;
+            try {
+                user = await this._userDB.get(email);
+            }
+            catch(err) {
+                // err is type any because promises can reject with any value.
+                // check if it's an actual error object
+                if (err instanceof Error) {
+                    // send fail api response
+                    res.status(404).send({
+                        "message": "Error fetching classrooms from teacher: " + err.message,
+                        "success": false
+                    });
+
+                    return; // prevent other code from running
+                }
+                // otherwise convert to string
+                let message = new String(err);
+
+                // send fail api response
+                res.status(404).send({
+                    "message": message,
+                    "success": false
+                });
+                return; // prevent other code from running
+            }
+
+            // we need to add support for getting students/teacher stuffies
+            let result: SongServer.API.ClassroomInfo[] = [];
+            for (let index = 0; index < user.classrooms.length; index++) {
+                let classroom = user.classrooms[index];
+                
+                try {
+                    let info = await this._classroomDB.get(classroom.code);
+                    let students: SongServer.API.StudentInfo[] = [];
+                    for (let studentIndex = 0; studentIndex < info.students.length; studentIndex++) {
+                        let foundUser = await this._userDB.get(info.students[studentIndex]);
+                        if (foundUser.type === "student") {
+                            students.push({
+                                "email": foundUser.email,
+                                "name": foundUser.name,
+                                "type": "student"
+                            });
+                        }
+                    }
+
+                    let classInfo: SongServer.API.ClassroomInfo = {
+                        "role": "teacher",
+                        "name": info.name,
+                        "code": info.code,
+                        "students": students    
+                    };
+
+                    result.push(classInfo);
+                }
+                catch {
+                    // todo: add exception handling
+                }
+            }
+
+            let response: SongServer.API.Responses.ClassroomsAPIResponse = {
+                data: result,
+                success: true
+            }
+            // send success api response
+            res.send(response);
+        });
+
+        router.post("/", async (req, res) => {
+            // query string of email is required
+            let email = req.query.email;
+            if (email == null) {
+
+                // send fail api response
+                res.status(400).send({
+                    "message": "An email query parameter is required for this endpoint",
+                    "success": false
+                });
+                return; // prevent other code from running
+            }
+            if (typeof email !== "string") {
+                // send fail api response
+                res.status(400).send({
+                    "message": "The email query parameter must be a string.",
+                    "success": false
+                });
+                return; // prevent other code from running
+            }
+
+            this.logger.debug("Received request for all classrooms from email " + email);
+            let user: SongServer.Data.User;
+            try {
+                user = await this._userDB.get(email);
+            }
+            catch(err) {
+                // err is type any because promises can reject with any value.
+                // check if it's an actual error object
+                if (err instanceof Error) {
+                    // send fail api response
+                    res.status(404).send({
+                        "message": "Error adding classrooms to teacher: " + err.message,
+                        "success": false
+                    });
+
+                    return; // prevent other code from running
+                }
+                // otherwise convert to string
+                let message = new String(err);
+
+                // send fail api response
+                res.status(404).send({
+                    "message": message,
+                    "success": false
+                });
+                return; // prevent other code from running
+            }
+
+            // only teachers may add a new classroom
+            if (user.type != "teacher") {
+                res.status(403).send({
+                    "message": "This endpoint is only available to teachers",
+                    "success": false
+                });
+                return; // prevent other code from running
+            }
+
+            let body: SongServer.API.Server.Requests.CreateClassroomRequest = req.body;
+            if (body.name == null) {
+                // send fail api response
+                res.status(400).send({
+                    "message": "A name is required for the class",
+                    "success": false
+                });
+
+                return; // prevent other code from running
+            }
+            if (typeof body.name !== "string") {
+                // send fail api response
+                res.status(400).send({
+                    "message": "The name field must be a string",
+                    "success": false
+                });
+
+                return; // prevent other code from running
+            }
+
+            let joinable: boolean = true;
+            if (body.joinable != null) {
+                if (typeof body.joinable !== "boolean") {
+                    // send fail api response
+                    res.status(400).send({
+                        "message": "The joinable field if provided must be a boolean or null",
+                        "success": false
+                    });
+
+                    return; // prevent other code from running
+                }
+
+                joinable = body.joinable;
+            }
+            let allowSongSubmissions = true;
+            if (body.allowSongSubmissions != null) {
+                if (typeof body.allowSongSubmissions !== "boolean") {
+                    // send fail api response
+                    res.status(400).send({
+                        "message": "The allowSongSubmissions field if provided must be a boolean or null",
+                        "success": false
+                    });
+
+                    return; // prevent other code from running
+                }
+
+                allowSongSubmissions = body.allowSongSubmissions;
+            }
+
+            let newClassIndex = user.classrooms.length;
+
+            // find the hash function of the email
+            // (same as java implementation for string hash function)
+            let content = `${newClassIndex}$${user.email}`;
+
+            let hash = 0;
+            for (let i = 0; i < content.length; i++) {
+                let char = content.charCodeAt(i);
+                hash = ((hash << 5) - hash) + char;
+                hash = hash & hash; // Convert to 32bit integer
+            }
+            if (hash < 0) hash = -hash; // convert negative hashs to positive values
+
+            // convert the hash function to a 6 or 7 letter code
+            let code = "";
+            while (hash > 1) {
+                code += String.fromCharCode(65 + hash % 26);
+                hash = hash / 26;
+            }
+
+            let classroom: SongServer.Data.Classroom = {
+                "code": code,
+                "name": body.name,
+                "teacher": email,
+                "settings": {
+                    "allowSongSubmission": allowSongSubmissions,
+                    "joinable": joinable
+                },
+                "students": []
+            };
+
+            try {
+                let added = await this._classroomDB.add(code, classroom);
+                if (added) {
+                    user.classrooms.push({
+                        "code": code
+                    });
+
+                    await this._userDB.set(email, user);
+
+                    // send success api response
+                    res.send({
+                        "data": classroom,
+                        "success": true
+                    });
+                }
+                else {
+                    // send failed api response
+                    res.status(500).send({
+                        "message": "Failed to add classroom to database",
+                        "success": false
+                    });
+                }
+            }
+            catch (err) {
+                let message: string;
+                if (err instanceof Error) {
+                    message = err.message;
+                }
+                else {
+                    message = new String(err) as string;
+                }
+
+                this.logger.warn("Error adding classroom: " + message);
+                
+                // send api error response
+                res.status(500).send({
+                    "message": message,
+                    "success": false
+                });
+            }
+
+            
+        });
+
         // handles requesting for a classroom via a code
         // todo: maybe hide or change some things for the response (e.g. student emails)
         router.get("/:code", async (req, res) => {
             this.logger.debug("Received request for classroom with code " + req.params.code);
-            let classroom: Classroom;
+            let classroom: SongServer.Data.Classroom;
+            try {
+                classroom = await this._classroomDB.get(req.params.code);
+            }
+            catch (err) {
+                // err is type any because promises can reject with any value.
+                // check if it's an actual error object
+                if (err instanceof Error) {
+                    // send fail api response
+                    res.status(404).send({
+                        "message": "Error fetching class: " + err.message,
+                        "success": false
+                    });
+
+                    return; // prevent other code from running
+                }
+                // otherwise convert to string
+                let message = new String(err);
+
+                // send fail api response
+                res.status(404).send({
+                    "message": message,
+                    "success": false
+                });
+                return; // prevent other code from running
+            }
+
+            // todo: add student and teacher views
+            
+
+            let students: SongServer.API.StudentInfo[] = [];
+            try {
+                for (let studentIndex = 0; studentIndex < classroom.students.length; studentIndex++) {
+                    let foundUser = await this._userDB.get(classroom.students[studentIndex]);
+                    if (foundUser.type === "student") {
+                        students.push({
+                            "email": foundUser.email,
+                            "name": foundUser.name,
+                            "type": "student"
+                        });
+                    }
+                }
+            }
+            catch {
+                // todo: catch exceptions
+            }
+
+            // success api response (we may need to change it)
+            let result: SongServer.API.ClassroomInfo = {
+                "code": classroom.code,
+                "name": classroom.name,
+                "role": "teacher",
+                "students": students
+            };
+
+            let response: SongServer.API.Responses.ClassroomAPIResponse = {
+                "data": result,
+                "success": true
+            }
+
+            res.send(response);
+        });
+
+        router.patch("/:code", async (req, res) => {
+            this.logger.debug("Received request to patch classroom with code " + req.params.code);
+
+            let classroom: SongServer.Data.Classroom;
+            try {
+                classroom = await this._classroomDB.get(req.params.code);
+            }
+            catch (err) {
+                // err is type any because promises can reject with any value.
+                // check if it's an actual error object
+                if (err instanceof Error) {
+                    // send fail api response
+                    res.status(404).send({
+                        "message": "Error fetching class: " + err.message,
+                        "success": false
+                    });
+
+                    return; // prevent other code from running
+                }
+                // otherwise convert to string
+                let message = new String(err);
+
+                // send fail api response
+                res.status(404).send({
+                    "message": message,
+                    "success": false
+                });
+                return; // prevent other code from running
+            }
+
+            let body: SongServer.API.Server.Requests.PatchClassroomRequest = req.body;
+
+            if (body.name != null) {
+                if (typeof body.name !== "string" ){
+                    // send fail api response
+                    res.status(400).send({
+                        "message": "The name field must be of type string",
+                        "success": false
+                    });
+                    return; // prevent other code from running
+                }
+
+                classroom.name = body.name;
+            }
+
+            // success api response (we may need to change it)
+            let result: boolean = await this._classroomDB.set(req.params.code, classroom);
+            
+            res.send({
+                "data": result,
+                "success": true
+            });
+        });
+
+        router.get("/:code/settings", async (req, res) => {
+            this.logger.debug("Received request for classroom settings with code " + req.params.code);
+            let classroom: SongServer.Data.Classroom;
             try {
                 classroom = await this._classroomDB.get(req.params.code);
             }
@@ -69,56 +446,20 @@ export default class ClassroomModel extends APIModel<ClassroomModel> {
             }
 
             // success api response (we may need to change it)
-            let result: Classroom = classroom;
+            let result: SongServer.API.ClassroomSettingsInfo = classroom.settings;
 
-            res.send({
+            let response: SongServer.API.Responses.ClassroomSettingsAPIResponse = {
                 "data": result,
                 "success": true
-            });
-        });
-
-        router.get("/:code/submissions", async (req, res) => {
-            this.logger.debug("Received request for classroom submission status with code " + req.params.code);
-            let classroom: Classroom;
-            try {
-                classroom = await this._classroomDB.get(req.params.code);
-            }
-            catch (err) {
-                // err is type any because promises can reject with any value.
-                // check if it's an actual error object
-                if (err instanceof Error) {
-                    // send fail api response
-                    res.status(404).send({
-                        "message": "Error fetching class: " + err.message,
-                        "success": false
-                    });
-
-                    return; // prevent other code from running
-                }
-                // otherwise convert to string
-                let message = new String(err);
-
-                // send fail api response
-                res.status(404).send({
-                    "message": message,
-                    "success": false
-                });
-                return; // prevent other code from running
             }
 
-            // success api response (we may need to change it)
-            let result: boolean = classroom.settings.allowSongSubmission;
-
-            res.send({
-                "data": result,
-                "success": true
-            });
+            res.send(response);
         });
 
-        router.patch("/:code/submissions", async (req, res) => {
+        router.patch("/:code/settings", async (req, res) => {
             this.logger.debug("Received request for setting classroom submission status with code " + req.params.code);
 
-            let classroom: Classroom;
+            let classroom: SongServer.Data.Classroom;
             try {
                 classroom = await this._classroomDB.get(req.params.code);
             }
@@ -145,7 +486,33 @@ export default class ClassroomModel extends APIModel<ClassroomModel> {
                 return; // prevent other code from running
             }
 
-            classroom.settings.allowSongSubmission = req.query.enabled == "true"; 
+            let body: SongServer.API.Server.Requests.PatchClassroomSettingsRequest = req.body;
+            if (body.joinable != null) {
+                if (typeof body.joinable !== "boolean") {
+                    
+                    // send fail api response
+                    res.status(400).send({
+                        "message": "The joinable field must be of type boolean",
+                        "success": false
+                    });
+                    return; // prevent other code from running
+                }
+                classroom.settings.joinable = body.joinable;
+            }
+
+            if (body.allowSongSubmission != null) {
+                if (typeof body.allowSongSubmission !== "boolean") {
+                    
+                    // send fail api response
+                    res.status(400).send({
+                        "message": "The allowSongSubmission field must be of type boolean",
+                        "success": false
+                    });
+                    return; // prevent other code from running
+                }
+                classroom.settings.allowSongSubmission = body.allowSongSubmission;
+            }
+
             // success api response (we may need to change it)
             let result: boolean = await this._classroomDB.set(req.params.code, classroom);
 
@@ -153,6 +520,6 @@ export default class ClassroomModel extends APIModel<ClassroomModel> {
                 "data": result,
                 "success": true
             });
-        })
+        });
     }
 }

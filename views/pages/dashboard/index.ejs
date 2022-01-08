@@ -1,0 +1,29 @@
+<ul id="navbar1">
+    <%# If is a teacher view, set the navbar thingy to say teacher view%>
+    <% if (view === "teacher") { %>
+        <a id= "navbarstyling">Classroom Music - Teacher View</a>
+    <% } else { %>
+        <a id= "navbarstyling">Classroom Music</a>
+    <% } %>
+</ul>
+
+<!-- <div class="g-signin2" data-onsuccess="onSignIn"></div> -->
+<button id = "signOutButton" href="#" onclick="signOut();" class="btn mr-2 mb-2 btn-primary" type="button">
+    <div id="googleIcon"></div>
+    <div id="signInOutText">Sign Out</div>
+</button>
+
+<% if (view === "student") { %>
+    <%= include("_student") %>
+<% } else if (view === "teacher") { %>
+    <%= include("_teacher") %>
+<% } %>
+
+<script src="https://apis.google.com/js/api.js"></script>
+<script src="/static/script.js"></script>
+
+<% if (view === "student") { %>
+    <%= include("_student-scripts") %>
+<% } else if (view === "teacher") { %>
+    <%= include("_teacher-scripts") %>
+<% } %>

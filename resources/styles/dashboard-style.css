@@ -1,0 +1,6 @@
+body {
+    background-image: url('/resources/images/background.png');
+    background-attachment: scroll;
+    background-size: cover;
+    background-size: 40%;
+}

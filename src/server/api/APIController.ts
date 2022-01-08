@@ -2,6 +2,9 @@ import { OAuth2Client } from "google-auth-library";
 import express from "express";
 import Controller from "../Controller";
 import { u32 as uint } from "typed-numbers"; // unsigned integer (0-2^32)
+import ClassroomModel from "./routes/Classroom";
+import AuthModel from "./routes/Auth";
+import YoutubeModel from "./routes/Youtube";
 
 export default class APIController extends Controller<APIController> {
 
@@ -33,7 +36,9 @@ export default class APIController extends Controller<APIController> {
 
     // override and implement abstract method
     protected override loadModels(): void {
-        throw new Error("Method not implemented.");
+        this.addModel(new ClassroomModel(this));
+        this.addModel(new AuthModel(this));
+        this.addModel(new YoutubeModel(this));
     }
 
 }
