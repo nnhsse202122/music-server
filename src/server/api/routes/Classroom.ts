@@ -8,15 +8,9 @@ import { APIModel } from "../APIModel";
 
 export default class ClassroomModel extends APIModel<ClassroomModel> {
 
-    private _classroomDB: DataBase<string, SongServer.Data.Classroom>;
-    private _userDB: DataBase<string, SongServer.Data.User>;
-
     public constructor(controller: APIController) {
         // api version 1
         super(controller, "/classrooms", 1);
-
-        this._classroomDB = new SimpleJSONDataBase();
-        this._userDB = new SimpleJSONDataBase();
     }
 
     protected override initRoutes(router: Router): void {
@@ -46,7 +40,7 @@ export default class ClassroomModel extends APIModel<ClassroomModel> {
 
             let user: SongServer.Data.User;
             try {
-                user = await this._userDB.get(email);
+                user = await this.userDatabase.get(email);
             }
             catch(err) {
                 // err is type any because promises can reject with any value.
@@ -77,15 +71,16 @@ export default class ClassroomModel extends APIModel<ClassroomModel> {
                 let classroom = user.classrooms[index];
                 
                 try {
-                    let info = await this._classroomDB.get(classroom.code);
+                    let info = await this.classroomDatabase.get(classroom.code);
                     let students: SongServer.API.StudentInfo[] = [];
                     for (let studentIndex = 0; studentIndex < info.students.length; studentIndex++) {
-                        let foundUser = await this._userDB.get(info.students[studentIndex]);
+                        let foundUser = await this.userDatabase.get(info.students[studentIndex]);
                         if (foundUser.type === "student") {
                             students.push({
                                 "email": foundUser.email,
                                 "name": foundUser.name,
-                                "type": "student"
+                                "type": "student",
+                                "currentClass": foundUser.currentClass
                             });
                         }
                     }
@@ -136,7 +131,7 @@ export default class ClassroomModel extends APIModel<ClassroomModel> {
             this.logger.debug("Received request for all classrooms from email " + email);
             let user: SongServer.Data.User;
             try {
-                user = await this._userDB.get(email);
+                user = await this.userDatabase.get(email);
             }
             catch(err) {
                 // err is type any because promises can reject with any value.
@@ -252,13 +247,13 @@ export default class ClassroomModel extends APIModel<ClassroomModel> {
             };
 
             try {
-                let added = await this._classroomDB.add(code, classroom);
+                let added = await this.classroomDatabase.add(code, classroom);
                 if (added) {
                     user.classrooms.push({
                         "code": code
                     });
 
-                    await this._userDB.set(email, user);
+                    await this.userDatabase.set(email, user);
 
                     // send success api response
                     res.send({
@@ -301,7 +296,7 @@ export default class ClassroomModel extends APIModel<ClassroomModel> {
             this.logger.debug("Received request for classroom with code " + req.params.code);
             let classroom: SongServer.Data.Classroom;
             try {
-                classroom = await this._classroomDB.get(req.params.code);
+                classroom = await this.classroomDatabase.get(req.params.code);
             }
             catch (err) {
                 // err is type any because promises can reject with any value.
@@ -332,12 +327,13 @@ export default class ClassroomModel extends APIModel<ClassroomModel> {
             let students: SongServer.API.StudentInfo[] = [];
             try {
                 for (let studentIndex = 0; studentIndex < classroom.students.length; studentIndex++) {
-                    let foundUser = await this._userDB.get(classroom.students[studentIndex]);
+                    let foundUser = await this.userDatabase.get(classroom.students[studentIndex]);
                     if (foundUser.type === "student") {
                         students.push({
                             "email": foundUser.email,
                             "name": foundUser.name,
-                            "type": "student"
+                            "type": "student",
+                            "currentClass": foundUser.currentClass
                         });
                     }
                 }
@@ -367,7 +363,7 @@ export default class ClassroomModel extends APIModel<ClassroomModel> {
 
             let classroom: SongServer.Data.Classroom;
             try {
-                classroom = await this._classroomDB.get(req.params.code);
+                classroom = await this.classroomDatabase.get(req.params.code);
             }
             catch (err) {
                 // err is type any because promises can reject with any value.
@@ -408,7 +404,7 @@ export default class ClassroomModel extends APIModel<ClassroomModel> {
             }
 
             // success api response (we may need to change it)
-            let result: boolean = await this._classroomDB.set(req.params.code, classroom);
+            let result: boolean = await this.classroomDatabase.set(req.params.code, classroom);
             
             res.send({
                 "data": result,
@@ -420,7 +416,7 @@ export default class ClassroomModel extends APIModel<ClassroomModel> {
             this.logger.debug("Received request for classroom settings with code " + req.params.code);
             let classroom: SongServer.Data.Classroom;
             try {
-                classroom = await this._classroomDB.get(req.params.code);
+                classroom = await this.classroomDatabase.get(req.params.code);
             }
             catch (err) {
                 // err is type any because promises can reject with any value.
@@ -461,7 +457,7 @@ export default class ClassroomModel extends APIModel<ClassroomModel> {
 
             let classroom: SongServer.Data.Classroom;
             try {
-                classroom = await this._classroomDB.get(req.params.code);
+                classroom = await this.classroomDatabase.get(req.params.code);
             }
             catch (err) {
                 // err is type any because promises can reject with any value.
@@ -514,7 +510,7 @@ export default class ClassroomModel extends APIModel<ClassroomModel> {
             }
 
             // success api response (we may need to change it)
-            let result: boolean = await this._classroomDB.set(req.params.code, classroom);
+            let result: boolean = await this.classroomDatabase.set(req.params.code, classroom);
 
             res.send({
                 "data": result,

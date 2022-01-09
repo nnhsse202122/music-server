@@ -27,7 +27,9 @@ declare namespace SongServer.Data {
         /** The user email */
         email: string,
         /** The list of classrooms by ID. */
-        classrooms: UserClass[]
+        classrooms: UserClass[],
+        /** The current classroom. */
+        currentClass: string | null
     };
 
     type UserClass = {
@@ -38,6 +40,19 @@ declare namespace SongServer.Data {
     type StudentUser = UserBase<"student">;
 
     type User = TeacherUser | StudentUser;
+
+    /** Represents a song playlist */
+    type SongPlaylist = {
+        songs: Song[]
+    };
+
+    type Song = {
+        /** The email of the user */
+        requestedBy: SongServer.API.BasicUser
+    } & ({
+        source: "youtube",
+        videoID: string
+    });
 }
 
 declare namespace SongServer.API {
@@ -81,7 +96,13 @@ declare namespace SongServer.API {
 
     type SongInfo = {
         id: string,
-        requested_by: string
+        source: SongSource,
+        requested_by: BasicUser
+    }
+
+    type BasicUser = {
+        name: string,
+        email: string
     }
 
     // type containing information of a fetched video using the search
@@ -93,7 +114,7 @@ declare namespace SongServer.API {
         id: string
     }
 
-
+    type SongSource = "youtube";
 }
 
 declare namespace SongServer.API.Responses {
@@ -124,7 +145,8 @@ declare namespace SongServer.API.Responses {
 
     type DeletePlaylistResponse = DeleteResponse;
     type DeleteSongFromPlaylistResponse = DeleteResponse;
-    type PlaylistInfoResponse = APIResponse<PlaylistInfo | null>;
+    type PlaylistInfoResponse = APIResponse<PlaylistInfo>;
+    type AddSongToPlaylistResponse = APIResponse<boolean>;
 
     type FetchUserResponse = APIResponse<UserInfo>;
 }
@@ -144,6 +166,12 @@ declare namespace SongServer.API.Server.Requests {
         joinable?: any,
         allowSongSubmissions?: any
     };
+
+    type AddSongToPlaylistRequest = {
+        requestedBy?: any,
+        source?: any,
+        id?: any
+    }
 }
 
 declare namespace SongServer.API.Client.Requests {
@@ -161,4 +189,10 @@ declare namespace SongServer.API.Client.Requests {
         joinable?: boolean,
         allowSongSubmissions?: boolean
     };
+
+    type AddSongToPlaylistRequest = {
+        requestedBy?: SongServer.API.BasicUser,
+        source?: "youtube",
+        id?: string
+    }
 }

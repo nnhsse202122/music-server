@@ -71,7 +71,7 @@ async function getClassList(code: string): Promise<SongServer.API.ClassroomInfo>
 //Hmm ^^^
 
 /* The playlist variable we have as of now works a bit strangely -- every even index is the song, and every odd index is the name of the student who submitted it. */
-async function getPlaylist(playlistID: string): Promise<SongServer.API.PlaylistInfo | null> {
+async function getPlaylist(playlistID: string): Promise<SongServer.API.PlaylistInfo> {
     let response = await fetch(`/api/v1/playlists/${playlistID}`);
     let data: SongServer.API.Responses.PlaylistInfoResponse = await response.json();
 
@@ -231,7 +231,7 @@ async function showPlaylist() {
             songBeingLookedAt = song.id;
             
             songInfoNameElement.textContent = "Song Name: " + title;
-            submittedByElement.textContent = "Submitted By: " + studentName;
+            submittedByElement.textContent = "Submitted By: " + studentName.name;
             songOptionsModalElement.style.display = "block";
         });
 
@@ -273,8 +273,8 @@ async function removeStudentFromClass(): Promise<boolean> {
     return data.data;
 }
 
-async function displaySongInfo(id: string, stuName: string) {
-    console.log("id: " + id + "\nname: " + stuName);
+async function displaySongInfo(id: string, stuName: SongServer.API.BasicUser) {
+    console.log("id: " + id + "\nname: " + stuName.name);
 }
 
 shuffleButtonElement.addEventListener("click", async () => {
