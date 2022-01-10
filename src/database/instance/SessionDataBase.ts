@@ -19,7 +19,7 @@ export default class SessionDataBase extends SimpleJSONDataBase<string, SongServ
         const GEN_KEY = "AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz0123456789_-";
         for (let count = 0; count < length; count++) {
             // add random char of GEN_KEY to sessionID
-            sessionID = GEN_KEY.charAt(Math.floor(Math.random() * GEN_KEY.length))
+            sessionID += GEN_KEY.charAt(Math.floor(Math.random() * GEN_KEY.length))
         }
         return sessionID;
     }

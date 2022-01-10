@@ -17,21 +17,21 @@ export default class YoutubeModel extends APIModel<YoutubeModel> {
         // will handle searching for a video using req.query.
         // returns the first 3 videos that match the specific query
         router.get("/videos", async (req, res) => {
-            let term = req.query.keyword;
-            if (term == null) {
+            let query = req.query.query;
+            if (query == null) {
                 // send fail api response
                 res.status(400).send({
-                    "message": "A term query parameter is required!",
+                    "message": "A query query parameter is required!",
                     "success": false
                 });
 
                 return; // prevent other code from running
             }
             // make sure term is string
-            if (typeof term !== "string") {
+            if (typeof query !== "string") {
                 // send fail api response
                 res.status(400).send({
-                    "message": "Term provided must not be an array. Only strings are accepted",
+                    "message": "Query provided must not be an array. Only strings are accepted",
                     "success": false
                 });
 
@@ -49,7 +49,7 @@ export default class YoutubeModel extends APIModel<YoutubeModel> {
                                              // for more info
                     "key": process.env.KEY,
                     "maxResults": 3,
-                    "q": term
+                    "q": query
                 });
             }
             // catch errors

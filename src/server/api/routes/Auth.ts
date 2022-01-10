@@ -1,5 +1,6 @@
 import { Request, Router } from "express";
 import { LoginTicket } from "google-auth-library";
+import { getRoleFromEmail } from "../../Server";
 import APIController from "../APIController";
 import { APIModel, APIResponseInfo } from "../APIModel";
 
@@ -61,6 +62,42 @@ export default class AuthModel extends APIModel<AuthModel> {
                 "success": false,
                 "status": 400
             };
+        }
+
+        let session = await this.sessionDatabase.get(createdSession.token);
+        if (!await this.userDatabase.contains(session.email)) {
+
+            let role = getRoleFromEmail(session.email);
+            let user: SongServer.Data.User;
+            if (role == "invalid") {
+                // send fail api response
+                return {
+                    "message": "Email is not authorized for this application",
+                    "success": false,
+                    "status": 401
+                };
+            }
+            else if (role === "student") {
+                user = {
+                    "type": "student",
+                    "classrooms": [],
+                    "currentClass": null,
+                    "email": session.email,
+                    "name": session.name
+                };
+            }
+            else {
+
+                user = {
+                    "type": "teacher",
+                    "classrooms": [],
+                    "currentClass": null,
+                    "email": session.email,
+                    "name": session.name
+                };
+            }
+
+            await this.userDatabase.add(session.email, user);
         }
 
         // send a success response. Success api responses are a JSON object, that have 2 fields.

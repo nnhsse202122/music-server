@@ -5,6 +5,7 @@ import AuthModel from "./routes/Auth";
 import YoutubeModel from "./routes/Youtube";
 import PlaylistModel from "./routes/Playlist";
 import Server from "../Server";
+import UserModel from "./routes/User";
 
 export default class APIController extends Controller<APIController> {
 
@@ -28,6 +29,7 @@ export default class APIController extends Controller<APIController> {
         this.addModel(new AuthModel(this));
         this.addModel(new YoutubeModel(this));
         this.addModel(new PlaylistModel(this));
+        this.addModel(new UserModel(this));
     }
 
 }

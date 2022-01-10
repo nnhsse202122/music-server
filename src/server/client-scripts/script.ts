@@ -15,11 +15,12 @@ let confirmSongElement = document.getElementById("confirmSong")! as HTMLButtonEl
 let verifyCancelButtonElement = document.getElementById("verifyCancelButton")! as HTMLButtonElement;
 let cancelButtonElement = document.getElementById("cancelButton")! as HTMLButtonElement;
 let store_nameElement = document.getElementById("store_name")! as HTMLDivElement;
+let displayCodeElement = document.getElementById("displayCode")! as HTMLParagraphElement;
 
 // selectedSongID variable
 let selectedSongID: string = "";
 
-let getCurrentCode = window.getCurrentClassCode ?? window.getCurrentCodeForStudent;
+var getCurrentCode: () => Promise<string>;
 
 submitButtonElement.addEventListener("click", async () => {
 	let searchTerm = searchWordElement.value;
@@ -39,7 +40,7 @@ submitButtonElement.addEventListener("click", async () => {
     console.log(data);
         
 	if (data.data.allowSongSubmission) {
-        let fetchResponse = await fetch(`/api/v1/yt/videos?term=${encodeURI(searchTerm)}`);
+        let fetchResponse = await fetch(`/api/v1/yt/videos?query=${encodeURI(searchTerm)}`);
         let fetchData: SongServer.API.Responses.SearchVideosAPIResponse = await fetchResponse.json();
 
         if (!fetchData.success) {

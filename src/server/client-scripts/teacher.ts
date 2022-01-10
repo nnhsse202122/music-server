@@ -34,7 +34,6 @@ let changeClassNameButtonElement = document.getElementById("changeClassNameButto
 let changeClassNameElement = document.getElementById("changeClassName")! as HTMLInputElement;
 let selectClassLabelElement = document.getElementById("selectClassLabel")! as HTMLLabelElement;
 let selectorElement = document.getElementById("selector")! as HTMLDivElement;
-let displayCodeElement = document.getElementById("displayCode")! as HTMLParagraphElement;
 
 // variables
 let isPlaying = false;
@@ -57,8 +56,55 @@ async function getCode(index: number = 0): Promise<string> {
         throw new Error(data.message);
     }
 
+    if (index === 0 && data.data.length === 0) {
+        let addClassroomResponse = await fetch(`/api/v1/classrooms`, {
+            "method": "POST",
+            "body": JSON.stringify({
+                "joinable": true,
+                "name": "Classroom",
+                "allowSongSubmissions": true
+            }),
+            "headers": {
+                "Content-Type": "application/json",
+                "Authorization": `Basic ${window.localStorage.getItem("auth")}`
+            }
+        });
+        let classData: SongServer.API.Responses.CreateClassroomAPIResponse = await addClassroomResponse.json();
+        
+        if (classData.success) {
+            return classData.data.code;
+        }
+
+        throw new Error(classData.message);
+    }
+
+    if (data.data[index] == null) {
+        // @ts-ignore
+        return null;
+    }
     return data.data[index].code;
 }
+
+var profile: gapi.auth2.BasicProfile;
+
+//load up that authy boi
+gapi.load("auth2", async () => {
+    
+    // todo: figure out params
+    // @ts-ignore
+    gapi.auth2.init()
+        .then(async response => {
+            profile = response.currentUser.get().getBasicProfile();
+            console.log('Full Name: ' + profile.getName());
+            console.log('Email: ' + profile.getEmail());
+
+            store_nameElement.textContent = profile.getName();
+            let currentCode = await getCurrentClassCode();
+            displayCodeElement.textContent = "Your current code is: " + currentCode;
+            await loadClassSelection();
+            await xyz();
+    });
+});
 
 async function getClassList(code: string): Promise<SongServer.API.ClassroomInfo> {
     console.log(code);
@@ -131,7 +177,7 @@ async function shufflePlaylist() {
 // returns the current class code for the teacher
 async function getCurrentClassCode(): Promise<string> {
     // @ts-ignore
-    return await getCode(profile.getEmail(), parseInt(classNumber));
+    return await getCode(parseInt(classNumber) - 1);
 }
 
 
@@ -319,9 +365,10 @@ async function loadClassSelection() {
 	newItem.id = 'selectClass';
     // @ts-ignore
 	let email = profile.getEmail();
-	for (let i = 0; i < 8; i++) {
+    // load one class, eventually load dynamically
+	for (let i = 0; i < 1; i++) {
 		let code = await getCode(i);
-        let response = await fetch(`/api/v1/classroom/${code}`, {
+        let response = await fetch(`/api/v1/classrooms/${code}`, {
             "headers": {
                 "Authorization": `Basic ${window.localStorage.getItem("auth")}`
             }
@@ -356,7 +403,7 @@ changeClassNameButtonElement.addEventListener("click", async () => {
 
 	document.getElementById("option" + classNumber)!.textContent = newName;
 
-    await fetch(`/api/v1/classroom/${code}`, {
+    await fetch(`/api/v1/classrooms/${code}`, {
         "method": "PATCH",
         "body": JSON.stringify({
             "name": newName
@@ -392,7 +439,7 @@ async function xyz () {
     console.log(456);
 
     // enabling/disabling song submission
-    await fetch(`/api/v1/classroom/${code}/settings`, {
+    await fetch(`/api/v1/classrooms/${code}/settings`, {
         "method": "PATCH",
         "body": JSON.stringify({
             "allowSongSubmission": isSubmitEnabled
@@ -415,7 +462,7 @@ disableClassButtonElement.addEventListener("click", async () => {
         disableClassButtonElement.textContent = "Enable Classroom Code"; // change button to ask for enable
         disableClassDescriptionElement.textContent = "Your class is currently DISABLED"; // change description to disabled
 
-        await fetch(`/api/v1/classroom/${code}/settings`, {
+        await fetch(`/api/v1/classrooms/${code}/settings`, {
             "method": "PATCH",
             "body": JSON.stringify({
                 "joinable": false
@@ -431,7 +478,7 @@ disableClassButtonElement.addEventListener("click", async () => {
         disableClassButtonElement.textContent = "Disable Classroom Code"; // change button to ask for disable
         disableClassDescriptionElement.textContent = "Your class is currently ENABLED"; // change description to enabled
         
-        await fetch(`/api/v1/classroom/${code}/settings`, {
+        await fetch(`/api/v1/classrooms/${code}/settings`, {
             "method": "PATCH",
             "body": JSON.stringify({
                 "joinable": true
@@ -454,7 +501,7 @@ disableSubmitButtonElement.addEventListener("click", async () => {
         disableSubmitButtonElement.textContent = "Enable Song Submissions"; // change button to ask for enable
         disableSongDescriptionElement.textContent = "Your playlist is currently DISABLED"; // change description to disabled
         
-        await fetch(`/api/v1/classroom/${code}/settings`, {
+        await fetch(`/api/v1/classrooms/${code}/settings`, {
             "method": "PATCH",
             "body": JSON.stringify({
                 "allowSongSubmission": false
@@ -470,7 +517,7 @@ disableSubmitButtonElement.addEventListener("click", async () => {
         disableSubmitButtonElement.textContent = "Disable Song Submissions"; // change button to ask for disable
         disableSongDescriptionElement.textContent = "Your playlist is currently ENABLED"; // change description to enabled
         
-        await fetch(`/api/v1/classroom/${code}/settings`, {
+        await fetch(`/api/v1/classrooms/${code}/settings`, {
             "method": "PATCH",
             "body": JSON.stringify({
                 "allowSongSubmission": true
@@ -512,7 +559,7 @@ async function refreshClass() {
 }
 
 async function emailToName(email: string, code: string): Promise<string> {
-    let response = await fetch(`/api/v1/classroom/${code}/students/${email}`, {
+    let response = await fetch(`/api/v1/classrooms/${code}/students/${email}`, {
         "headers": {
             "Authorization": `Basic ${window.localStorage.getItem("auth")}`
         }
@@ -539,3 +586,5 @@ confirmClearButtonElement.addEventListener("click", async () => {
 clearPlaylistElement.addEventListener("click", async () => {
     confirmClearModal.style.display = "block";
 });
+
+getCurrentCode = getCurrentClassCode;

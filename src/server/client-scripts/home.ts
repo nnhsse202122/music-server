@@ -24,7 +24,7 @@ async function googleLogin() {
         });
         let response: SongServer.API.Responses.AuthorizeResponse = await request.json();
         window.localStorage.setItem("auth", response.success ? response.data.token : "");
-        //window.location.pathname = "/dashboard";
+        window.location.pathname = "/dashboard";
     }
     catch(err) {
         window.alert("Error whilst authorizing: " + err);

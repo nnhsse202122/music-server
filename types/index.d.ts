@@ -141,6 +141,19 @@ declare namespace SongServer.API {
         token: string
     }
 
+    type CreatedClassroomInfo = {
+        /** The class name */
+        name: string,
+        /** The class code */
+        code: string,
+        /** The teacher that manages this classroom */
+        teacher: string,
+        /** The list of students by email */
+        students: string[],
+        /** Classroom settings */
+        settings: ClassroomSettingsInfo,
+    }
+
     type SongSource = "youtube";
 }
 
@@ -162,6 +175,7 @@ declare namespace SongServer.API.Responses {
     type SearchVideosAPIResponse = APIResponse<FetchedVideo[]>;
 
     type ClassroomsAPIResponse = APIResponse<ClassroomInfo[]>;
+    type CreateClassroomAPIResponse = APIResponse<CreatedClassroomInfo>;
     type ClassroomAPIResponse = APIResponse<ClassroomInfo>;
     type ClassroomSettingsAPIResponse = APIResponse<ClassroomSettingsInfo>;
 

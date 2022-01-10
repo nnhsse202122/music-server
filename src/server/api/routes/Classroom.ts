@@ -844,9 +844,28 @@ export default class ClassroomModel extends APIModel<ClassroomModel> {
                     "message": "The class can't be joined",
                     "success": false
                 });
+                return;
             }
 
+            user.currentClass = req.params.code;
 
+            classroom.students.push(session.email);
+            try {
+                await this.userDatabase.set(user.email, user);
+                await this.classroomDatabase.set(req.params.code, classroom);
+
+                res.send({
+                    "success": true,
+                    "data": true
+                });
+            }
+            catch (err) {
+                // todo: handler error
+                res.status(500).send({
+                    "success": false,
+                    "message": "internal server error"
+                });
+            }
         });
     }
 }

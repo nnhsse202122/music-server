@@ -132,3 +132,8 @@ Deletes a playlist
 
 ### DELETE `/api/v1/playlists/{playlist-id}/songs/{song-id}`
 Deletes a song with the specified
+
+## Users
+
+### GET `/api/v1/users`
+Gets information about the current user.

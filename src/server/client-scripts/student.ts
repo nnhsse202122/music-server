@@ -45,7 +45,7 @@ gapi.load("auth2", async () => {
             let currentCode = await getCurrentCodeForStudent();
             displayCodeElement.textContent = "Your current code is: " + currentCode;
     });
-})
+});
 
 function signOut() {
     let auth2 = gapi.auth2.getAuthInstance();
@@ -67,7 +67,8 @@ async function joinClass(code: string, email: string, name: string) {
             "name": name
         }),
         "headers": {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
         }
     });
     let data: SongServer.API.Responses.ClassroomAddStudentAPIResponse = await response.json();
@@ -79,3 +80,5 @@ async function joinClass(code: string, email: string, name: string) {
     console.log("Student successfully added");
     displayCodeElement.textContent = "Your current code is: " + code;
 }
+
+getCurrentCode = getCurrentCodeForStudent;
