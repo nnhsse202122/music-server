@@ -135,7 +135,13 @@ export default abstract class Model<TModel extends Model<TModel, TController>, T
             this.logger.error(`Error initializing routes: ${(err as Error).stack}`);
         }
 
-        let id = "/" + this.urlPath;
+        // replace all \ with /
+        let id = this.urlPath.replace(/\\/gi, "/");
+        // add / if needed
+        if (!id.startsWith("/")) {
+            id = "/" + id;
+        }
+
         this.app.use(id, router);
         this.logger.debug(`Initialized server router '${id}'`);
     }
