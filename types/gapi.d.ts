@@ -98,6 +98,12 @@ declare namespace gapi.auth2 {
          */
         signOut(): Promise<void>;
 
+        /**
+         * Signs in the user with the options specified to `gapi.auth2.init()`.
+         * @returns A Promise that is fulfilled with the GoogleUser instance when the user successfully authenticates and grants the requested scopes, or rejected with an object containing an error property if an error happened (see below for error codes).
+         */
+        signIn(): Promise<GoogleUser>
+
         currentUser: {
             get: () => GoogleUser
         };
@@ -130,6 +136,29 @@ declare namespace gapi.auth2 {
          * **Do not use the user's profile information to communicate the currently signed in user to your backend server. Instead, send ID tokens, which can be securely validated on the server.**
          */
         getBasicProfile(): BasicProfile;
+
+        /**
+         * Get the response object from the user's auth session.
+         * @param includeAuthorizationData A boolean that specifies whether to always return an access token and scopes. By default, the access token and requested scopes are not returned when fetch_basic_profile is true (the default value) and no additional scopes are requested.
+         * @returns A gapi.auth2.AuthResponse object.
+         */
+        getAuthResponse(includeAuthorizationData?: boolean): AuthResponse
+
+        
+    }
+    export interface AuthResponse {
+        /** The Access Token granted. */
+        access_token: string,
+        /** The ID Token granted. */
+        id_token: string,
+        /** The scopes granted in the Access Token. */
+        scope: string,
+        /** The number of seconds until the Access Token expires. */
+        expires_in: number,
+        /** The timestamp at which the user first granted the scopes requested. */
+        first_issued_at: number,
+        /** The timestamp at which the Access Token will expire. */
+        expires_at: number
     }
 
     export interface BasicProfile {

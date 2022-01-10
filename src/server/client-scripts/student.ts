@@ -4,9 +4,12 @@ let submitCodeElement = document.getElementById("submitCode")! as HTMLButtonElem
 let classCodeEnterElement = document.getElementById("classCodeEnter")! as HTMLInputElement;
 
 // function that returns the student's current class code
-async function getCurrentCodeForStudent(): Promise<string | null> {
-    let email = profile.getEmail();
-    let response = await fetch(`/api/v1/users/${email}`);
+async function getCurrentCodeForStudent(): Promise<string> {
+    let response = await fetch(`/api/v1/users/`, {
+        "headers": {
+            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
+        }
+    });
     let data: SongServer.API.Responses.FetchUserResponse = await response.json();
 
     if (!data.success) {
@@ -14,6 +17,9 @@ async function getCurrentCodeForStudent(): Promise<string | null> {
     }
 
     if (data.data.type === "student") {
+        if (data.data.currentClass == null) {
+            throw new Error("Student isn't in a class");
+        }
         return data.data.currentClass;
     }
     else {
@@ -44,7 +50,7 @@ gapi.load("auth2", async () => {
 function signOut() {
     let auth2 = gapi.auth2.getAuthInstance();
     auth2.signOut().then(() => {
-        window.location.href = window.location.origin + "/static/index.html";
+        window.location.pathname = "";
     });
 }
     

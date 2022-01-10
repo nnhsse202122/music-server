@@ -10,39 +10,6 @@
     </div>
 </div>
 
-	<script>
-		var studentCode = ""; // Student's current class classcode
-    
-    // method to join a class, if class is enabled
-    document.getElementById("submitCode").addEventListener("click", async () => {
-			studentCode = document.getElementById("classCodeEnter").value;
-			
-			await joinClass(studentCode, profile.getEmail(), profile.getName());
-			await setEmailToName(profile.getEmail(), profile.getName());
-    });
-		
-    async function joinClass(code, email, name) {
-			await fetch(`/joinclass?code=${encodeURI(code)}&email=${encodeURI(email)}&name=${name}`)
-        .then(response => response.json())
-        .then(data => {
-          if (data.contains === true) {
-            window.alert("You are already in this class. Please try again with a different class code.");
-          }
-          else if (data.classEnabled) {
-            console.log("Student successfully added");
-						document.getElementById("displayCode").innerHTML = "Your current code is: " + studentCode;
-          } else {
-						window.alert("Joining that classroom is disabled right now!");
-					}
-        });
-    }
-
-		async function setEmailToName(email, name) {
-			await fetch(`/setemailtoname?email=${encodeURI(email)}&name=${encodeURI(name)}`);
-			console.log("aaaaaaaaa");
-		}
-  </script>
-
 <div class="modal" id="verifyModal">
     <div id="modalContent">
         <div class="card-header">

@@ -9,7 +9,7 @@ export default class YoutubeModel extends APIModel<YoutubeModel> {
 
     public constructor(controller: APIController) {
         // version 1
-        super(controller, "/yt", 1);
+        super(controller, "yt", 1);
     }
 
     protected override initRoutes(router: Router): void {

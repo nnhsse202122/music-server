@@ -19,15 +19,16 @@ let store_nameElement = document.getElementById("store_name")! as HTMLDivElement
 // selectedSongID variable
 let selectedSongID: string = "";
 
+let getCurrentCode = window.getCurrentClassCode ?? window.getCurrentCodeForStudent;
+
 submitButtonElement.addEventListener("click", async () => {
 	let searchTerm = searchWordElement.value;
-    let getcode = getCurrentClassCode;
-    if (getcode == null) {
-        // @ts-ignore
-        getcode = getCurrentCodeForStudent;
-    }
-	let code = await getCurrentClassCode();
-    let response = await fetch(`/api/v1/classrooms/${code}/settings`);
+	let code = await getCurrentCode();
+    let response = await fetch(`/api/v1/classrooms/${code}/settings`, {
+        "headers": {
+            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
+        }
+    });
     let data: SongServer.API.Responses.ClassroomSettingsAPIResponse = await response.json();
 
     if (!data.success) {
@@ -71,10 +72,11 @@ async function addSongToPlaylist(id: string, playlistID: string) {
     await fetch(`/playlists/${playlistID}/songs`, {
         "method": "POST",
         "body": JSON.stringify({
-        "songID": id
+            "songID": id
         }),
         "headers": {
-        "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
         }
     }).then(response => response.json())
         .then(data => {
@@ -166,7 +168,7 @@ confirmSongElement.addEventListener("click", async () => {
     // console.log(name);
     //var songInfo = [id, name];
 
-    addSongToPlaylist(selectedSongID, await getCurrentClassCode());
+    addSongToPlaylist(selectedSongID, await getCurrentCode());
 });
 
 verifyCancelButtonElement.addEventListener("click", () => {

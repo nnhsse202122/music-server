@@ -14,16 +14,16 @@
 </button>
 
 <% if (view === "student") { %>
-    <%= include("_student") %>
+    <%- include("_student") %>
 <% } else if (view === "teacher") { %>
-    <%= include("_teacher") %>
+    <%- include("_teacher") %>
 <% } %>
 
 <script src="https://apis.google.com/js/api.js"></script>
-<script src="/static/script.js"></script>
+<script src="/resources/scripts/script.js"></script>
 
 <% if (view === "student") { %>
-    <%= include("_student-scripts") %>
+    <%- include("_student-scripts") %>
 <% } else if (view === "teacher") { %>
-    <%= include("_teacher-scripts") %>
+    <%- include("_teacher-scripts") %>
 <% } %>

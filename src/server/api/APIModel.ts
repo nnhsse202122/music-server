@@ -3,11 +3,13 @@ import APIController from "./APIController";
 import path from "path";
 import { Response } from "express";
 import { u32 as uint } from "typed-numbers";
-import DataBase from "../../database/DataBase";
 
-export type APIResponseInfo<TResponse> = Promise<TResponse & {
-    status?: number
-}>;
+export type APIResponseInfo<TResponse> = Promise<TResponse & ({
+    success: false,
+    status: number
+} | {
+    success: true
+})>;
 export abstract class APIModel<TModel extends APIModel<TModel>> extends Model<TModel, APIController> {
     
     private _apiVersion: uint;
@@ -38,18 +40,6 @@ export abstract class APIModel<TModel extends APIModel<TModel>> extends Model<TM
                 "data": result.data
             });
         }
-    }
-
-    public get userDatabase(): DataBase<string, SongServer.Data.User> {
-        return this.controller.userDatabase;
-    }
-
-    public get classroomDatabase(): DataBase<string, SongServer.Data.Classroom> {
-        return this.controller.classroomDatabase;
-    }
-
-    public get playlistDatabase(): DataBase<string, SongServer.Data.SongPlaylist> {
-        return this.controller.playlistDatabase;
     }
 
     /** 

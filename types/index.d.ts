@@ -53,6 +53,20 @@ declare namespace SongServer.Data {
         source: "youtube",
         videoID: string
     });
+
+    /**
+     * Representation of a session
+     */
+    type Session = {
+        /** The email the session is for */
+        email: string,
+        /** The name of the user the session is for */
+        name: string,
+        /** The access token of the session */
+        accessToken: string,
+        /** The UTC timestamp at which the session expires at. */
+        expiresAfter: number
+    };
 }
 
 declare namespace SongServer.API {
@@ -73,6 +87,7 @@ declare namespace SongServer.API {
     };
 
     type UserInfo = TeacherInfo | StudentInfo;
+    type UserType = ClassroomRole;
 
     type ClassroomRole = "student" | "teacher"
 
@@ -84,7 +99,7 @@ declare namespace SongServer.API {
 
     type StudentClassroomInfo = ClassroomInfoBase<"student">;
     type TeacherClassroomInfo = ClassroomInfoBase<"teacher"> & {
-        students: SongServer.API.StudentInfo[]
+        students: StudentInClassroom[]
     }
 
     type ClassroomInfo = StudentClassroomInfo | TeacherClassroomInfo;
@@ -105,6 +120,11 @@ declare namespace SongServer.API {
         email: string
     }
 
+    type StudentInClassroom = {
+        name: string;
+        email: string,
+    }
+
     // type containing information of a fetched video using the search
     // option for the youtube api, or for a singular video
     type FetchedVideo = {
@@ -112,6 +132,13 @@ declare namespace SongServer.API {
         title: string,
         /** The video id */
         id: string
+    }
+
+    type CreatedSessionInfo = {
+        // The UTC timestamp at which this session expires
+        expires_at: number,
+        // The generated session token.
+        token: string
     }
 
     type SongSource = "youtube";
@@ -149,6 +176,8 @@ declare namespace SongServer.API.Responses {
     type AddSongToPlaylistResponse = APIResponse<boolean>;
 
     type FetchUserResponse = APIResponse<UserInfo>;
+
+    type AuthorizeResponse = APIResponse<CreatedSessionInfo>
 }
 
 declare namespace SongServer.API.Server.Requests {
@@ -172,6 +201,10 @@ declare namespace SongServer.API.Server.Requests {
         source?: any,
         id?: any
     }
+
+    type AuthorizeRequest = {
+        token?: any
+    }
 }
 
 declare namespace SongServer.API.Client.Requests {
@@ -194,5 +227,9 @@ declare namespace SongServer.API.Client.Requests {
         requestedBy?: SongServer.API.BasicUser,
         source?: "youtube",
         id?: string
+    }
+
+    type AuthorizeRequest = {
+        token?: string
     }
 }

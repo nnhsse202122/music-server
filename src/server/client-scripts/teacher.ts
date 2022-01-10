@@ -45,8 +45,12 @@ let songBeingLookedAt: string | null = null;
 let studentBeingLookedAt: string | null = null;
 var songPlaylistBeingLookedAt;
 //Is this needed ^^^ or this vvv
-async function getCode(email: string, index: number = 0): Promise<string> {
-    let response = await fetch(`/classrooms?email=${encodeURIComponent(email)}`);
+async function getCode(index: number = 0): Promise<string> {
+    let response = await fetch(`/api/v1/classrooms`, {
+        "headers": {
+            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
+        }
+    });
     let data: SongServer.API.Responses.ClassroomsAPIResponse = await response.json();
 
     if (!data.success) {
@@ -59,7 +63,11 @@ async function getCode(email: string, index: number = 0): Promise<string> {
 async function getClassList(code: string): Promise<SongServer.API.ClassroomInfo> {
     console.log(code);
     console.log("abc");
-    let response = await fetch(`/api/v1/classrooms/${code}`);
+    let response = await fetch(`/api/v1/classrooms/${code}`, {
+        "headers": {
+            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
+        }
+    });
     let data: SongServer.API.Responses.ClassroomAPIResponse = await response.json();
     
     if (!data.success) {
@@ -72,7 +80,11 @@ async function getClassList(code: string): Promise<SongServer.API.ClassroomInfo>
 
 /* The playlist variable we have as of now works a bit strangely -- every even index is the song, and every odd index is the name of the student who submitted it. */
 async function getPlaylist(playlistID: string): Promise<SongServer.API.PlaylistInfo> {
-    let response = await fetch(`/api/v1/playlists/${playlistID}`);
+    let response = await fetch(`/api/v1/playlists/${playlistID}`, {
+        "headers": {
+            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
+        }
+    });
     let data: SongServer.API.Responses.PlaylistInfoResponse = await response.json();
 
     if (!data.success) {
@@ -85,7 +97,10 @@ async function getPlaylist(playlistID: string): Promise<SongServer.API.PlaylistI
 // deleted specified playlist
 async function deletePlaylist(playlistID: string): Promise<boolean> {
     let response = await fetch(`/api/v1/playlists/${playlistID}`, {
-        "method": "DELETE"
+        "method": "DELETE",
+        "headers": {
+            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
+        }
     });
     let data: SongServer.API.Responses.DeletePlaylistResponse = await response.json();
 
@@ -121,7 +136,7 @@ async function getCurrentClassCode(): Promise<string> {
 
 
 async function updateCurrentlyPlayingText(id: string): Promise<void> {
-    let response = await fetch(`/api/v1/videos/${id}`);
+    let response = await fetch(`/api/v1/yt/videos/${id}`);
     let data: SongServer.API.Responses.FetchVideoAPIResponse = await response.json();
 
     if (!data.success) {
@@ -246,7 +261,12 @@ async function removeSongFromPlaylist(): Promise<boolean> {
     let playlistID = await getCurrentClassCode();
     if (songID == null) throw new Error("Cannot remove song because no song is being played/looked at")
 
-    let response = await fetch(`/api/v1/playlists/${playlistID}/songs/${songID}`, { "method": "DELETE" });
+    let response = await fetch(`/api/v1/playlists/${playlistID}/songs/${songID}`, { 
+        "method": "DELETE",
+        "headers": {
+            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
+        }
+    });
     let data: SongServer.API.Responses.DeleteSongFromPlaylistResponse = await response.json();
     if (!data.success) {
         throw new Error(data.message);
@@ -261,7 +281,12 @@ async function removeStudentFromClass(): Promise<boolean> {
 	let email = studentBeingLookedAt;
 	let classroomID = await getCurrentClassCode();
 
-    let response = await fetch(`/api/v1/classrooms/${classroomID}/students/${email}`, { "method": "DELETE" });
+    let response = await fetch(`/api/v1/classrooms/${classroomID}/students/${email}`, {
+        "method": "DELETE",
+        "headers": {
+            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
+        }
+    });
     let data: SongServer.API.Responses.ClassroomRemoveStudentAPIResponse = await response.json();
 
     if (!data.success) {
@@ -295,8 +320,12 @@ async function loadClassSelection() {
     // @ts-ignore
 	let email = profile.getEmail();
 	for (let i = 0; i < 8; i++) {
-		let code = await getCode(email, i);
-        let response = await fetch(`/api/v1/classroom/${code}`);
+		let code = await getCode(i);
+        let response = await fetch(`/api/v1/classroom/${code}`, {
+            "headers": {
+                "Authorization": `Basic ${window.localStorage.getItem("auth")}`
+            }
+        });
         let data: SongServer.API.Responses.ClassroomAPIResponse = await response.json();
 
         if (!data.success) {
@@ -330,11 +359,11 @@ changeClassNameButtonElement.addEventListener("click", async () => {
     await fetch(`/api/v1/classroom/${code}`, {
         "method": "PATCH",
         "body": JSON.stringify({
-        "code": code,
-        "name": newName
+            "name": newName
         }),
         "headers": {
-        "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
         }
     });
 });
@@ -369,7 +398,8 @@ async function xyz () {
             "allowSongSubmission": isSubmitEnabled
         }),
         "headers": {
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
+            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
         }
     });// so it's not linked to pressing the button
     disableSubmitButtonElement.innerHTML = "Disable Song Submissions";
@@ -391,7 +421,8 @@ disableClassButtonElement.addEventListener("click", async () => {
                 "joinable": false
             }),
             "headers": {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Basic ${window.localStorage.getItem("auth")}`
             }
         });
     }
@@ -406,7 +437,8 @@ disableClassButtonElement.addEventListener("click", async () => {
                 "joinable": true
             }),
             "headers": {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Basic ${window.localStorage.getItem("auth")}`
             }
         });
     }
@@ -428,7 +460,8 @@ disableSubmitButtonElement.addEventListener("click", async () => {
                 "allowSongSubmission": false
             }),
             "headers": {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Basic ${window.localStorage.getItem("auth")}`
             }
         });
     }
@@ -443,7 +476,8 @@ disableSubmitButtonElement.addEventListener("click", async () => {
                 "allowSongSubmission": true
             }),
             "headers": {
-                "Content-Type": "application/json"
+                "Content-Type": "application/json",
+                "Authorization": `Basic ${window.localStorage.getItem("auth")}`
             }
         });
     }
@@ -478,7 +512,11 @@ async function refreshClass() {
 }
 
 async function emailToName(email: string, code: string): Promise<string> {
-    let response = await fetch(`/api/v1/classroom/${code}/students/${email}`);
+    let response = await fetch(`/api/v1/classroom/${code}/students/${email}`, {
+        "headers": {
+            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
+        }
+    });
     let data: SongServer.API.Responses.ClassroomStudentAPIResponse = await response.json();
 
     if (!data.success) {

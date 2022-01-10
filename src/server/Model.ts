@@ -1,7 +1,15 @@
-import express, { Router } from "express";
+import express, { Request, Router } from "express";
 import Controller from "./Controller";
 import Logger from "../util/Logger";
 import path from "path";
+import UserDataBase from "../database/instance/UserDataBase";
+import ClassroomDataBase from "../database/instance/ClassroomDataBase";
+import PlaylistDataBase from "../database/instance/PlaylistDataBase";
+import SessionDataBase from "../database/instance/SessionDataBase";
+
+export type AuthorizedSession = SongServer.Data.Session & {
+    userType: "teacher" | "student"
+};
 
 /**
  * Base class for models.
@@ -43,6 +51,63 @@ export default abstract class Model<TModel extends Model<TModel, TController>, T
 
     public get controller(): TController {
         return this._controller;
+    }
+
+    public get userDatabase(): UserDataBase {
+        return this.controller.userDatabase;
+    }
+
+    public get classroomDatabase(): ClassroomDataBase {
+        return this.controller.classroomDatabase;
+    }
+
+    public get playlistDatabase(): PlaylistDataBase {
+        return this.controller.playlistDatabase;
+    }
+
+    public get sessionDatabase(): SessionDataBase {
+        return this.controller.sessionDatabase;
+    }
+
+
+    /**
+     * Performs authorization.
+     */
+    protected async authorize(token: string | null | undefined): Promise<SongServer.Data.Session> {
+        if (token == null) {
+            throw new Error("A token is required");
+        }
+
+        let session: SongServer.Data.Session;
+        try {
+            session = await this.sessionDatabase.get(token);
+        }
+        catch (err) {
+            throw new Error("Invalid auth token");
+        }
+
+        // potentially implement cooldowns here maybe i dunno
+        return session;
+    }
+
+    protected async authorizeFromRequest(req: Request): Promise<SongServer.Data.Session> {
+        let authorization = req.headers.authorization;
+        if (authorization == null) {
+            throw new Error("An authorization header is required for this route");
+        }
+
+        let authParts = authorization.split(" ", 2);
+        if (authParts.length != 2) {
+            throw new Error("2 parts are required for authorization");
+        }
+
+        let authType = authParts[0];
+        if (authType !== "Basic") {
+            throw new Error("Only basic authorization is supported");
+        }
+
+        let authToken = authParts[1];
+        return await this.authorize(authToken);
     }
 
     /**

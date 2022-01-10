@@ -1,4 +1,4 @@
-import { Request, Response, Router } from "express";
+import { Router } from "express";
 import APIController from "../APIController";
 import { APIModel, APIResponseInfo } from "../APIModel";
 
@@ -12,7 +12,7 @@ function getIDFromSong(song: SongServer.Data.Song): string {
 export default class PlaylistModel extends APIModel<PlaylistModel> {
     
     public constructor(controller: APIController) { 
-        super(controller, "/playlists", 1);
+        super(controller, "playlists", 1);
     }
 
     protected override initRoutes(router: Router): void {

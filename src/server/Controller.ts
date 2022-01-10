@@ -1,20 +1,26 @@
 import express from "express";
 import Model from "./Model";
+import Server from "./Server";
+import ClassroomDataBase from "../database/instance/ClassroomDataBase";
+import UserDataBase from "../database/instance/UserDataBase";
+import PlaylistDataBase from "../database/instance/PlaylistDataBase";
+import SessionDataBase from "../database/instance/SessionDataBase";
+import { OAuth2Client } from "google-auth-library";
 
 /**
  * The base class for any controller.
  */
 export default abstract class Controller<TController extends Controller<TController>> {
     private _models: Model<any, TController>[];
-    private _app: express.Express;
     private _viewsPath: string | null;
+    private _server: Server;
 
     /**
      * Initializes this instance of the controller
      * @param app The express application to use.
      */
-    public constructor(app: express.Express, viewsPath: string | null = null) {
-        this._app = app;
+    public constructor(server: Server, viewsPath: string | null = null) {
+        this._server = server;
         this._models = [];
         this._viewsPath = viewsPath;
     }
@@ -23,11 +29,15 @@ export default abstract class Controller<TController extends Controller<TControl
         return this._viewsPath;
     }
 
+    public get server(): Server {
+        return this._server;
+    }
+
     /**
      * The express application this controller is for.
      */
-     public get app(): express.Express {
-        return this._app;
+    public get app(): express.Express {
+        return this.server.app;
     }
 
     /**
@@ -37,6 +47,31 @@ export default abstract class Controller<TController extends Controller<TControl
         // return copy of array using spread operator to prevent modification.
         // modification should be done through the 'addModel' method.
         return [...this._models];
+    }
+
+    // getters for accessing the databases
+    public get classroomDatabase(): ClassroomDataBase {
+        return this.server.classroomDatabase;
+    }
+
+    public get userDatabase(): UserDataBase {
+        return this.server.userDatabase;
+    }
+
+    public get playlistDatabase(): PlaylistDataBase {
+        return this.server.playlistDatabase;
+    }
+
+    public get sessionDatabase(): SessionDataBase {
+        return this.server.sessionDatabase;
+    }
+
+    public get authClientID(): string {
+        return this.server.authClientID;
+    }
+
+    public get authClient(): OAuth2Client {
+        return this.authClient;
     }
 
     /**
@@ -61,6 +96,7 @@ export default abstract class Controller<TController extends Controller<TControl
 
         // call init on each model
         this._models.forEach((model) => {
+            model.logger.info("loading...");
             model.init();
         });
     }
