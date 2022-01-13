@@ -78,10 +78,90 @@ or
 * `data[n].students[i].name`: The name of the student
 * `message` A string value only present when `success` is false, that specifies the error message of why the request wasn't recognized by the server.
 
+### GET `/api/v1/classrooms/{code}`
+Gets the classroom with the specified code. Requires teacher authorization or for the student to be in that class
+(which will result in them getting less info about the class).
+* `code` The current classroom code.
+
+### GET `/api/v1/classrooms/{code}/settings`
+Gets the current settings of the classroom.
+* `code` The current classroom code.
+
+### PUT `/api/v1/classrooms/{code}/settings`
+* `code` The current classroom code.
+
+### GET `/api/v1/classrooms/{code}/playlist`
+Gets the current playlist the classroom is using. Will return a 404 if the classroom isn't using a playlist
+* `code` The current classroom code.
+
+### POST `/api/v1/classrooms/{code}/playlist`
+Sets the playlist of the current classroom.
+* `code` The current classroom code.
+
+### DELETE `/api/v1/classrooms/{code}/playlist`
+Deletes the current classroom playlist. This wont delete the playlist the classroom uses, but rather will de-reference it.
+* `code` The current classroom code.
+
+### POST `/api/v1/classrooms/{code}/playlist/songs`
+Adds a song to the current classroom playlist.
+* `code` The current classroom code.
+
+### DELETE `/api/v1/classrooms/{code}/playlist/songs/`
+Deletes a song from the current classroom playlist.
+* `code` The current classroom code.
+
+### PATCH `/api/v1/classrooms/{code}/playlist/songs/`
+Modify the current song position of a specified song
+* `code` The current classroom code.
+
+### POST `/api/v1/classrooms/{code}/playlist/shuffle`
+Shuffles the current classroom playlist. **ONLY AVAILABLE FOR TEACHERS**
+* `code` The current classroom code.
+
+#### Query Parameters
+Do not specify query parameters.
+
+#### Headers
+* `Authorization`: Basic Authorization containing the session id.
+
+#### Body
+Do not specify a body.
+
+#### Response
+```json
+{
+    "success": false,
+    "message": string
+}
+```
+or
+```json
+{
+    "success": true,
+    "data": {
+        "name": string,
+        "songs": {
+            "id": string,
+            "source": string,
+            "requested_by": {
+                "name": string,
+                "email": string
+            },
+            "is_temp": boolean,
+        }[]
+    }[]
+}
+```
+* `success`: A boolean indicating whether or not the request was successfully recognized by the server
+* `data`: An array of objects only present when `success` is true, that represents the current classroom playlist.
+* `message` A string value only present when `success` is false, that specifies the error message of why the request wasn't recognized by the server.
+
+
 ## Playlists
 
 ### GET `/api/v1/playlists/{playlist-id}`
 Returns the info for the specified playlist.
+* `playlist-id` The ID of the playlist to get the songs from.
 
 ### POST `/api/v1/playlists/{playlist-id}/songs`
 Adds a song to the playlist with the specified ID.

@@ -25,12 +25,7 @@ var getCurrentCode: () => Promise<string>;
 submitButtonElement.addEventListener("click", async () => {
 	let searchTerm = searchWordElement.value;
 	let code = await getCurrentCode();
-    let response = await fetch(`/api/v1/classrooms/${code}/settings`, {
-        "headers": {
-            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
-        }
-    });
-    let data: SongServer.API.Responses.ClassroomSettingsAPIResponse = await response.json();
+    let data = await ClientAPI().classrooms.classroom(code).settings.get();
 
     if (!data.success) {
         throw new Error(data.message);
@@ -40,14 +35,13 @@ submitButtonElement.addEventListener("click", async () => {
     console.log(data);
         
 	if (data.data.allowSongSubmission) {
-        let fetchResponse = await fetch(`/api/v1/yt/videos?query=${encodeURI(searchTerm)}`);
-        let fetchData: SongServer.API.Responses.SearchVideosAPIResponse = await fetchResponse.json();
+        let fetchData = await ClientAPI().youtube.search(searchTerm);
 
         if (!fetchData.success) {
             throw new Error(fetchData.message);
         }
         let videoData = fetchData.data;
-        showSongChoices(videoData[0].id, videoData[1].id, videoData[2].id,videoData[0].title, videoData[1].title, videoData[2].title);
+        showSongChoices(videoData);
 	}
 	else {
 		window.alert("Song could not be submitted. Make sure you've joined a classroom. If you have, ask your teacher if submitting a song is currently disabled for this playlist.");
@@ -55,42 +49,34 @@ submitButtonElement.addEventListener("click", async () => {
 		
 });
 
-function showSongChoices(videoId1: string, videoId2: string, videoId3: string, videoTitle1: string, videoTitle2: string, videoTitle3: string) {
-    songChoice1Element.textContent = "Title: " + videoTitle1;
-	songChoice1Element.setAttribute("videoid", videoId1);
-    songChoice2Element.textContent = "Title: " + videoTitle2;
-	songChoice2Element.setAttribute("videoid", videoId2);
-    songChoice3Element.textContent = "Title: " + videoTitle3;
-	songChoice3Element.setAttribute("videoid", videoId3);
-
-
-    songChoiceBox1Element.style.display = "block";
-    songChoiceBox2Element.style.display = "block";
-    songChoiceBox3Element.style.display = "block";
+function showSongChoices(data: SongServer.API.FetchedVideo[]) {
+    if (data.length > 0) {
+        songChoice1Element.textContent = "Title: " + data[0].title;
+	    songChoice1Element.setAttribute("videoid", data[0].id);
+        songChoiceBox1Element.style.display = "block";
+    }
+    if (data.length > 1) {
+        songChoice2Element.textContent = "Title: " + data[1].title;
+	    songChoice2Element.setAttribute("videoid", data[1].id);
+        songChoiceBox2Element.style.display = "block";
+    }
+    if (data.length > 2) {
+        songChoice3Element.textContent = "Title: " + data[2].title;
+	    songChoice3Element.setAttribute("videoid", data[2].id);
+        songChoiceBox3Element.style.display = "block";
+    }
 }
 
-async function addSongToPlaylist(id: string, playlistID: string) {
-    await fetch(`/playlists/${playlistID}/songs`, {
-        "method": "POST",
-        "body": JSON.stringify({
-            "songID": id
-        }),
-        "headers": {
-            "Content-Type": "application/json",
-            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
-        }
-    }).then(response => response.json())
-        .then(data => {
-            // if (data.contains === true) {
-            //   window.alert("Song was already in the playlist and could not be submitted. Please try again with a different song.");
-            // }
-            // else {
-            //   console.log("Sent song to server for database logging\nID: " + data.id);
-            // }
-        })
-        .catch(err => {
-            window.alert("An error occurred whilst processing your request: " + err);
-        });
+async function addSongToPlaylist(id: string, classCode: string) {
+    let data = await ClientAPI().classrooms.classroom(classCode).playlist.songs.add({
+        "source": "youtube",
+        "songID": id
+    });
+    if (!data.success) {
+        window.alert("Error occurred wilst proccessing your request: " + data.message);
+    }
+
+    console.log(data);
 }
 
 

@@ -11,6 +11,8 @@ declare namespace SongServer.Data {
         students: string[],
         /** Classroom settings */
         settings: ClassroomSettings,
+        /** The playlist this classroom is using */
+        playlist: ClassroomPlaylist | null
     }
 
     type ClassroomSettings = {
@@ -41,19 +43,6 @@ declare namespace SongServer.Data {
 
     type User = TeacherUser | StudentUser;
 
-    /** Represents a song playlist */
-    type SongPlaylist = {
-        songs: Song[]
-    };
-
-    type Song = {
-        /** The email of the user */
-        requestedBy: SongServer.API.BasicUser
-    } & ({
-        source: "youtube",
-        videoID: string
-    });
-
     /**
      * Representation of a session
      */
@@ -67,6 +56,73 @@ declare namespace SongServer.Data {
         /** The UTC timestamp at which the session expires at. */
         expiresAfter: number
     };
+
+    /**
+     * Information of a classroom playlist
+     */
+    type ClassroomPlaylist = {
+        /** The ID of the playlist () */
+        playlistID: string,
+        /** The owner of the playlist */
+        playlistOwner: string,
+        /** Current playlist song position */
+        songPosition: number,
+        /** Song Overrides */
+        overrides: ClassroomPlaylistSongOverride[]
+    };
+
+    /** Information for the classroom playlist song overrides */
+    type ClassroomPlaylistSongOverride = {
+        type: "move",
+        index: number,
+        newIndex: number
+    } | {
+        type: "add",
+        index: number,
+        song: ClassroomPlaylistSong
+    } | {
+        type: "remove",
+        index: number
+    }
+
+    type UserPlaylistsInfo = {
+        email: string,
+        playlists: {
+            [key: string]: Playlist | undefined
+        }
+    }
+
+    type Playlist = {
+        /** The name of the playlist */
+        name: string,
+        /** The visibility of the playlist */
+        visibility: PlaylistVisibility,
+        /** The songs inside the playlist */
+        songs: PlaylistSong[]
+    }
+
+    type PlaylistVisibility = "public" | "unlisted" | "private";
+
+    type SongBase = YoutubeSong | UnknownSong;
+    type PlaylistSong = SongBase;
+    type Song = {
+        /** The user that requested the song */
+        requestedBy: SongServer.API.BasicUser
+    } & SongBase;
+
+    type ClassroomPlaylistSong = {
+        /** The user that requested the song */
+        requestedBy?: SongServer.API.BasicUser
+    } & (Song | PlaylistSong)
+
+    type UnknownSong = {
+        source: "unknown"
+    }
+
+    type YoutubeSong = {
+        source: "youtube",
+        videoID: string
+    }
 }
 
 declare namespace SongServer.API {
@@ -94,12 +150,15 @@ declare namespace SongServer.API {
     type ClassroomInfoBase<TRole extends ClassroomRole> = {
         role: TRole,
         name: string,
-        code: string
+        code: string,
     }
 
-    type StudentClassroomInfo = ClassroomInfoBase<"student">;
+    type StudentClassroomInfo = ClassroomInfoBase<"student"> & {
+        playlist: ClassroomStudentSongInfo[] | null
+    }
     type TeacherClassroomInfo = ClassroomInfoBase<"teacher"> & {
-        students: StudentInClassroom[]
+        students: StudentInClassroom[],
+        playlist: ClassroomTeacherSongInfo[] | null
     }
 
     type ClassroomInfo = StudentClassroomInfo | TeacherClassroomInfo;
@@ -112,7 +171,8 @@ declare namespace SongServer.API {
     type SongInfo = {
         id: string,
         source: SongSource,
-        requested_by: BasicUser
+        requested_by?: BasicUser,
+        is_temp: boolean
     }
 
     type BasicUser = {
@@ -152,7 +212,35 @@ declare namespace SongServer.API {
         students: string[],
         /** Classroom settings */
         settings: ClassroomSettingsInfo,
+        /** playlist */
+        playlist: null | ClassroomSongInfo[]
     }
+
+    type CreatedPlaylistInfo = {
+        id: string,
+        owner: string
+    }
+
+    type ClassroomSongBase = {
+        id: string,
+        source: SongSource
+    } | {
+        id: null,
+        source: "unknown"
+    };
+
+    type ClassroomTeacherSongInfo = ClassroomSongBase & {
+        requested_by: BasicUser | null,
+        is_temp: boolean
+    }
+
+    type ClassroomStudentSongInfo = ClassroomSongBase;
+
+    type ClassroomSongInfo = ClassroomTeacherSongInfo | ClassroomStudentSongInfo;
+    type ClassroomPlaylistInfo = {
+        name: string,
+        songs: ClassroomSongInfo[]
+    };
 
     type SongSource = "youtube";
 }
@@ -178,16 +266,28 @@ declare namespace SongServer.API.Responses {
     type CreateClassroomAPIResponse = APIResponse<CreatedClassroomInfo>;
     type ClassroomAPIResponse = APIResponse<ClassroomInfo>;
     type ClassroomSettingsAPIResponse = APIResponse<ClassroomSettingsInfo>;
+    type ClassroomModifySettingsAPIResponse = APIResponse<boolean>;
+    type ClassroomModifyAPIResponse = APIResponse<boolean>;
+    type ClassroomJoinAPIResponse = APIResponse<boolean>;
 
     type ClassroomStudentAPIResponse = APIResponse<StudentInfo>;
     type ClassroomStudentsAPIResponse = APIResponse<StudentInfo[]>;
     type ClassroomAddStudentAPIResponse = APIResponse<boolean>;
     type ClassroomRemoveStudentAPIResponse = DeleteResponse;
 
+    type ClassroomPlaylistAPIResponse = APIResponse<ClassroomPlaylistInfo>;
+    type ClassroomNewPlaylistAPIResponse = APIResponse<ClassroomPlaylistInfo>;
+    type ClassroomDeletePlaylistAPIResponse = DeleteResponse;
+    type ClassroomAddSongAPIResponse = APIResponse<boolean>;
+    type ClassroomMoveSongAPIResponse = APIResponse<boolean>;
+    type ClassroomRemoveSongAPIResponse = DeleteResponse;
+    type ClassroomShufflePlaylistAPIResponse = APIResponse<ClassroomPlaylistInfo>;
+
     type DeletePlaylistResponse = DeleteResponse;
     type DeleteSongFromPlaylistResponse = DeleteResponse;
     type PlaylistInfoResponse = APIResponse<PlaylistInfo>;
     type AddSongToPlaylistResponse = APIResponse<boolean>;
+    type CreatePlaylistResponse = APIResponse<CreatedPlaylistInfo>;
 
     type FetchUserResponse = APIResponse<UserInfo>;
 
@@ -211,13 +311,38 @@ declare namespace SongServer.API.Server.Requests {
     };
 
     type AddSongToPlaylistRequest = {
-        requestedBy?: any,
         source?: any,
         id?: any
     }
 
     type AuthorizeRequest = {
         token?: any
+    }
+
+    type SetPlaylistRequest = {
+        playlistAuthor?: any,
+        playlistID?: any
+    };
+
+    type AddSongToClassroomPlaylistRequest = {
+        source?: any,
+        songID?: any
+    }
+
+    type RemoveSongToClassroomPlaylistRequest = {
+        source?: any,
+        songID?: any
+    }
+
+    type ModifySongInClassroomPlaylistRequest = {
+        source?: any,
+        songID?: any,
+        newPosition?: any
+    }
+
+    type CreatePlaylistRequest = {
+        name?: any,
+        playlistVisibility?: any
     }
 }
 
@@ -238,12 +363,37 @@ declare namespace SongServer.API.Client.Requests {
     };
 
     type AddSongToPlaylistRequest = {
-        requestedBy?: SongServer.API.BasicUser,
         source?: "youtube",
         id?: string
     }
 
     type AuthorizeRequest = {
         token?: string
+    }
+
+    type SetPlaylistRequest = {
+        playlistAuthor?: string,
+        playlistID?: string
+    };
+
+    type AddSongToClassroomPlaylistRequest = {
+        source?: string,
+        songID?: string
+    }
+
+    type RemoveSongToClassroomPlaylistRequest = {
+        source?: string,
+        songID?: string
+    }
+
+    type ModifySongInClassroomPlaylistRequest = {
+        source?: string,
+        songID?: string,
+        newPosition?: number
+    }
+
+    type CreatePlaylistRequest = {
+        name?: string,
+        playlistVisibility?: SongServer.Data.PlaylistVisibility
     }
 }

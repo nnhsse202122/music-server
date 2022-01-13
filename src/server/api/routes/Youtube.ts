@@ -97,7 +97,7 @@ export default class YoutubeModel extends APIModel<YoutubeModel> {
                 "data": result
             };
 
-            res.status(400).send(response);
+            res.send(response);
         });
 
         // wacky :id syntax allows for extracting the ID passed

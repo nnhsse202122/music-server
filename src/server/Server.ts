@@ -8,6 +8,8 @@ import UserDataBase from "../database/instance/UserDataBase";
 import APIController from "./api/APIController";
 import WebController from "./web/WebController";
 import path from "path";
+// @ts-ignore
+import devConfig from "../../dev-config.json";
 
 export const VALID_DISTRICTS: string[] = ["naperville203"];
 // todo: add start and end regex tag checking
@@ -15,7 +17,7 @@ export const VALID_EMAIL_REGEX = new RegExp(`^([a-zA-Z0-9_]+)@(stu\\.)?(${VALID_
 
 export function getRoleFromEmail(email: string): SongServer.API.UserType | "invalid" {
     let valid = false;
-    if (email === "fluffydoggolel@gmail.com") {
+    if (devConfig.teachers.includes(email)) {
         return "teacher";
     }
     let role = email.replace(VALID_EMAIL_REGEX, (full, p1, stu, p2) => {

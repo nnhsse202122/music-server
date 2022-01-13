@@ -45,37 +45,43 @@ let studentBeingLookedAt: string | null = null;
 var songPlaylistBeingLookedAt;
 //Is this needed ^^^ or this vvv
 async function getCode(index: number = 0): Promise<string> {
-    let response = await fetch(`/api/v1/classrooms`, {
-        "headers": {
-            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
-        }
-    });
-    let data: SongServer.API.Responses.ClassroomsAPIResponse = await response.json();
+    let data = await ClientAPI().classrooms.list();
 
     if (!data.success) {
         throw new Error(data.message);
     }
 
     if (index === 0 && data.data.length === 0) {
-        let addClassroomResponse = await fetch(`/api/v1/classrooms`, {
-            "method": "POST",
-            "body": JSON.stringify({
-                "joinable": true,
-                "name": "Classroom",
-                "allowSongSubmissions": true
-            }),
-            "headers": {
-                "Content-Type": "application/json",
-                "Authorization": `Basic ${window.localStorage.getItem("auth")}`
-            }
+        let classData = await ClientAPI().classrooms.create({
+            "allowSongSubmissions": true,
+            "joinable": true,
+            "name": "Classroom"
         });
-        let classData: SongServer.API.Responses.CreateClassroomAPIResponse = await addClassroomResponse.json();
-        
-        if (classData.success) {
-            return classData.data.code;
+
+        if (!classData.success) {
+            throw new Error(classData.message);
         }
 
-        throw new Error(classData.message);
+        if (classData.data.playlist == null || classData.data.playlist.length == 0) {
+            let playlistInfo = await ClientAPI().playlists.create(profile.getEmail(), {
+                "name": "Class Playlist 1",
+                "playlistVisibility": "private"
+            });
+
+            if (!playlistInfo.success) {
+                throw new Error(playlistInfo.message);
+            }
+
+            let s = await ClientAPI().classrooms.classroom(classData.data.code).playlist.set(profile.getEmail(), playlistInfo.data.id);
+    
+            if (!s.success) {
+                throw new Error(s.message);
+            }
+
+            classData.data.playlist = [];
+        }
+
+        return classData.data.code;
     }
 
     if (data.data[index] == null) {
@@ -109,13 +115,8 @@ gapi.load("auth2", async () => {
 async function getClassList(code: string): Promise<SongServer.API.ClassroomInfo> {
     console.log(code);
     console.log("abc");
-    let response = await fetch(`/api/v1/classrooms/${code}`, {
-        "headers": {
-            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
-        }
-    });
-    let data: SongServer.API.Responses.ClassroomAPIResponse = await response.json();
-    
+    let data = await ClientAPI().classrooms.classroom(code).get();
+
     if (!data.success) {
         throw new Error(data.message);
     }
@@ -125,13 +126,8 @@ async function getClassList(code: string): Promise<SongServer.API.ClassroomInfo>
 //Hmm ^^^
 
 /* The playlist variable we have as of now works a bit strangely -- every even index is the song, and every odd index is the name of the student who submitted it. */
-async function getPlaylist(playlistID: string): Promise<SongServer.API.PlaylistInfo> {
-    let response = await fetch(`/api/v1/playlists/${playlistID}`, {
-        "headers": {
-            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
-        }
-    });
-    let data: SongServer.API.Responses.PlaylistInfoResponse = await response.json();
+async function getClassPlaylist(classroomCode: string): Promise<SongServer.API.ClassroomPlaylistInfo> {
+    let data = await ClientAPI().classrooms.classroom(classroomCode).playlist.get();
 
     if (!data.success) {
         throw new Error(data.message);
@@ -141,15 +137,9 @@ async function getPlaylist(playlistID: string): Promise<SongServer.API.PlaylistI
 }
 
 // deleted specified playlist
-async function deletePlaylist(playlistID: string): Promise<boolean> {
-    let response = await fetch(`/api/v1/playlists/${playlistID}`, {
-        "method": "DELETE",
-        "headers": {
-            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
-        }
-    });
-    let data: SongServer.API.Responses.DeletePlaylistResponse = await response.json();
+async function deleteClassPlaylist(classroomCode: string): Promise<boolean> {
 
+    let data = await ClientAPI().classrooms.classroom(classroomCode).playlist.remove();
     if (!data.success) {
         throw new Error(data.message);
     }
@@ -160,18 +150,12 @@ async function deletePlaylist(playlistID: string): Promise<boolean> {
 
 // shuffles the currently selected playlist
 async function shufflePlaylist() {
-    isShuffled = !isShuffled;
-    currentPlaylist = [];
-    let newPlaylist = await getPlaylist(await getCurrentClassCode());
-    let newSongs = [...newPlaylist!.songs];
-    if (isShuffled) {
-        while (newSongs.length > 0) {
-            let randIndex = Math.floor(Math.random() * newSongs.length);
-            currentPlaylist.push(newSongs[randIndex]);
-            newSongs.splice(randIndex, 1); // remove one item
-        }
-        console.log(currentPlaylist);
+    let data = await ClientAPI().classrooms.classroom(await getCurrentClassCode()).playlist.shuffle();
+    if (!data.success) {
+        throw new Error(data.message);
     }
+    // @ts-ignore
+    currentPlaylist = data.data.songs;
 }
 
 // returns the current class code for the teacher
@@ -182,8 +166,7 @@ async function getCurrentClassCode(): Promise<string> {
 
 
 async function updateCurrentlyPlayingText(id: string): Promise<void> {
-    let response = await fetch(`/api/v1/yt/videos/${id}`);
-    let data: SongServer.API.Responses.FetchVideoAPIResponse = await response.json();
+    let data = await ClientAPI().youtube.get(id);
 
     if (!data.success) {
         throw new Error(data.message);
@@ -195,12 +178,13 @@ async function updateCurrentlyPlayingText(id: string): Promise<void> {
 let currentSongIndex = 0;
 async function loadNextSong() {
 	if (windowWithPlayer.player != null) {
-		let newPlaylist = await getPlaylist(await getCurrentClassCode());
+        // @ts-ignore
+	    currentPlaylist = (await getClassPlaylist(await getCurrentClassCode())).songs;
         let songID = currentPlaylist[currentSongIndex].id;
 
         // handle wrapping
         currentSongIndex++;
-        if (currentSongIndex > newPlaylist!.songs.length) {
+        if (currentSongIndex >= currentPlaylist.length) {
             currentSongIndex = 0;
         }
 
@@ -243,7 +227,7 @@ cancelSongOptionsesButtonElement.addEventListener("click", async () => {
 removeSongButtonElement.addEventListener("click", async () => {
     songOptionsModalElement.style.display = "none";
     console.log("bruhas");
-    await removeSongFromPlaylist();
+    await removeSongFromClassPlaylist();
     await showPlaylist();
     songOptionsModalElement.style.display = "none";
 })
@@ -261,7 +245,7 @@ showPlaylistElement.addEventListener("click", showPlaylist)
 async function showPlaylist() {
     playlistCardElement.style.display = "inline-block";
     playlistElement.textContent = '';
-    let newPlaylist = await getPlaylist(await getCurrentClassCode());
+    let newPlaylist = await getClassPlaylist(await getCurrentClassCode());
     if (newPlaylist == null) return;
 
     let songs = newPlaylist.songs;
@@ -269,11 +253,10 @@ async function showPlaylist() {
 
     // song id
     for (let index = 0; index < songs.length; index++) {
-        let song = songs[index];
-        let studentName = song.requested_by;
+        let song = songs[index] as SongServer.API.ClassroomTeacherSongInfo;
+        let studentName = song.requested_by!;
 
-        let response = await fetch(`/api/v1/yt/videos/${song.id}`);
-        let data: SongServer.API.Responses.FetchVideoAPIResponse = await response.json();
+        let data = await ClientAPI().youtube.get(song.id!);
 
         if (!data.success) {
             throw new Error(data.message);
@@ -302,18 +285,17 @@ async function showPlaylist() {
 }
 
 
-async function removeSongFromPlaylist(): Promise<boolean> {
+async function removeSongFromClassPlaylist(): Promise<boolean> {
     let songID = songBeingLookedAt;
     let playlistID = await getCurrentClassCode();
-    if (songID == null) throw new Error("Cannot remove song because no song is being played/looked at")
+    if (songID == null) throw new Error("Cannot remove song because no song is being played/looked at");
 
-    let response = await fetch(`/api/v1/playlists/${playlistID}/songs/${songID}`, { 
-        "method": "DELETE",
-        "headers": {
-            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
-        }
+    // for now use youtube source, but may be changed later
+    let data = await ClientAPI().classrooms.classroom(playlistID).playlist.songs.remove({
+        "songID": songID,
+        "source": "youtube"
     });
-    let data: SongServer.API.Responses.DeleteSongFromPlaylistResponse = await response.json();
+
     if (!data.success) {
         throw new Error(data.message);
     }
@@ -327,13 +309,7 @@ async function removeStudentFromClass(): Promise<boolean> {
 	let email = studentBeingLookedAt;
 	let classroomID = await getCurrentClassCode();
 
-    let response = await fetch(`/api/v1/classrooms/${classroomID}/students/${email}`, {
-        "method": "DELETE",
-        "headers": {
-            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
-        }
-    });
-    let data: SongServer.API.Responses.ClassroomRemoveStudentAPIResponse = await response.json();
+    let data = await ClientAPI().classrooms.classroom(classroomID).removeStudent(email!);
 
     if (!data.success) {
         throw new Error(data.message);
@@ -350,12 +326,7 @@ async function displaySongInfo(id: string, stuName: SongServer.API.BasicUser) {
 
 shuffleButtonElement.addEventListener("click", async () => {
     shufflePlaylist();
-    if (isShuffled) {
-        window.alert("Playlist is shuffling!");
-    }
-    else {
-        window.alert("Playlist is no longer shuffling!");
-    }
+    window.alert("Shuffled playlist!");
 })
 
 
@@ -366,26 +337,20 @@ async function loadClassSelection() {
     // @ts-ignore
 	let email = profile.getEmail();
     // load one class, eventually load dynamically
-	for (let i = 0; i < 1; i++) {
-		let code = await getCode(i);
-        let response = await fetch(`/api/v1/classrooms/${code}`, {
-            "headers": {
-                "Authorization": `Basic ${window.localStorage.getItem("auth")}`
-            }
-        });
-        let data: SongServer.API.Responses.ClassroomAPIResponse = await response.json();
+    let data = await ClientAPI().classrooms.list();
+    if (!data.success) {
+        throw new Error(data.message);
+    }
 
-        if (!data.success) {
-            throw new Error(data.message);
-        }
-
+    for (let i = 0; i < data.data.length; i++) {
+        let classInfo = data.data[i];
         let newOption = document.createElement('option');
-        newOption.innerHTML = data.data.name;
+        newOption.innerHTML = classInfo.name;
         newOption.id = 'option' + i;
         newOption.value = "" + i;
 
         newItem.appendChild(newOption);
-	}
+    }
 
 	selectClassLabelElement.textContent = "Select your class: ";
 	selectorElement.appendChild(newItem);
@@ -403,15 +368,8 @@ changeClassNameButtonElement.addEventListener("click", async () => {
 
 	document.getElementById("option" + classNumber)!.textContent = newName;
 
-    await fetch(`/api/v1/classrooms/${code}`, {
-        "method": "PATCH",
-        "body": JSON.stringify({
-            "name": newName
-        }),
-        "headers": {
-            "Content-Type": "application/json",
-            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
-        }
+    await ClientAPI().classrooms.classroom(code).modify({
+        "name": newName
     });
 });
 
@@ -439,16 +397,10 @@ async function xyz () {
     console.log(456);
 
     // enabling/disabling song submission
-    await fetch(`/api/v1/classrooms/${code}/settings`, {
-        "method": "PATCH",
-        "body": JSON.stringify({
-            "allowSongSubmission": isSubmitEnabled
-        }),
-        "headers": {
-            "Content-Type": "application/json",
-            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
-        }
-    });// so it's not linked to pressing the button
+    await ClientAPI().classrooms.classroom(code).settings.modify({
+        "allowSongSubmission": isSubmitEnabled
+    });
+    // so it's not linked to pressing the button
     disableSubmitButtonElement.innerHTML = "Disable Song Submissions";
     disableSongDescriptionElement.textContent = "Your playlist is currently ENABLED";
 }
@@ -462,15 +414,8 @@ disableClassButtonElement.addEventListener("click", async () => {
         disableClassButtonElement.textContent = "Enable Classroom Code"; // change button to ask for enable
         disableClassDescriptionElement.textContent = "Your class is currently DISABLED"; // change description to disabled
 
-        await fetch(`/api/v1/classrooms/${code}/settings`, {
-            "method": "PATCH",
-            "body": JSON.stringify({
-                "joinable": false
-            }),
-            "headers": {
-                "Content-Type": "application/json",
-                "Authorization": `Basic ${window.localStorage.getItem("auth")}`
-            }
+        await ClientAPI().classrooms.classroom(code).settings.modify({
+            "joinable": false
         });
     }
     else { // else(if disabled)
@@ -478,15 +423,8 @@ disableClassButtonElement.addEventListener("click", async () => {
         disableClassButtonElement.textContent = "Disable Classroom Code"; // change button to ask for disable
         disableClassDescriptionElement.textContent = "Your class is currently ENABLED"; // change description to enabled
         
-        await fetch(`/api/v1/classrooms/${code}/settings`, {
-            "method": "PATCH",
-            "body": JSON.stringify({
-                "joinable": true
-            }),
-            "headers": {
-                "Content-Type": "application/json",
-                "Authorization": `Basic ${window.localStorage.getItem("auth")}`
-            }
+        await ClientAPI().classrooms.classroom(code).settings.modify({
+            "joinable": true
         });
     }
 });
@@ -501,15 +439,8 @@ disableSubmitButtonElement.addEventListener("click", async () => {
         disableSubmitButtonElement.textContent = "Enable Song Submissions"; // change button to ask for enable
         disableSongDescriptionElement.textContent = "Your playlist is currently DISABLED"; // change description to disabled
         
-        await fetch(`/api/v1/classrooms/${code}/settings`, {
-            "method": "PATCH",
-            "body": JSON.stringify({
-                "allowSongSubmission": false
-            }),
-            "headers": {
-                "Content-Type": "application/json",
-                "Authorization": `Basic ${window.localStorage.getItem("auth")}`
-            }
+        await ClientAPI().classrooms.classroom(code).settings.modify({
+            "allowSongSubmission": false
         });
     }
     else { // else(if disabled)
@@ -517,15 +448,8 @@ disableSubmitButtonElement.addEventListener("click", async () => {
         disableSubmitButtonElement.textContent = "Disable Song Submissions"; // change button to ask for disable
         disableSongDescriptionElement.textContent = "Your playlist is currently ENABLED"; // change description to enabled
         
-        await fetch(`/api/v1/classrooms/${code}/settings`, {
-            "method": "PATCH",
-            "body": JSON.stringify({
-                "allowSongSubmission": true
-            }),
-            "headers": {
-                "Content-Type": "application/json",
-                "Authorization": `Basic ${window.localStorage.getItem("auth")}`
-            }
+        await ClientAPI().classrooms.classroom(code).settings.modify({
+            "allowSongSubmission": true
         });
     }
 });
@@ -557,29 +481,12 @@ async function refreshClass() {
         classListElement.appendChild(newItem1);
     }
 }
-
-async function emailToName(email: string, code: string): Promise<string> {
-    let response = await fetch(`/api/v1/classrooms/${code}/students/${email}`, {
-        "headers": {
-            "Authorization": `Basic ${window.localStorage.getItem("auth")}`
-        }
-    });
-    let data: SongServer.API.Responses.ClassroomStudentAPIResponse = await response.json();
-
-    if (!data.success) {
-        throw new Error(data.message);
-    }
-
-    console.log(data.data.name);
-    return data.data.name;
-}
-
 cancelClearButtonElement.addEventListener("click", async () => {
     confirmClearModal.style.display = "none";
 });
 
 confirmClearButtonElement.addEventListener("click", async () => {
-    deletePlaylist(await getCurrentClassCode());
+    deleteClassPlaylist(await getCurrentClassCode());
     confirmClearModal.style.display = "none";
 });
 
