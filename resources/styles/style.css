@@ -13,8 +13,8 @@
 }
 
 #player {
-    bottom: 10;
-    left: 10;
+    bottom: 10px;
+    left: 10px;
     position: fixed;
     z-index: 3000;
 
@@ -435,7 +435,7 @@ li {
 }
 
 #googleIcon {
-    background-image: url('/static/images/google.png');
+    background-image: url('/resources/images/google.png');
     background-size: cover;
     background-size: 99%;
     display: inline-block;

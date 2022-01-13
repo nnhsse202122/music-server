@@ -366,7 +366,7 @@ changeClassNameButtonElement.addEventListener("click", async () => {
 	let code = await getCurrentClassCode();
 	let newName = changeClassNameElement.value;
 
-	document.getElementById("option" + classNumber)!.textContent = newName;
+	document.getElementById("option" + (parseInt(classNumber) - 1))!.textContent = newName;
 
     await ClientAPI().classrooms.classroom(code).modify({
         "name": newName
