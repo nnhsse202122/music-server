@@ -793,6 +793,64 @@ export default class ClassroomModel extends APIModel<ClassroomModel> {
         router.post("/:code/playlist/shuffle", async (req, res) => {
             await this.handleRes(res, this.shufflePlaylist(req));
         });
+
+        router.delete("/:code/students/:studentEmail", async (req, res) => {
+            await this.handleRes(res, this.removeStudentFromClassroom(req));
+        })
+    }
+
+    public async removeStudentFromClassroom(req: Request): APIResponseInfo<SongServer.API.Responses.ClassroomRemoveStudentAPIResponse> {
+        let info = await this._verifySession<SongServer.API.Responses.ClassroomRemoveStudentAPIResponse>(req);
+        if (info.is_response) {
+            return info.response;
+        }
+
+        let { user } = info;
+
+        if (user.type !== "teacher") {
+            return {
+                "success": false,
+                "status": 403,
+                "message": "This endpoint is only available to teachers"
+            }
+        }
+
+        let code = req.params.code;
+        let classroom: SongServer.Data.Classroom;
+        try {
+            classroom = await this.classroomDatabase.get(code);
+        }
+        catch(err) {
+            let message: string;
+            if (err instanceof Error) {
+                message = err.message;
+            }
+            else {
+                message = new String(err) as string;
+            }
+
+            return {
+                "success": false,
+                "status": 404,
+                "message": "Classroom not found"
+            };
+        }
+
+        let studentIndex = classroom.students.indexOf(req.params.studentEmail);
+        if (studentIndex == -1) {
+            return {
+                "success": false,
+                "status": 404,
+                "message": "Student isn't in the classroom"
+            };
+        }
+
+        delete classroom.students[studentIndex];
+        await this.classroomDatabase.set(code, classroom);
+        return {
+            "success": true,
+            "data": true
+        };
     }
 
     public async createClassroomRequest(req: Request): APIResponseInfo<SongServer.API.Responses.CreateClassroomAPIResponse> {

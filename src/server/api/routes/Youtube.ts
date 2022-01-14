@@ -4,12 +4,15 @@ import { APIModel } from "../APIModel"
 import { youtube, youtube_v3 } from "@googleapis/youtube";
 import { GaxiosResponse } from "gaxios";
 import colors from "colors/safe";
+import YoutubeCache, { YoutubeSearch, YoutubeVideo } from "../../../database/instance/YoutubeCache";
 
 export default class YoutubeModel extends APIModel<YoutubeModel> {
+    private _cache: YoutubeCache;
 
     public constructor(controller: APIController) {
         // version 1
         super(controller, "yt", 1);
+        this._cache = new YoutubeCache();
     }
 
     protected override initRoutes(router: Router): void {
@@ -38,19 +41,10 @@ export default class YoutubeModel extends APIModel<YoutubeModel> {
                 return; // prevent other code from running
             }
 
-            let videos: GaxiosResponse<youtube_v3.Schema$SearchListResponse>;
+            let search: YoutubeSearch;
             try {
                 // fetch video from google api
-                videos = await youtube("v3").search.list({
-                    "part": ["snippet"],
-                    "type": ["video"],
-                    "videoCategoryId": "10", // 10 is music category. 
-                                             // Look at https://developers.google.com/youtube/v3/docs/videoCategories/list
-                                             // for more info
-                    "key": process.env.KEY,
-                    "maxResults": 3,
-                    "q": query
-                });
+                search = await this._cache.search(query);
             }
             // catch errors
             catch (err) {
@@ -77,18 +71,18 @@ export default class YoutubeModel extends APIModel<YoutubeModel> {
                 return; // prevent other code from running
             }
 
-            let foundVideos = videos.data.items!; // ignore that items could be null
-            this.logger.debug(`Fetched ${foundVideos.length} videos. ${foundVideos.map((v) => 
+            let foundVideos = search.results; // ignore that items could be null
+            this.logger.debug(`Fetched ${search.count} videos. ${foundVideos.map((v) => 
                 // map each video to a string representation, and join them
-                `\n    [${colors.cyan(v.id!.videoId!)}] ${colors.yellow(v.snippet!.title!)}`).join("")}`);
+                `\n    [${colors.cyan(v.id)}] ${colors.yellow(v.title)}`).join("")}`);
             
             // convert the found video array to result array
             let result: SongServer.API.FetchedVideo[] = foundVideos.map((v) => {
                 // map each item in video array to a fetched video item
                 return {
-                    "id": v.id!.videoId!, // use ! to tell typescript nobody cares that x or y could be undefined/null
-                    "title": v.snippet!.title!
-                }
+                    "id": v.id, // use ! to tell typescript nobody cares that x or y could be undefined/null
+                    "title": v.title
+                };
             });
             
             // send success api response
@@ -105,15 +99,9 @@ export default class YoutubeModel extends APIModel<YoutubeModel> {
         router.get("/videos/:id", async (req, res) => {
             this.logger.debug("Searching for video with id '" + req.params.id + "'");
 
-            // our list of videos
-            let videos: GaxiosResponse<youtube_v3.Schema$VideoListResponse>;
+            let video: YoutubeVideo | null;
             try {
-                // fetch video from google api
-                videos = await youtube("v3").videos.list({
-                    "part": ["snippet", "contentDetails", "statistics"],
-                    "id": [req.params.id],
-                    "key": process.env.KEY
-                });
+                video = await this._cache.fetch(req.params.id);
             }
             // catch errors
             catch (err) {
@@ -140,23 +128,20 @@ export default class YoutubeModel extends APIModel<YoutubeModel> {
                 return; // prevent other code from running
             }
 
-            let videosItems = videos.data.items;
-            if (videosItems == null) {
-                 // send fail api response
-                 res.status(404).send({
-                    "message": "No such video found",
-                    "success": false
-                });
-                return; // prevent other code from running
+            if (video == null) {
+                // send fail api response
+                res.status(404).send({
+                   "message": "No such video found",
+                   "success": false
+               });
+               return; // prevent other code from running
             }
-
-            let firstVideo = videosItems[0];
 
             let result: SongServer.API.FetchedVideo = {
                 // in typescript, '!' tells typescript to ignore the fact that the variable/field/whatever
                 // you are accessing could be null or undefined.
-                "title": firstVideo.snippet!.title!,
-                "id": firstVideo.id!
+                "title": video!.title,
+                "id": video!.id
             };
 
             // success response
