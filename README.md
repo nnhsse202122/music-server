@@ -10,10 +10,17 @@ If you want to run the server on your computer locally, here are the steps. Note
 1. Pull the code from Github.
 2. Install node.js and npm. You can download it here: https://www.npmjs.com/get-npm.
 3. In the VScode terminal, enter the command `npm install`. This will install all the packages you need.
+4. Create a .env file in the root directory with the following key/value pairs:
+```
+API_KEY = # YOUTUBE API KEY 
+OAUTH_CLIENT_ID = # GOOGLE OAUTH CLIENT ID
+OAUTH_CLIENT_SECRET = # GOOGLE OAUTH CLIENT SECRET
+MONGO_URI = # MONGO DATABASE CONNECTION URI
+```
 ### Running the Program:
 1. First, you will need to build the program. To do this, you will need to run the command `npm run build`, which will compile the typescript files into javascript files.
 2. In the VScode terminal, run the `index.js` file (by using the command `node index.js`).
-3. Open your favorite browser and go to the url `localhost:3000`. This will pull up a local version of the website. **Many features will not work on this version**, since the music server requires repl.it integration for databases. 
+3. Open your favorite browser and go to the url `localhost:3000`. This will pull up a local version of the website.
 4. To stop running the server, press ctrl+C (not command+C if you’re on mac!).
 
 ## Sign-In
