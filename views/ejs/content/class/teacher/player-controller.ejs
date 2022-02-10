@@ -1,0 +1,46 @@
+<div class="player-controller">
+    <div class="song-image">
+        <div class="image-container">
+            <img id="controller-image" src="https://cdn.suwalls.com/wallpapers/movies/the-amazing-spider-man-2-logo-51097-2560x1440.jpg" draggable="false"/>
+        </div>
+    </div>
+    <div class="main-display">
+        <div class="title">
+            <div class="title-song-name" id="controller-song-name">-</div>
+            <div class="title-song-author" id="controller-song-author">-</div>
+        </div>
+        <div class="controls">
+            <button class="action-button" id="controller-shuffle-btn">
+                <i class="fa-solid fa-random"></i>
+            </button>
+            <button class="action-button" id="controller-previous-btn">
+                <i class="fa-solid fa-backward"></i>
+            </button>
+            <button class="action-button" id="controller-playback-btn">
+                <i class="fa-solid fa-play"></i>
+                <i class="fa-solid fa-pause"></i>
+                <i class="fa-solid fa-clock"></i>
+            </button>
+            <button class="action-button" id="controller-next-btn">
+                <i class="fa-solid fa-forward"></i>
+            </button>
+            <button class="action-button" id="controller-delete-btn">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar">
+                <div class="progress-value" id="controller-progress"></div>
+            </div>
+        </div>
+        <div class="volume-controls">
+            <span class="volume-percent">
+                <span id="controller-volume-percent">-</span>%
+            </span>
+            <input class="volume-slider" type="range" min="0" max="100" id="controller-volume"/>
+            <span class="volume-icon">
+                <i class="fa-solid fa-volume-up"></i>
+            </span>
+        </div>
+    </div>
+</div>

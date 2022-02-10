@@ -1,0 +1,167 @@
+{
+    "api.classroom.not_found": {
+        "message": "Classroom not found.",
+        "status": 404,
+        "parameters": []
+    },
+    "api.classroom.not_joinable": {
+        "message": "Classroom is not joinable.",
+        "status": 403,
+        "parameters": []
+    },
+    "api.classroom.joined": {
+        "message": "You have already joined this classroom.",
+        "status": 400,
+        "parameters": []
+    },
+    "api.classroom.playlist.hidden": {
+        "message": "You aren't allowed to view the songs in the playlist.",
+        "status": 403,
+        "parameters": []
+    },
+    "api.classroom.playlist.song.delete.fail": {
+        "message": "Failed to delete song.",
+        "status": 400,
+        "parameters": []
+    },
+    "api.classroom.playlist.song.move.fail": {
+        "message": "Failed to move song.",
+        "status": 400,
+        "parameters": []
+    },
+    "api.classroom.playlist.song.add.fail": {
+        "message": "Failed to add song.",
+        "status": 400,
+        "parameters": []
+    },
+    "api.classroom.playlist.song.not_found": {
+        "message": "Song not found.",
+        "status": 404,
+        "parameters": []
+    },
+    "api.classroom.delete.fail": {
+        "message": "Only the owner of the classroom can delete the classroom.",
+        "status": 403,
+        "parameters": []
+    },
+    "api.classroom.submissions.disabled": {
+        "message": "Song submissions are disabled for this classroom.",
+        "status": 403,
+        "parameters": []
+    },
+    "api.classroom.submissions.tokens": {
+        "message": "You don't have enough tokens to submit that song.",
+        "status": 403,
+        "parameters": []
+    },
+
+    "api.playlist.not_found": {
+        "message": "Playlist not found.",
+        "status": 404,
+        "parameters": []
+    },
+    "api.playlist.delete.fail": {
+        "message": "Only the owner of the playlist can delete the playlist.",
+        "status": 403,
+        "parameters": []
+    },
+
+    "api.authorization.token.required": {
+        "message": "An authorization token is required.",
+        "status": 401,
+        "parameters": []
+    },
+    "api.authorization.token.invalid": {
+        "message": "Invalid authorization token.",
+        "status": 401,
+        "parameters": []
+    },
+    "api.authorization.header.required": {
+        "message": "An authorization header is required for this route.",
+        "status": 401,
+        "parameters": []
+    },
+    "api.authorization.parts.invalid": {
+        "message": "2 parts seperated by a space is required for authorization.",
+        "status": 401,
+        "parameters": []
+    },
+    "api.authorization.type.invalid": {
+        "message": "Only Basic authorization is supported for now.",
+        "status": 401,
+        "parameters": []
+    },
+
+    "api.restrictions.teachers": {
+        "message": "This endpoint is only available for teachers.",
+        "status": 403,
+        "parameters": []
+    },
+    "api.restrictions.students": {
+        "message": "This endpoint is only available for students.",
+        "status": 403,
+        "parameters": []
+    },
+    "api.restrictions.teachers_owner": {
+        "message": "This endpoint is only available for teachers or the owner of the resource.",
+        "status": 403,
+        "parameters": []
+    },
+
+    "api.user.not_found": {
+        "message": "Failed to find the user specified.",
+        "status": 404,
+        "parameters": []
+    },
+
+    "api.body.content_type": {
+        "message": "API Request Body Content-Type wasn't application/json.",
+        "status": 400,
+        "parameters": ["content_type"]
+    },
+    "api.body.null": {
+        "message": "API Request Body was null.",
+        "status": 400,
+        "parameters": []
+    },
+    "api.body.field.null": {
+        "message": "Field '{field_name}' cannot be null. Path: {path}",
+        "status": 400,
+        "parameters": ["field_name", "path", "valid_types"]
+    },
+    "api.body.field.required": {
+        "message": "Field '{field_name}' is required. Path: {path}",
+        "status": 400,
+        "parameters": ["field_name", "path"]
+    },
+    "api.body.field.string": {
+        "message": "Field '{field_name}' cannot be a string. Path: {path}",
+        "status": 400,
+        "parameters": ["field_name", "path", "valid_types"]
+    },
+    "api.body.field.number": {
+        "message": "Field '{field_name}' cannot be a number. Path: {path}",
+        "status": 400,
+        "parameters": ["field_name", "path", "valid_types"]
+    },
+    "api.body.field.boolean": {
+        "message": "Field '{field_name}' cannot be a boolean. Path: {path}",
+        "status": 400,
+        "parameters": ["field_name", "path", "valid_types"]
+    },
+    "api.body.field.array": {
+        "message": "Field '{field_name}' cannot be an array. Path: {path}",
+        "status": 400,
+        "parameters": ["field_name", "path", "valid_types"]
+    },
+    "api.body.field.object": {
+        "message": "Field '{field_name}' cannot be an object. Path: {path}",
+        "status": 400,
+        "parameters": ["field_name", "path", "valid_types"]
+    },
+    "api.body.field.invalid_type": {
+        "message": "Field '{field_name}' is an invalid type. Path: {path}",
+        "status": 400,
+        "parameters": ["field_name", "path", "valid_types"]
+    }
+}

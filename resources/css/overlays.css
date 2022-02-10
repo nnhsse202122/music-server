@@ -1,0 +1,146 @@
+.overlay {
+    position: fixed;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+    bottom: 0px;
+    background-color: rgba(0, 0, 0, 0.3);
+    z-index: 9999;
+    place-items: center;
+    display: none;
+}
+
+.overlay > * > .title {
+    font-family: var(--font-title);
+    font-size: 32px;
+    height: 50px;
+    justify-items: center;
+    align-items: center;
+    background-color: orange;
+    margin: 0px 40px;
+    padding: 00px 20px;
+    text-align: center;
+    transform: translateY(50%);
+    box-shadow: 2px 2px 5px 2px rgba(0, 0, 0, 0.5);
+}
+.loading > .body {
+    text-align: center;
+}
+
+.overlay > *  > .body {
+    padding: 45px 20px 40px 20px;
+    background-color: white;
+    box-shadow: 3px 3px 5px 2px rgba(0, 0, 0, 0.5);
+    font-family: var(--font-primary);
+    font-size: 20px;
+}
+
+.join-class-model > .body > .body-content,
+.create-class-model > .body > .body-content {
+    display: grid;
+    gap: 10px;
+    justify-items: center;
+}
+
+.join-class-model > .body > .join-error,
+.create-class-model > .body > .create-error {
+    color: red;
+    text-align: center;
+    font-size: 12px;
+}
+
+.join-class-model > .body > .body-content input[type="text"],
+.create-class-model > .body > .body-content input[type="text"]  {
+    border: none;
+    text-align: center;
+    font-size: 16px;
+    border-bottom: 2px solid #555;
+    font-family: var(--font-secondary);
+    width: 75%;
+}
+
+.join-class-model > .body > .body-content input[type="text"]:focus,
+.create-class-model > .body > .body-content input[type="text"]:focus {
+    outline: none;
+    border-color: black;
+}
+
+.overlay > * > .actions {
+    font-family: var(--font-primary);
+    font-size: 40px;
+    display: grid;
+    align-items: center;
+    justify-items: center;
+    transform: translateY(-50%);
+}
+
+
+.overlay > * > .actions > .action {
+    font-size: 20px;
+    font-family: var(--font-secondary);
+    padding: 5px 10px;
+    height: 50px;
+    border: none;
+    cursor: pointer;
+    transition: color 200ms ease, transform 200ms ease;
+    border-radius: 50%;
+    background-color: #333;
+    width: 50px;
+    color: white;
+    cursor: pointer;
+}
+
+.overlay > * > .actions > .action:hover {
+    transform: scale(105%);
+}
+
+.join-class-model > .actions > .join:hover,
+.create-class-model > .actions > .create:hover,
+.are-you-sure-students > .actions > .yes:hover,
+.are-you-sure-song > .actions > .yes:hover {
+    color: #7F7;
+}
+
+.join-class-model > .actions > .cancel:hover,
+.create-class-model > .actions > .cancel:hover,
+.are-you-sure-students > .actions > .no:hover,
+.are-you-sure-song > .actions > .no:hover {
+    color: #F77;
+}
+
+.are-you-sure-students > .actions,
+.are-you-sure-song > .actions,
+.join-class-model > .actions,
+.create-class-model > .actions {
+    grid-template-columns: auto auto;
+}
+
+.create-class-model > .body > .body-content > .class-settings-container {
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+    justify-items: center;
+    gap: 40px;
+}
+
+.create-class-model > .body > .body-content > .class-settings-container {
+    display: grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+    justify-items: center;
+    gap: 40px;
+}
+
+.create-class-model > .body > .body-content > .class-settings-container > .settings-item {
+    display: grid;
+    grid-template-rows: auto auto;
+    align-items: center;
+    justify-items: center;
+}
+.create-class-model > .body > .body-content > .class-settings-container > .settings-item > .settings-title {
+    width: 100%;
+    text-align: center;
+    font-weight: bold;
+    font-size: 18px;
+    font-family: var(--font-primary);
+}

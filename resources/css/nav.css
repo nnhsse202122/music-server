@@ -1,0 +1,84 @@
+:root {
+    --nav-padding: 20px;
+    --nav-user-icon-size: 56px;
+    --nav-height: 75px;
+    --nav-title-font-size: 26px;
+    --nav-page-font-size: 18px;
+    --nav-bg-color: rgba(23, 23, 26);
+}
+
+.header {
+    background-color: var(--nav-bg-color);
+    height: 75px;
+
+    --nav-item-count: 1;
+    --nav-title-size: max(30%, 250px);
+
+    display: grid;
+    align-items: center;
+    grid-template-columns: var(--nav-title-size) calc(100% - var(--nav-title-size));
+    padding: 0px var(--nav-padding);
+
+    position: sticky;
+    left: 0px;
+    right: 0px;
+    top: 0px;
+
+    z-index: 1000;
+}
+
+body.logged-in > .header {
+    grid-template-columns: var(--nav-title-size) calc(100% - calc(var(--nav-title-size) + var(--nav-user-icon-size))) var(--nav-user-icon-size);
+}
+
+.header > .title {
+    color: var(--color-title);
+    font-family: var(--font-title);
+    font-size: var(--nav-title-font-size);
+}
+
+.header > .title > .title-name {
+    margin-left: 5px;
+}
+
+.header > .pages {
+    justify-self: right;
+
+    display: grid;
+    grid-template-columns: repeat(var(--nav-item-count), auto);
+    gap: 20px;
+}
+
+.header > .pages > .link {
+    color: #FFF;
+    text-decoration: none;
+    font-family: var(--font-secondary);
+    
+    display: grid;
+    grid-template-columns: 16px auto;
+    gap: 6px;
+    justify-items: center;
+    align-items: center;
+    transition: color 200ms;
+}
+
+.header > .pages > .link:hover {
+    color: #CCC;
+}
+
+
+.header > .pages > .link > span {
+    font-size: var(--nav-page-font-size);
+}
+
+.header > .user-info {
+    display: flex;
+    align-content: center;
+    justify-content: center;
+}
+
+.header > .user-info > .user-icon {
+    border-radius: 50%;
+    width: auto;
+    height: 40px;
+}

@@ -1,0 +1,28 @@
+<div class="class-info">
+    <div class="class-title">
+        <span class="class-name"><%= classroom.name %></span>
+    </div>
+    <div class="class-body">
+        <div class="class-code"><%= classroom.code %></div>
+        <div class="class-status">
+            <span class="class-status-submissions" data-status="<%- classroom.settings.allow_submissions ? "enabled" : "disabled" %>">
+                <i class="fa-solid fa-circle-<%- classroom.settings.allow_submissions ? "check" : "xmark" %> fa-lg"></i>
+                <span>Submissions</span>
+            </span>
+            <span class="class-status-tokens">
+                <i class="fa-solid fa-coins fa-lg"></i>
+                <span><%= classroom.tokens %> Token<%= (classroom.tokens == 1 ? "" : "s") %></span>
+            </span>
+        </div>
+    </div>
+    <div class="class-actions">
+        <a class="class-action-play" href="/classes/<%= classroom.code %>/?songs">
+            <i class="fa-solid fa-music"></i>
+            <span>Songs</span>
+        </a>
+        <a class="class-action-delete" href="/classes/<%= classroom.code %>/?leave">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span>Leave</span>
+        </a>
+    </div>
+</div>

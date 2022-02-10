@@ -1,0 +1,127 @@
+.player-controller {
+    margin: 30px;
+    display: flex;
+    position: absolute;
+    width: 800px;
+    height: 200px;
+    background-color: #FFF;
+    border-radius: 30px;
+    flex-direction: row;
+    align-items: center;
+    overflow: hidden;
+}
+
+.player-controller > .song-image {
+    margin: auto;
+    margin-left: 0px;
+    padding-left: 0px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.player-controller > .song-image > .image-container {
+    width: 200px;
+    height: 200px;
+    overflow: hidden;
+}
+
+.player-controller > .song-image > .image-container > img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.player-controller > .main-display {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.player-controller > .main-display > .title {
+    display: grid;
+    gap: 0.2rem;
+    align-items: center;
+    justify-items: center;
+    flex-direction: column;
+}
+
+.player-controller > .main-display > .title > .title-song-name {
+    font-size: 2.5rem;
+}
+
+.player-controller > .main-display > .title > .title-song-author {
+    font-size: 1.2rem;
+}
+
+.player-controller > .main-display > .controls > .action-button {
+    margin: 5px;
+    border: 0px;
+    background: none;
+    font-size: 1.5rem;
+    color: #CCC;
+}
+
+.player-controller > .main-display > .controls > .action-button#controller-playback-btn > i {
+    display: none;
+}
+
+.player-controller[data-playback="paused"] > .main-display > .controls > .action-button#controller-playback-btn > i.fa-play {
+    display: inline-block;
+}
+
+.player-controller[data-playback="playing"] > .main-display > .controls > .action-button#controller-playback-btn > i.fa-pause {
+    display: inline-block;
+}
+
+.player-controller[data-playback="buffering"] > .main-display > .controls > .action-button#controller-playback-btn > i.fa-clock {
+    display: inline-block;
+}
+
+.player-controller > .main-display > .progress-bar-container {
+    height: 10px;
+    width: 350px;
+}
+
+.player-controller > .main-display > .progress-bar-container > .progress-bar {
+    background-color: #CCC;
+    border-radius: 5px;
+    cursor: pointer;
+    height: 4px;
+    transition: all 0.18s ease-in-out 0s;
+}
+
+.player-controller > .main-display > .progress-bar-container > .progress-bar > .progress {
+    max-width: 100%;
+    background-color: lightblue;
+    border-radius: 5px;
+    height: 100%;
+    width: calc(100% * var(--progress, 0));
+    transition: width 0.1s linear;
+}
+
+.player-controller > .volume-controls {
+    margin: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.player-controller > .volume-controls > .volume-percent {
+    font-size: 0.75rem;
+    color: #CCC;
+}
+
+.player-controller > .volume-controls > .volume-slider {
+    transform: rotateY(270deg);
+    width: 100px;
+    height: 10px;
+}
+
+.player-controller > .volume-controls > .volume-icon {
+    margin: 5px;
+    font-size: 0.5rem;
+    color: #CCC;
+}
