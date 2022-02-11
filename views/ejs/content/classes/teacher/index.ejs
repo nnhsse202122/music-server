@@ -1,0 +1,8 @@
+<main class="content" id="content">
+    <% for (let index = 0; index < classrooms.length; index++) { %>
+        <%- include("./_class", { classroom: classrooms[index] }); %>
+    <% } %>
+    <button class="create-class-info" id="show-create-class-btn">
+        <i class="fa-solid fa-plus"></i>
+    </button>
+</main>

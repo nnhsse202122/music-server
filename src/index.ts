@@ -1,7 +1,16 @@
-import "../types/sessions";
-import "../types/yt-player";
-import "../types/gapi";
-import "../types";
-import "./server/index";
+import ConsoleLogHandler from "./ConsoleLogHandler";
+import ServerInstance from "./ServerInstance";
+import Logger from "./util/logging/Logger";
 import dotenv from "dotenv";
-dotenv.config();
+import path from "path"
+
+dotenv.config({
+    "path": path.resolve(__dirname, "../.env")
+});
+
+Logger.handler = new ConsoleLogHandler();
+
+let server = new ServerInstance();
+server.initialize().then(() => {
+    server.start();
+});

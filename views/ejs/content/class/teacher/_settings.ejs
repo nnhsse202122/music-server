@@ -1,0 +1,44 @@
+<div class="settings-container">
+    <div class="settings-header">
+        Settings
+    </div>
+    <div class="settings-body">
+        <div class="settings-item full">
+            <div class="settings-title">Class Name</div>
+            <input type="text" class="settings-value" id="class-name" value="<%- classroom.escapedName %>"/>
+        </div>
+        <div class="settings-item">
+            <div class="settings-title">Allow Song Submissions</div>
+            <input type="checkbox" class="settings-value" id="class-submit-enabled" <%= classroom.settings.allowSongSubmission ? "checked" : "" %>/>
+        </div>
+        <div class="settings-item" id="class-submit-tokens-container">
+            <div class="settings-title">Lock Submissions to Tokens</div>
+            <input type="checkbox" class="settings-value" id="class-submit-tokens" <%= classroom.settings.submissionsRequireTokens ? "checked" : "" %>/>
+        </div>
+        <div class="settings-item">
+            <div class="settings-title">Enable Joining</div>
+            <input type="checkbox" class="settings-value" id="class-joins" <%= classroom.settings.joinable ? "checked" : "" %>/>
+        </div>
+        <div class="settings-item">
+            <div class="settings-title">Students Can See Playlist</div>
+            <input type="checkbox" class="settings-value" id="class-playlist-visible" <%= classroom.settings.playlistVisible ? "checked" : "" %>/>
+        </div>
+        <div class="settings-item">
+            <div class="settings-title">Playlist</div>
+            <select class="settings-value" id="class-playlist-items">
+                <!-- TODO: IMPLEMENT PLAYLISTS -->
+                <option>None</option>
+            </select>
+        </div>
+    </div>
+    <div class="settings-actions">
+        <button class="settings-action" id="revert-settings">
+            <i class="fa-solid fa-arrow-rotate-left"></i>
+            <span>Revert</span>
+        </button>
+        <button class="settings-action revert" id="save-settings">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Save</span>
+        </button>
+    </div>
+</div>
