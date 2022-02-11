@@ -1,0 +1,33 @@
+
+<div class="class-info">
+    <div class="class-title">
+        <span class="class-name"><%= classroom.name %></span>
+    </div>
+    <div class="class-body">
+        <div class="class-code"><%= classroom.code %></div>
+        <div class="class-status">
+            <span class="class-status-joinable"  data-status="<%- classroom.settings.joinable ? "enabled" : "disabled" %>">
+                <i class="fa-solid fa-circle-<%- classroom.settings.joinable ? "check" : "xmark" %> fa-lg"></i>
+                <span>Joinable</span>
+            </span>
+            <span class="class-status-submissions" data-status="<%- classroom.settings.allow_submissions ? "enabled" : "disabled" %>">
+                <i class="fa-solid fa-circle-<%- classroom.settings.allow_submissions ? "check" : "xmark" %> fa-lg"></i>
+                <span>Submissions</span>
+            </span>
+        </div>
+    </div>
+    <div class="class-actions">
+        <a class="class-action-play" href="/classes/<%= classroom.code %>/?playback">
+            <i class="fa-solid fa-circle-play"></i>
+            <span>Player</span>
+        </a>
+        <a class="class-action-manage" href="/classes/<%= classroom.code %>/?manage">
+            <i class="fa-solid fa-screwdriver-wrench"></i>
+            <span>Manage</span>
+        </a>
+        <a class="class-action-delete" href="/classes/<%= classroom.code %>/?delete">
+            <i class="fa-solid fa-trash"></i>
+            <span>Delete</span>
+        </a>
+    </div>
+</div>

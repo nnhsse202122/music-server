@@ -1,0 +1,7 @@
+<% if (user === null) { %>
+    <%- include("./_default"); %>
+<% } else if (user.role === 1) { %>
+    <%- include("./_student"); %>
+<% } else if (user.role === 0) { %>
+    <%- include("./_teacher"); %>
+<% } %>

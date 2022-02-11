@@ -1,0 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=Bree+Serif&family=Source+Sans+Pro&family=Varela+Round&display=swap');
+
+:root {
+    --font-title: 'Bree Serif', serif;
+    --font-primary: 'Varela Round', sans-serif;
+    --font-secondary: 'Source Sans Pro', sans-serif;
+    --color-title: white;
+}
+
+body {
+    margin: 0px;
+    padding: 0px;
+}
