@@ -2,7 +2,8 @@
     "name": "music-server",
     "description": "A web server made by the software engineering class that is designed to allow for playing music in a classroom setting.",
     "scripts": {
-        "build": "npx tsc --build"
+        "setup": "npm install && npm run build",
+        "build": "npx tsc --build && node index"
     },
     "dependencies": {
         "@googleapis/youtube": "^2.0.0",
