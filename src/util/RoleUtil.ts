@@ -1,4 +1,6 @@
 import Role from "../data/users/Role";
+// @ts-ignore
+import devConfig from "../../../dev-config";
 
 const VALID_DISTRICTS = [
     "naperville203"
@@ -16,7 +18,7 @@ const VALID_DISTRICTS_REGEX = () => {
 export const VALID_EMAIL_REGEX = new RegExp(`^([a-zA-Z0-9_]+)@(stu\\.)?${VALID_DISTRICTS_REGEX()}\\.org$`);
 
 export function getRoleFromEmail(email: string): Role | null {
-    if (email === "fluffydoggolel@gmail.com") {
+    if (devConfig.teachers.includes(email)) {
         return Role.Teacher
     }
 
