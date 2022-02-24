@@ -1,6 +1,6 @@
 import Role from "../data/users/Role";
 // @ts-ignore
-import devConfig from "../../../dev-config";
+import devConfig from "./../../dev-config.json";
 
 const VALID_DISTRICTS = [
     "naperville203"
