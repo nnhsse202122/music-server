@@ -20,7 +20,6 @@ function displayStudents(students) {
         let student = students[index];
         noStudents = false;
         let tr = document.createElement("tr");
-        let tdEmail = document.createElement("td");
         let tdName = document.createElement("td");
         let tdTokens = document.createElement("td");
         let tdRemove = document.createElement("td");
@@ -42,7 +41,6 @@ function displayStudents(students) {
         });
         tdRemove.appendChild(removeButton);
         tdName.textContent = student.name;
-        tdEmail.textContent = student.email;
         let tokenCountText = document.createElement("input");
         tokenCountText.classList.add("token-count");
         tokenCountText.type = "number";
@@ -87,8 +85,6 @@ function displayStudents(students) {
         tdRemove.classList.add("student-remove");
         tdName.classList.add("student-name");
         tdTokens.classList.add("student-tokens");
-        tdEmail.classList.add("student-email");
-        tr.appendChild(tdEmail);
         tr.appendChild(tdName);
         tr.appendChild(tdTokens);
         tr.appendChild(tdRemove);
