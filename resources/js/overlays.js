@@ -1,4 +1,3 @@
-
 // handles all overlay models
 /** @extends OverlayModelBase */
 class JoinClassOverlayModel extends OverlayModelBase {
@@ -258,6 +257,50 @@ class LoadingOverlayModel extends OverlayModelBase {
     }
 }
 /** @extends OverlayModelBase */
+class SettingsSavedOverlayModel extends OverlayModelBase {
+    /** @private */
+    _closeButton = undefined;
+    /** @public */
+    constructor(overlay) {
+        super(overlay, "settings-saved");
+        this._closeButton = null;
+    }
+    /** @protected
+     * @param {HTMLDivElement} titleDiv
+     * @returns {void}
+     */
+    instantiateTitle(titleDiv) {
+        let titleSpan = document.createElement("span");
+        titleSpan.textContent = "Saved";
+        titleDiv.appendChild(titleSpan);
+    }
+    /** @protected
+     * @param {HTMLDivElement} bodyDiv
+     * @returns {void}
+     */
+    instantiateBody(bodyDiv) {
+        bodyDiv.innerHTML = `Your settings have been saved!`;
+    }
+    /** @protected
+     * @param {HTMLDivElement} actionsDiv
+     * @returns {void}
+     */
+    instantiateActions(actionsDiv) {
+        this._closeButton = document.createElement("button");
+        this._closeButton.classList.add("action");
+        this._closeButton.classList.add("yes");
+        this._closeButton.addEventListener("click", () => this._onCloseButtonClicked());
+        this._closeButton.innerHTML = `<i class="fa-solid fa-check"></i>`;
+        actionsDiv.appendChild(this._closeButton);
+    }
+    /** @private
+     * @returns {void}
+     */
+    _onCloseButtonClicked() {
+        this.overlay.hide();
+    }
+}
+/** @extends OverlayModelBase */
 class CreateClassOverlayModel extends OverlayModelBase {
     /** @private */
     _submissionsEnabledCheckbox = undefined;
@@ -337,9 +380,9 @@ class CreateClassOverlayModel extends OverlayModelBase {
         titleDiv.classList.add("settings-title");
         titleDiv.textContent = title;
         let checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
         checkbox.classList.add("settings-value");
         checkbox.id = id;
+        checkbox.type = "checkbox";
         settingsItemDiv.appendChild(titleDiv);
         settingsItemDiv.appendChild(checkbox);
         container.appendChild(settingsItemDiv);
@@ -411,7 +454,4 @@ overlayManager.addOverlay(CreateClassOverlayModel);
 overlayManager.addOverlay(DeleteSongFromPlaylistOverlayModel);
 overlayManager.addOverlay(DeleteAllStudentsOverlayModel);
 overlayManager.addOverlay(LoadingOverlayModel);
-
-
-
-
+overlayManager.addOverlay(SettingsSavedOverlayModel);
