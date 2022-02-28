@@ -4,7 +4,7 @@
  * @param {SongServer.API.StudentInfo[]} students  Students
  * @returns {void}
  */
-function displayStudents(students) {
+ function displayStudents(students) {
     /** @type {HTMLTableElement} */
     let table = document.getElementById("student-table");
     /** @type {HTMLDivElement} */

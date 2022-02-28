@@ -295,7 +295,7 @@ body {
     color: #CCC;
 }
 
-.model#playback-model.active {
+.model#overview-model.active {
     display: grid;
     place-items: center;
     grid-template-columns: auto auto;
