@@ -2,12 +2,8 @@
     <div class="side-bar-title"><%= classroom.name %></div>
     <hr/>
     <button class="side-bar-button" id="overview">
-        <i class="fa-solid fa-circle-info"></i>
-        <span>Overview</span>
-    </button>
-    <button class="side-bar-button" id="playback">
         <i class="fa-solid fa-circle-play"></i>
-        <span>Playback</span>
+        <span>Overview</span>
     </button>
     <button class="side-bar-button" id="students">
         <i class="fa-solid fa-users"></i>
@@ -29,9 +25,6 @@
 <main class="content">
     <div class="model" id="overview-model">
         <%- include("./_overview", { classroom: classroom }) %> 
-    </div>
-    <div class="model" id="playback-model">
-        <%- include("./_player", { classroom: classroom }) %>
     </div>
     <div class="model" id="students-model">
         <%- include("./_student-list", { classroom: classroom }) %>

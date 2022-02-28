@@ -1,1 +1,61 @@
-A
+<div class="player-container">
+    <div class="player-controls">
+        <div class="player-control now-playing">
+            <div class="player-control-title">Now Playing</div>
+            <div class="player-control-value">
+                <span id="now-playing-text">None...</span>
+            </div>
+        </div>
+        <div class="player-control volume">
+            <div class="player-control-title">Volume</div>
+            <div class="player-control-value">
+                <input type="range" min="0" max="100" step="1" name="volume-slider" id="volume-slider">
+                <label for="volume-slider" id="volume-slider-label">100%</label>
+            </div>
+        </div>
+        <div class="player-control">
+            <div class="player-control-title">Remove</div>
+            <div class="player-control-value">
+                <button id="remove-song-btn">
+                    <i class="fa-solid fa-trash"></i>
+                </button>
+            </div>
+        </div>
+        <div class="player-control">
+            <div class="player-control-title">Previous</div>
+            <div class="player-control-value">
+                <button id="previous-song-btn">
+                    <i class="fa-solid fa-backward-step"></i>
+                </button>
+            </div>
+        </div>
+        <div class="player-control">
+            <div class="player-control-title">Playback</div>
+            <div class="player-control-value">
+                <button id="playback-btn">
+                    <i class="fa-solid fa-play"></i>
+                </button>
+            </div>
+        </div>
+        <div class="player-control">
+            <div class="player-control-title">Next</div>
+            <div class="player-control-value">
+                <button id="next-song-btn">
+                    <i class="fa-solid fa-forward-step"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="player"></div>
+</div>
+<div class="playlist-container">
+    <div class="playlist-title">Playlist</div>
+    <div class="playlist-body" id="playlist-container">
+        <div id="playlist-container-empty">
+            Your playlist is empty!
+        </div>
+        <div class="playlist-item-container top" id="top-playlist-item" ondrop="onSongDrop(event, 0)" ondragover="onSongDragOver(event, 0)">
+            <i class="fa-solid fa-plus"></i>
+        </div>
+    </div>
+</div>

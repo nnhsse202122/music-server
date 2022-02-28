@@ -4,7 +4,7 @@
  * @param {SongServer.API.StudentInfo[]} students  Students
  * @returns {void}
  */
-function displayStudents(students) {
+ function displayStudents(students) {
     /** @type {HTMLTableElement} */
     let table = document.getElementById("student-table");
     /** @type {HTMLDivElement} */
@@ -444,10 +444,7 @@ async function refreshPlaylist() {
     console.log(songs);
 }
 console.log(window.location.search);
-if (window.location.search === "?playback") {
-    controller.toggle("playback");
-}
-else if (window.location.search === "?manage") {
+if (window.location.search === "?manage") {
     controller.toggle("settings");
 }
 else if (window.location.search === "?students") {
