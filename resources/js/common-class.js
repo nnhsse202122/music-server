@@ -138,9 +138,6 @@ function updateSettings() {
 let controller = new SidebarController();
 controller.addButton("overview", () => {
 });
-controller.addButton("playback", () => {
-    //window.player.loadVideo("sIHV7R6-TUw");
-});
 controller.addButton("students", async () => {
     await loadStudents();
 });
@@ -180,8 +177,7 @@ async function saveSettings() {
         window.alert("Error whilst updating settings: " + response.message);
         throw new Error(response.message);
     }
-    window.alert("Your settings have been saved!");
-    window.overlayManager.hide();
+    window.overlayManager.show("settings-saved");
 }
 /** @returns {void} */
 function goBack() {
