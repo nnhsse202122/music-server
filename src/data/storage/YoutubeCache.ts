@@ -394,10 +394,8 @@ export default class YoutubeCache {
                     "author": searchedVideo.snippet!.channelTitle!,
                 });
                 
-                // @ts-ignore member visibility
-                if (!await this._db.yt._videoDB.contains(searchedVideo.id!.videoId!)) {
-                    // @ts-ignore member visibility
-                    await this._db.yt._videoDB.add(searchedVideo.id!.videoId!, {
+                if (!await this._videoDB.contains(searchedVideo.id!.videoId!)) {
+                    await this._videoDB.add(searchedVideo.id!.videoId!, {
                         "etag": searchedVideo.etag!,
                         "id": searchedVideo.id!.videoId!,
                         "title": searchedVideo.snippet!.title!,
