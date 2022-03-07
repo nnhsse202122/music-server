@@ -532,7 +532,6 @@ class SubmitSongStudentOverlay extends OverlayModelBase {
      */
     _onCancelButtonClick() {
         this._checkbox.checked = false;
-        SongSearchManager.resetCurrent();
         this.overlay.hide();
     }
 }
@@ -611,7 +610,6 @@ class SubmitSongTeacherOverlay extends OverlayModelBase {
      * @returns {void}
      */
     _onCancelButtonClick() {
-        SongSearchManager.resetCurrent();
         this.overlay.hide();
     }
 }
