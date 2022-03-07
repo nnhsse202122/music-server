@@ -448,6 +448,273 @@ class CreateClassOverlayModel extends OverlayModelBase {
         }
     }
 }
+/** @extends OverlayModelBase */
+class SubmitSongStudentOverlay extends OverlayModelBase {
+    /** @private */
+    _checkbox;
+    /** @private */
+    _submitButton;
+    /** @private */
+    _cancelButton;
+
+    /** @public */
+    constructor(overlay) {
+        super(overlay, "submit-song-student-model");
+        this._checkbox = null;
+        this._submitButton = null;
+        this._cancelButton = null;
+    }
+    /** @protected
+     * @param {HTMLDivElement} titleDiv
+     * @returns {void}
+     */
+    instantiateTitle(titleDiv) {
+        let titleSpan = document.createElement("span");
+        titleSpan.textContent = "Submit Song";
+        titleDiv.appendChild(titleSpan);
+    }
+    /** @protected
+     * @param {HTMLDivElement} bodyDiv
+     * @returns {void}
+     */
+    instantiateBody(bodyDiv) {
+        let bodyContent = document.createElement("span");
+        bodyContent.textContent = "Please confirm this song is 100% CLEAN: The song must not include obsecene language or inappropriate themes.";
+        this._checkbox = document.createElement("input");
+        this._checkbox.type = "checkbox";
+
+        bodyDiv.appendChild(bodyContent);
+        bodyDiv.appendChild(this._checkbox);
+    }
+    /** @protected
+     * @param {HTMLDivElement} actionsDiv
+     * @returns {void}
+     */
+    instantiateActions(actionsDiv) {
+        this._submitButton = document.createElement("button");
+        this._submitButton.classList.add("action");
+        this._submitButton.classList.add("create");
+        this._submitButton.addEventListener("click", async () => await this._onSubmitButtonClick());
+        this._submitButton.innerHTML = `<i class="fa-solid fa-check"></i>`;
+        this._cancelButton = document.createElement("button");
+        this._cancelButton.classList.add("action");
+        this._cancelButton.classList.add("cancel");
+        this._cancelButton.addEventListener("click", () => this._onCancelButtonClick());
+        this._cancelButton.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+        actionsDiv.appendChild(this._submitButton);
+        actionsDiv.appendChild(this._cancelButton);
+    }
+
+    /** @private
+     * @returns {Promise<void>}
+     */
+    async _onSubmitButtonClick() {
+        if (!this._checkbox.checked) return;
+        this.overlay.hide();
+        this.overlay.show("loading");
+
+        let req = await SongServerAPI().classroom(classCode).playlist.songs.add({
+            "id": this.getData("id"),
+            "source": this.getData("source")
+        });
+        if (!req.success) {
+            this.overlay.show("submit-song-fail-model", { message: req.message });
+        }
+        else {
+            this.overlay.show("submit-song-success-model");
+            SongSearchManager.resetCurrent();
+        }
+        this._checkbox.checked = false;
+    }
+
+    /** @private
+     * #returns {void}
+     */
+    _onCancelButtonClick() {
+        this._checkbox.checked = false;
+        SongSearchManager.resetCurrent();
+        this.overlay.hide();
+    }
+}
+/** @extends OverlayModelBase */
+class SubmitSongTeacherOverlay extends OverlayModelBase {
+    /** @private */
+    _submitButton;
+    /** @private */
+    _cancelButton;
+
+    /** @public */
+    constructor(overlay) {
+        super(overlay, "submit-song-teacher-model");
+        this._submitButton = null;
+        this._cancelButton = null;
+    }
+    /** @protected
+     * @param {HTMLDivElement} titleDiv
+     * @returns {void}
+     */
+    instantiateTitle(titleDiv) {
+        let titleSpan = document.createElement("span");
+        titleSpan.textContent = "Submit Song";
+        titleDiv.appendChild(titleSpan);
+    }
+    /** @protected
+     * @param {HTMLDivElement} bodyDiv
+     * @returns {void}
+     */
+    instantiateBody(bodyDiv) {
+        let bodyContent = document.createElement("span");
+        bodyContent.textContent = "Add this song to the playlist?";
+
+        bodyDiv.appendChild(bodyContent);
+    }
+    /** @protected
+     * @param {HTMLDivElement} actionsDiv
+     * @returns {void}
+     */
+    instantiateActions(actionsDiv) {
+        this._submitButton = document.createElement("button");
+        this._submitButton.classList.add("action");
+        this._submitButton.classList.add("create");
+        this._submitButton.addEventListener("click", async () => await this._onSubmitButtonClick());
+        this._submitButton.innerHTML = `<i class="fa-solid fa-check"></i>`;
+        this._cancelButton = document.createElement("button");
+        this._cancelButton.classList.add("action");
+        this._cancelButton.classList.add("cancel");
+        this._cancelButton.addEventListener("click", () => this._onCancelButtonClick());
+        this._cancelButton.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+        actionsDiv.appendChild(this._submitButton);
+        actionsDiv.appendChild(this._cancelButton);
+    }
+
+    /** @private
+     * @returns {Promise<void>}
+     */
+    async _onSubmitButtonClick() {
+        this.overlay.hide();
+        this.overlay.show("loading");
+
+        let req = await SongServerAPI().classroom(classCode).playlist.songs.add({
+            "id": this.getData("id"),
+            "source": this.getData("source")
+        });
+        if (!req.success) {
+            this.overlay.show("submit-song-fail-model", { message: data.message });
+        }
+        else {
+            this.overlay.show("submit-song-success-model");
+            SongSearchManager.resetCurrent();
+        }
+    }
+
+    /** @private
+     * @returns {void}
+     */
+    _onCancelButtonClick() {
+        SongSearchManager.resetCurrent();
+        this.overlay.hide();
+    }
+}
+/** @extends OverlayModelBase */
+class SubmitSongFailOverlayModel extends OverlayModelBase {
+    /** @private */
+    _closeButton = undefined;
+    /** @private */
+    _text = undefined;
+    /** @public */
+    constructor(overlay) {
+        super(overlay, "submit-song-fail-model");
+        this._closeButton = null;
+        this._text = null;
+    }
+    /** @protected
+     * @param {HTMLDivElement} titleDiv
+     * @returns {void}
+     */
+    instantiateTitle(titleDiv) {
+        let titleSpan = document.createElement("span");
+        titleSpan.textContent = "Submission Failed";
+        titleDiv.appendChild(titleSpan);
+    }
+    /** @protected
+     * @param {HTMLDivElement} bodyDiv
+     * @returns {void}
+     */
+    instantiateBody(bodyDiv) {
+        this._text = document.createElement("span");
+        bodyDiv.appendChild(this._text);
+    }
+    /** @protected
+     * @param {HTMLDivElement} actionsDiv
+     * @returns {void}
+     */
+    instantiateActions(actionsDiv) {
+        this._closeButton = document.createElement("button");
+        this._closeButton.classList.add("action");
+        this._closeButton.classList.add("no");
+        this._closeButton.addEventListener("click", () => this._onCloseButtonClicked());
+        this._closeButton.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+        actionsDiv.appendChild(this._closeButton);
+    }
+    /** @private
+     * @returns {void}
+     */
+    _onCloseButtonClicked() {
+        this.overlay.hide();
+    }
+
+    /** @public
+     * @override
+     * @returns {void}
+     */
+    onShow() {
+        this._text.textContent = this.getData("message");
+    }
+}
+/** @extends OverlayModelBase */
+class SubmitSongSuccessOverlayModel extends OverlayModelBase {
+    /** @private */
+    _closeButton = undefined;
+    /** @public */
+    constructor(overlay) {
+        super(overlay, "submit-song-success-model");
+        this._closeButton = null;
+    }
+    /** @protected
+     * @param {HTMLDivElement} titleDiv
+     * @returns {void}
+     */
+    instantiateTitle(titleDiv) {
+        let titleSpan = document.createElement("span");
+        titleSpan.textContent = "Submission Success";
+        titleDiv.appendChild(titleSpan);
+    }
+    /** @protected
+     * @param {HTMLDivElement} bodyDiv
+     * @returns {void}
+     */
+    instantiateBody(bodyDiv) {
+        bodyDiv.textContent = "The song has been added to the playlist";
+    }
+    /** @protected
+     * @param {HTMLDivElement} actionsDiv
+     * @returns {void}
+     */
+    instantiateActions(actionsDiv) {
+        this._closeButton = document.createElement("button");
+        this._closeButton.classList.add("action");
+        this._closeButton.classList.add("yes");
+        this._closeButton.addEventListener("click", () => this._onCloseButtonClicked());
+        this._closeButton.innerHTML = `<i class="fa-solid fa-check"></i>`;
+        actionsDiv.appendChild(this._closeButton);
+    }
+    /** @private
+     * @returns {void}
+     */
+    _onCloseButtonClicked() {
+        this.overlay.hide();
+    }
+}
 var overlayManager = new Overlay();
 overlayManager.addOverlay(JoinClassOverlayModel);
 overlayManager.addOverlay(CreateClassOverlayModel);
@@ -455,3 +722,7 @@ overlayManager.addOverlay(DeleteSongFromPlaylistOverlayModel);
 overlayManager.addOverlay(DeleteAllStudentsOverlayModel);
 overlayManager.addOverlay(LoadingOverlayModel);
 overlayManager.addOverlay(SettingsSavedOverlayModel);
+overlayManager.addOverlay(SubmitSongStudentOverlay);
+overlayManager.addOverlay(SubmitSongTeacherOverlay);
+overlayManager.addOverlay(SubmitSongFailOverlayModel);
+overlayManager.addOverlay(SubmitSongSuccessOverlayModel);

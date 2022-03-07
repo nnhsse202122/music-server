@@ -197,7 +197,7 @@ const SongServerAPI = (apiVersion = 1) => {
         },
         "youtube": {
             "search": async (query, auth = null) => {
-                return await getReq(`/youtube/search?q=${encodeURIComponent(query)}`, auth);
+                return await getReq(`/yt/search?q=${encodeURIComponent(query)}`, auth);
             }
         }
     };
