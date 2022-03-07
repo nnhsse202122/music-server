@@ -146,7 +146,7 @@
   }
   
   .song-results-container > .search-result {
-      width: 100%;
+      width: calc(100% - 40px); /** ensure no overflow */
       padding: 10px 20px;
       display: grid;
       grid-template-columns: auto 20%;

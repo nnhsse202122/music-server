@@ -108,10 +108,21 @@
     color: #F77;
 }
 
+.submit-song-student-model input[type="checkbox"] {
+    display: block;
+}
+
+.submit-song-student-model > .body {
+    display: grid;
+    justify-items: center;
+}
+
 .are-you-sure-students > .actions,
 .are-you-sure-song > .actions,
 .join-class-model > .actions,
-.create-class-model > .actions {
+.create-class-model > .actions,
+.submit-song-teacher-model > .actions,
+.submit-song-student-model > .actions {
     grid-template-columns: auto auto;
 }
 
