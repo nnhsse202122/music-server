@@ -28,6 +28,11 @@ class SongSearchManager {
         this.m_isTeacher = isTeacher;
         this.m_search = document.getElementById("search");
         document.getElementById("submit-search").addEventListener("click", () => this.search());
+        this.m_search.addEventListener("keydown", (ev) => {
+            if (ev.key == "Enter") {
+                this.search();
+            }
+        })
 
         this.m_container = document.getElementById("song-search-results");
         this.m_results = [];
