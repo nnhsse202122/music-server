@@ -21,8 +21,6 @@ type Config = {
     api: ServerConfig
 };
 
-const REDIRECT_URI = "http://127.0.0.1:3000/account/auth";
-
 export default class ServerInstance {
 
     private readonly _app: core.Express;
@@ -59,7 +57,7 @@ export default class ServerInstance {
     }
     
     public get oauthID(): string {
-        return process.env.OAUTH_CLIENT_ID ?? "";
+        return process.env.CLIENT_ID ?? "";
     }
     
     public get oauthSecret(): string {
@@ -67,7 +65,7 @@ export default class ServerInstance {
     }
 
     public get oauthRedirectURI(): string {
-        return REDIRECT_URI;
+        return process.env.REDIRECT_URI ?? "";
     }
 
     public start(): void {
