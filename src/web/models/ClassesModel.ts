@@ -39,7 +39,8 @@ class GetRoute extends WebRoute<ClassesModel> {
 
         res.render("./routes/classes", {
             user: user,
-            classrooms: classes
+            classrooms: classes,
+             apiDomain: process.env.API_DOMAIN
         });
     }
 }

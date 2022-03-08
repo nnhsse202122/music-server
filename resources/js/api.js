@@ -91,7 +91,7 @@ const SongServerAPI = (apiVersion = 1) => {
     function createUrl(url) {
         if (url.charAt(0) === '/')
             url = url.substring(1);
-        return `http://127.0.0.1:3000/api/v${apiVersion}/${url}`;
+        return `${API_DOMAIN}/api/v${apiVersion}/${url}`;
     }
     async function getReq(url, authorization, body) {
         return await handleReq("GET", createUrl(url), authorization, body);

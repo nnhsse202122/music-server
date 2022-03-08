@@ -1,5 +1,5 @@
 <% if (user.role === 1) { %>
-    <%- include("./student/_class", { classroom: classroom, user: user }); %>
+    <%- include("./student/_class", { classroom: classroom, user: user, apiDomain: apiDomain }); %>
 <% } else if (user.role === 0) { %>
-    <%- include("./teacher/_class", { classroom: classroom, user: user }); %>
+    <%- include("./teacher/_class", { classroom: classroom, user: user, apiDomain: apiDomain }); %>
 <% } %>
