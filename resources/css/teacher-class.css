@@ -517,8 +517,8 @@ body {
     padding: 10px;
     background-color: white;
     display: grid;
-    --player-control-item-size: calc(calc(100% - calc(10px * 3)) / 4);
-    grid-template-columns: repeat(4, var(--player-control-item-size));
+    --player-control-item-size: calc(calc(100% - calc(10px * 3)) / 5);
+    grid-template-columns: repeat(5, var(--player-control-item-size));
     min-width: 400px;
     gap: 10px;
     position: sticky;
@@ -531,7 +531,7 @@ body {
 
 .player-controls > .player-control.now-playing {
     grid-column-start: 1;
-    grid-column-end: 3;
+    grid-column-end: 4;
 }
 
 
@@ -541,8 +541,8 @@ body {
 }
 
 .player-controls > .player-control.volume {
-    grid-column-start: 3;
-    grid-column-end: 5;
+    grid-column-start: 4;
+    grid-column-end: 6;
 }
 
 .player-controls > .player-control.now-playing > .player-control-title,

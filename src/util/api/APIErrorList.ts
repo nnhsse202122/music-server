@@ -46,6 +46,11 @@ export let apiErrors = {
         "status": 400,
         "parameters": [],
     } as APIErrorInfo<"Failed to add song.", 400, []>,
+    "api.classroom.playlist.song.add.exists": {
+        "message": "That song already exists in the playlist.",
+        "status": 400,
+        "parameters": [],
+    } as APIErrorInfo<"That song already exists in the playlist.", 400, []>,
     "api.classroom.playlist.song.not_found": {
         "message": "Song not found.",
         "status": 404,

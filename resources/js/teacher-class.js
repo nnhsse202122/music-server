@@ -214,6 +214,9 @@ class TeacherPlaylistController extends PlaylistControllerBase {
         document.getElementById("previous-song-btn").addEventListener("click", () => {
             this.previousSong();
         });
+        document.getElementById("shuffle-song-btn").addEventListener("click", () => {
+            this.shuffle();
+        });
         document.getElementById("playback-btn").addEventListener("click", () => {
             if (this.currentSong?.state === PlaylistSongState.NOT_STARTED) {
                 this.changeSong(this.currentSong);
@@ -399,6 +402,13 @@ class TeacherPlaylistController extends PlaylistControllerBase {
                 this._playSong(previousSong);
         }
     }
+
+    async shuffle() {
+        let res = await SongServerAPI().classroom(classCode).playlist.shuffle();
+        if (res.success) {
+            refreshPlaylist();
+        }
+    }
 }
 /** @extends PlaylistSongBase */
 class TeacherPlaylistSong extends PlaylistSongBase {
@@ -462,3 +472,5 @@ refreshPlaylist();
 
 
 
+
+var songSearchManager = new SongSearchManager(true);

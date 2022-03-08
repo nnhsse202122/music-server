@@ -1,0 +1,13 @@
+<div class="song-search-component">
+    <div class="song-submit">
+        <div class="search-bar">
+            <input id="search" type="search" placeholder="Enter Song Name..." autofocus required />
+            <button id="submit-search"><i class="fa-solid fa-magnifying-glass"></i></button>    
+        </div>
+    </div>
+    <div class="song-results-container" id="song-search-results">
+        <% for (let i = 0; i < 3; i++) { %>
+            <%- include("./_song-search-result") %>
+        <% } %>
+    </div>
+</div>

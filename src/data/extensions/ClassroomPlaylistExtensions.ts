@@ -359,6 +359,12 @@ export async function getSongs(playlist: ClassroomPlaylist, playlistDB: Playlist
 
 export async function addSong(playlist: ClassroomPlaylist, playlistDB: PlaylistDataBase, classroomOwnerEmail: string, song: SongToAdd, index: int, role: Role): Promise<ClassroomSong[]> {
     let playlistSongs = await getSongs(playlist, playlistDB, classroomOwnerEmail);
+    for (let index = 0; index < playlistSongs.length; index++) {
+        // already exists
+        if (playlistSongs[index].id == song.id && playlistSongs[index].source === song.source) {
+            throw new Error("Song already exists!");
+        }
+    }
     if (index === -1) {
         let songCount = playlistSongs.length;
         for (let i = 0; i < playlist.modifications.length; i++) {

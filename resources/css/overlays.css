@@ -97,21 +97,36 @@
 .join-class-model > .actions > .join:hover,
 .create-class-model > .actions > .create:hover,
 .are-you-sure-students > .actions > .yes:hover,
-.are-you-sure-song > .actions > .yes:hover {
+.are-you-sure-song > .actions > .yes:hover,
+.submit-song-teacher-model > .actions > .yes:hover,
+.submit-song-student-model > .actions > .yes:hover {
     color: #7F7;
 }
 
 .join-class-model > .actions > .cancel:hover,
 .create-class-model > .actions > .cancel:hover,
 .are-you-sure-students > .actions > .no:hover,
-.are-you-sure-song > .actions > .no:hover {
+.are-you-sure-song > .actions > .no:hover,
+.submit-song-teacher-model > .actions > .no:hover,
+.submit-song-student-model > .actions > .no:hover {
     color: #F77;
+}
+
+.submit-song-student-model input[type="checkbox"] {
+    display: block;
+}
+
+.submit-song-student-model > .body {
+    display: grid;
+    justify-items: center;
 }
 
 .are-you-sure-students > .actions,
 .are-you-sure-song > .actions,
 .join-class-model > .actions,
-.create-class-model > .actions {
+.create-class-model > .actions,
+.submit-song-teacher-model > .actions,
+.submit-song-student-model > .actions {
     grid-template-columns: auto auto;
 }
 

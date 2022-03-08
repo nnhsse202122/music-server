@@ -1,7 +1,7 @@
 import { Request } from "express";
 import Classroom from "../../../data/classrooms/Classroom";
 import ClassroomSong from "../../../data/classrooms/ClassroomSong";
-import { addSong, deleteSong, getSongsAsClassSongs, moveSong } from "../../../data/extensions/ClassroomPlaylistExtensions";
+import { addSong, deleteSong, getSongs, getSongsAsClassSongs, moveSong } from "../../../data/extensions/ClassroomPlaylistExtensions";
 import { isInClassCode } from "../../../data/extensions/UserExtensions";
 import Role from "../../../data/users/Role";
 import APIEndpoint from "../../../mvc/api/APIEndpoint";
@@ -170,6 +170,14 @@ class PostRoute extends APIRoute<ClassroomSong[] | null, ClassroomPlaylistSongsE
             }
         };
 
+        let songs = await getSongsAsClassSongs(classroom.playlist, this.server.db.playlists, classroom.owner, Role.Student);
+        console.log(songs);
+        if (songs.some((s) => {
+            return s.id === songToAdd.id && s.source == songToAdd.source
+        })) {
+            return this.fail("api.classroom.playlist.song.add.exists", {});
+        }
+
         let displayResults = true;
         if (user.type === Role.Student) {
             if (!classroom.settings.allowSongSubmissions) {
@@ -223,9 +231,14 @@ class PostRoute extends APIRoute<ClassroomSong[] | null, ClassroomPlaylistSongsE
             }
         } 
 
-        let songs = await addSong(classroom.playlist, this.server.db.playlists, classroom.owner, songToAdd, int(-1), user.type);
-        await this.server.db.classrooms.set(code, classroom);
-        return this.success(displayResults ? songs : null);
+        try {
+            let songs = await addSong(classroom.playlist, this.server.db.playlists, classroom.owner, songToAdd, int(-1), user.type);
+            await this.server.db.classrooms.set(code, classroom);
+            return this.success(displayResults ? songs : null);
+        }
+        catch(err) {
+            return this.fail("api.classroom.playlist.song.add.fail", {});
+        }
     }
 } 
 class DeleteRoute extends APIRoute<RemoveClassroomSongResponse, ClassroomPlaylistSongsEndpoint> {
