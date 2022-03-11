@@ -39,12 +39,12 @@ The student can also submit songs. The student begins by searching for a song. I
 The teacher view has the most detail. Not only does it have all the elements of the student view, but also allows for control over the playlist itself, as well as the creation and control of classes.
 
 ### Playlist Controls
-The teacher can play the songs in the playlist in their given order, skip them if they find them to be inappropriate or too long, and can summon a list of all the songs within the playlist. Clicking on one of those songs reveals more info, specifically the song's name and which student submitted it.
+The teacher can play the songs in the playlist in their given order, skip them if they find them to be inappropriate or too long, change the volume, and remove a currently playing song. Clicking on the details button will reveal which student submitted it.
 
 In the situation that the teacher needs to erase the playlist,they can click the clear playlist button, which will reset the playlist entirely. And in case the teacher wants to mix it up, they have a shuffle feature, which plays the songs in the playlist in a random order, but keeps them in the order they're in right now. Finally, a teacher can enable or disable the submission of songs to their playlist.
 
 ### Classroom Controls
-Finally, each teachers has 8 classrooms, and each classroom has its own code. The teacher can rename the classroom. The "Disable Classroom Code" button disables the classroom code, making it so that new students are unable to join the classroom (this feature was coded but has bugs in it). Next to the disable class code button, there is a "Refresh Class List" button, and when clicked it shows a list of students in the currently selected class. Each student name on the list is clickable, and when clicked it shows more informations and options for the student: the full name, the full email, and a button allowing the teacher to remove that student from the class.
+Teachers can have as many playlists/classlists as they'd like, each classroom having its own code. Classrooms can be renamed, the ability for songs to be submitted to the playlist, and the ability for students to join a class can be toggled. The student tab provides the student name, the ability to add tokens (in development), remove a specific student, and remove all students. The whole classroom can also be deleted in the delete tab. 
 
 # Future Updates 
 For future teams working on this project, there is a list of features and enhancements to add to the webapp on our github issues page: https://github.com/nnhsse202021/Classroom-Music/issues
