@@ -30,7 +30,7 @@ The sign-in is simple -- its singular purpose is to guide students and teachers 
 In class slection, Teachers can create as many classrooms as they'd like with their desired functionality with the plus sign button. Those including: Class Name, Ability to submit songs, Ability for students to join, Ability for Student to see playlists, and Lock Submissions to Tokens.  
 
 ## Student Classes selection 
-Student's can join as many classes to add songs to Teacher's playists with the plus sign button. Class name, code, submissions ability and tokens will be displayed. Clicking on Songs will take them to Student View 
+Student's can join multiple classes and add songs. Class name, code, submissions ability and tokens will be displayed. Clicking on Songs will take them to Student View 
 
 ## Student View
 The student view is just a simple search bar, where students can enter their favorite song in and the website will return the top 3 results found on YouTube. After searching for a song and locating it, the student is told to verify that the song is clean.
