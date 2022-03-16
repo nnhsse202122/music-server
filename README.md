@@ -1,8 +1,8 @@
 # Classroom-Music
-The Classroom Music web server allows a teacher to play a playlist of songs as chosen by their students. It has three different views: the sign-in, teacher, and student views. Each one serves a different function in playing music in the classroom.
+The Classroom Music web server allows a teacher to play a playlist of songs as chosen by their students. It has four different views: the sign-in, classroom selection, teacher, and student views. Each one serves a different function in playing music in the classroom.  
 
 ## Usage:
-If you're simply interested in using or visiting the website, then you can visit https://classroom-music-public.thedoge.repl.co. The website will work on any modern web browser (Chrome/Firefox/Microsoft Edge) and should work on all major operating systems (Windows/MacOS/Linux). 
+If you're simply interested in using or visiting the website, then you can visit https://musicserver.nnhsse.org/ The website will work on any modern web browser (Chrome/Firefox/Microsoft Edge) and should work on all major operating systems (Windows/MacOS/Linux). 
 
 ## Development
 If you want to run the server on your computer locally, here are the steps. Note: this has been tested on Mac OS X+ and Windows 10, but it should work on most operating systems.
@@ -24,19 +24,19 @@ MONGO_URI = # MONGO DATABASE CONNECTION URI
 4. To stop running the server, press ctrl+C (not command+C if you’re on mac!).
 
 ## Sign-In
-The sign-in is simple -- its singular purpose is to guide students and teachers to their respective views.
+The sign-in is simple -- its singular purpose is to guide students and teachers to their respective views. The signout button will be in the top right after you sign-in.
+
+## Teacher Classes selection 
+In class slection, Teachers can create as many classrooms as they'd like with their desired functionality with the plus sign button. Those including: Class Name, Ability to submit songs, Ability for students to join, Ability for Student to see playlists, and Lock Submissions to Tokens.  
+
+## Student Classes selection 
+Student's can join as many classes to add songs to Teacher's playists with the plus sign button. Class name, code, submissions ability and tokens will be displayed. Clicking on Songs will take them to Student View 
 
 ## Student View
-The student view is a bit more complex. Just in case, the student gets a sign out button that brings them back to the sign-in page. 
-
-### Joining a Classroom
-Upon entering student view, the top of the student's page requires them to input the code they got from their teacher. Once they've done so, they can see whichever class code they're currently adding songs to, and then can begin submitting songs.
-
-### Submitting songs
-The student can also submit songs. The student begins by searching for a song. It finds this song on YouTube, after which the student can add it to the playlist in the teacher view. After searching for a song and locating it, the student is told to verify that the song is clean.
+The student view is just a simple search bar, where students can enter their favorite song in and the website will return the top 3 results found on YouTube. After searching for a song and locating it, the student is told to verify that the song is clean.
 
 ## Teacher View
-The teacher view has the most detail. Not only does it have all the elements of the student view, but also allows for control over the playlist itself, as well as the creation and control of classes.
+The teacher view has the most detail. Teachers have full control over their playlist, students and classroom controls. 
 
 ### Playlist Controls
 The teacher can play the songs in the playlist in their given order, skip them if they find them to be inappropriate or too long, change the volume, and remove a currently playing song. Clicking on the details button will reveal which student submitted it.
