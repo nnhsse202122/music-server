@@ -30,7 +30,7 @@ DEV_REDIRECT_URI = # DEV OAUTH REDIRECT URI. SHOULD BE IN FORMAT protocol://doma
 ### Running the Program:
 1. First, you will need to build the program. To do this, you will need to run the command `npm run build`, which will compile the typescript files into javascript files.
 2. In the VScode terminal, run the `index.js` file (by using the command `node index.js`).
-3. Open your favorite browser and go to the url `localhost:3000`. This will pull up a local version of the website.
+3. Open your favorite browser and go to the url `localhost:3030`. This will pull up a local version of the website.
 4. To stop running the server, press ctrl+C (not command+C if you’re on mac!).
 
 ## Sign-In
