@@ -12,12 +12,19 @@ class GetRoute extends WebRoute<HomeModel> {
     }
 
     protected async doHandle(req: Request, res: Response): Promise<void> {
-        console.debug(req.cookies);
-        let verifyResponse = await SongServerAPI().users.me().get("Basic " + req.cookies.authorization ?? "");
+        let auth = req.cookies.authorization != null ? ("Basic " + req.cookies.authorization) : "";
+        
+        let verifyResponse = await SongServerAPI().users.me().get(auth);
         console.log(verifyResponse);
         let user: FetchedUser | null;
         if (verifyResponse.success) {
             user = verifyResponse.data;
+
+            let classes = await SongServerAPI().classrooms.list(auth);
+            if (classes.success) {
+                res.redirect("/classes");
+                return;
+            }
         }
         else {
             user = null;
