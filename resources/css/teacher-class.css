@@ -6,6 +6,10 @@ body {
     background-size: 40%;
 }
 
+#player {
+    transform: translateY(100vh);
+}
+
 .side-bar {
     width: var(--side-bar-width);
     background-color: rgb(52, 51, 56);
@@ -299,11 +303,12 @@ body {
     display: grid;
     place-items: center;
     align-items: start;
-    grid-template-columns: auto auto;
+    grid-template-columns: 50% 50%;
 }
 
 .playlist-container {
     margin-top: 40px;
+    width: 75%;
 }
 .playlist-container > .playlist-title {
     background: #808;
@@ -341,6 +346,10 @@ body {
 
 .playlist-item > .status {
     display: none;
+}
+
+.playlist-item[data-selected] > .position {
+    color: blue;
 }
 
 .playlist-item > .position {

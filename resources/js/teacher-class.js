@@ -255,6 +255,7 @@ class TeacherPlaylistController extends PlaylistControllerBase {
         ;
         this.songIndex = position;
         document.getElementById("now-playing-text").textContent = this.currentSong?.title ?? "";
+        this.currentSong?.setSelected();
     }
     /** @public */
     get currentSong() {
@@ -296,6 +297,7 @@ class TeacherPlaylistController extends PlaylistControllerBase {
         }
         window.player.loadVideo(song.songID);
         SongServerAPI().classroom(classCode).playlist.position.set(song.songIndex);
+        newSong?.setSelected();
     }
     /** @public */
     get playable() {
@@ -429,12 +431,21 @@ class TeacherPlaylistSong extends PlaylistSongBase {
      * @returns {Promise<void>}
      */
     async onPlaybackButtonClicked() {
-        if (this.controller.songIndex != this.index || this.state !== PlaylistSongState.NOT_STARTED) {
+        if (this.controller.songIndex != this.index || this.state === PlaylistSongState.NOT_STARTED) {
             this.controller.changeSong(this);
         }
         else {
             this.controller.togglePlayback();
         }
+    }
+
+    setSelected() {
+        this.itemElement.setAttribute("data-selected", "");
+    }
+    
+    onSongChange() {
+        super.onSongChange();
+        this.itemElement.removeAttribute("data-selected");
     }
     /** @protected
      * @returns {Promise<void>}

@@ -37,6 +37,7 @@ class YTPlayer {
      */
     togglePause() {
         console.log("Toggle pause!");
+        console.log(new Error().stack);
         if (!this._buffering) {
             console.log("Actually doing it...");
             if (this.paused) {
