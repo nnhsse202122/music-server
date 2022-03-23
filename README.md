@@ -12,15 +12,25 @@ If you want to run the server on your computer locally, here are the steps. Note
 3. In the VScode terminal, enter the command `npm install`. This will install all the packages you need.
 4. Create a .env file in the root directory with the following key/value pairs:
 ```
-API_KEY = # YOUTUBE API KEY 
-OAUTH_CLIENT_ID = # GOOGLE OAUTH CLIENT ID
-OAUTH_CLIENT_SECRET = # GOOGLE OAUTH CLIENT SECRET
-MONGO_URI = # MONGO DATABASE CONNECTION URI
+API_KEY = # YOUTUBE API KEY
+PRODUCTION = false # whether or not to use production or dev settings
+#PRODUCTION
+PRODUCTION_CLIENT_ID = # PRODUCTION GOOGLE OAUTH CLIENT ID
+PRODUCTION_OAUTH_CLIENT_SECRET = # PRODUCTION GOOGLE OAUTH CLIENT SECRET
+PRODUCTION_API_DOMAIN = # PRODUCTION API DOMAIN NAME
+PRODUCTION_MONGO_URI = # PRODUCTION MONGO DATABASE URI
+PRODUCTION_REDIRECT_URI = # PRODUCTION OAUTH REDIRECT URI. SHOULD BE IN FORMAT protocol://domain/account/auth. For example: http://127.0.0.1:3030/account/auth
+#DEV
+DEV_CLIENT_ID = # DEV GOOGLE OAUTH CLIENT ID
+DEV_OAUTH_CLIENT_SECRET = # DEV GOOGLE OAUTH CLIENT SECRET
+DEV_API_DOMAIN = # DEV API DOMAIN NAME
+DEV_MONGO_URI = # DEV MONGO DATABASE URI
+DEV_REDIRECT_URI = # DEV OAUTH REDIRECT URI. SHOULD BE IN FORMAT protocol://domain/account/auth. For example: http://127.0.0.1:3030/account/auth
 ```
 ### Running the Program:
 1. First, you will need to build the program. To do this, you will need to run the command `npm run build`, which will compile the typescript files into javascript files.
 2. In the VScode terminal, run the `index.js` file (by using the command `node index.js`).
-3. Open your favorite browser and go to the url `localhost:3000`. This will pull up a local version of the website.
+3. Open your favorite browser and go to the url `localhost:3030`. This will pull up a local version of the website.
 4. To stop running the server, press ctrl+C (not command+C if you’re on mac!).
 
 ## Sign-In
