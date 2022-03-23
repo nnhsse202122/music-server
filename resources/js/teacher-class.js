@@ -233,6 +233,7 @@ class TeacherPlaylistController extends PlaylistControllerBase {
      */
     async refresh(songs, position) {
         let currentSong = this.currentSong;
+        currentSong?.onSongChange();
         let currentSongID = currentSong?.songID;
         let currentSongSource = currentSong?.songSource;
         this.playlistSongs = [];
@@ -248,12 +249,12 @@ class TeacherPlaylistController extends PlaylistControllerBase {
             console.log("No songs found :(");
             document.getElementById("playlist-container-empty").style.display = "block";
         }
+        this.songIndex = position;
         currentSong = this.currentSong;
-        if (this._playing && (currentSongID !== (currentSong?.songID) || (currentSongSource !== (currentSong?.songSource)))) {
+        if (this._playing && currentSong?.state === PlaylistSongState.PLAYING && (currentSongID !== (currentSong?.songID) || (currentSongSource !== (currentSong?.songSource)))) {
             currentSong?.play();
         }
         ;
-        this.songIndex = position;
         document.getElementById("now-playing-text").textContent = this.currentSong?.title ?? "";
         this.currentSong?.setSelected();
     }

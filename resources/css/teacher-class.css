@@ -306,6 +306,13 @@ body {
     grid-template-columns: 50% 50%;
 }
 
+#playlist-container-empty {
+    color: #F11;
+    font-family: var(--font-secondary);
+    font-size: 1.25rem;
+    text-align: center;
+}
+
 .playlist-container {
     margin-top: 40px;
     width: 75%;
@@ -349,7 +356,7 @@ body {
 }
 
 .playlist-item[data-selected] > .position {
-    color: blue;
+    color: hsl(249, 70%, 65%);
 }
 
 .playlist-item > .position {
