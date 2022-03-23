@@ -253,8 +253,9 @@ function getSongsAsBase<TSong extends ClassroomSong>(playlist: ClassroomPlaylist
                     let modification = gottenSong.modification;
                     modification.type = SongModificationType.DELETED;
                     gottenSong.modification = modification;
-                    
-                    setSongAtIndex(deleteMod.index, gottenSong);
+
+                    // not required because we just modif the song lmao
+                    //setSongAtIndex(deleteMod.index, gottenSong);
                 }
                 break;
             case SongModificationType.MOVED:
@@ -402,6 +403,7 @@ export async function addSong(playlist: ClassroomPlaylist, playlistDB: PlaylistD
 }
 
 export async function deleteSong(playlist: ClassroomPlaylist, playlistDB: PlaylistDataBase, classroomOwnerEmail: string, index: int): Promise<ClassroomSong[]> {
+    console.log("Deleting a song! Wow!");
     if (playlist.currentSongPosition >= index) {
         playlist.currentSongPosition--;
     }
@@ -409,12 +411,14 @@ export async function deleteSong(playlist: ClassroomPlaylist, playlistDB: Playli
         "index": index,
         "type": SongModificationType.DELETED
     };
+    console.log(playlist.modifications);
     playlist.modifications.push(deleteMod);
 
     let playlistSongs = await getSongs(playlist, playlistDB, classroomOwnerEmail);
     let songs = getSongsAsGeneric(playlist, playlistSongs);
 
     playlist.modifications = generateModifications(playlistSongs, songs);
+    console.log(playlist.modifications);
 
     let newSongs = getSongsAsTeacher(playlist, playlistSongs);
     if (playlist.currentSongPosition >= newSongs.length) {

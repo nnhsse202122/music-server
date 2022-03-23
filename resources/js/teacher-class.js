@@ -233,6 +233,7 @@ class TeacherPlaylistController extends PlaylistControllerBase {
      */
     async refresh(songs, position) {
         let currentSong = this.currentSong;
+        currentSong?.onSongChange();
         let currentSongID = currentSong?.songID;
         let currentSongSource = currentSong?.songSource;
         this.playlistSongs = [];
@@ -248,13 +249,14 @@ class TeacherPlaylistController extends PlaylistControllerBase {
             console.log("No songs found :(");
             document.getElementById("playlist-container-empty").style.display = "block";
         }
+        this.songIndex = position;
         currentSong = this.currentSong;
-        if (this._playing && (currentSongID !== (currentSong?.songID) || (currentSongSource !== (currentSong?.songSource)))) {
+        if (this._playing && currentSong?.state === PlaylistSongState.PLAYING && (currentSongID !== (currentSong?.songID) || (currentSongSource !== (currentSong?.songSource)))) {
             currentSong?.play();
         }
         ;
-        this.songIndex = position;
         document.getElementById("now-playing-text").textContent = this.currentSong?.title ?? "";
+        this.currentSong?.setSelected();
     }
     /** @public */
     get currentSong() {
@@ -296,6 +298,7 @@ class TeacherPlaylistController extends PlaylistControllerBase {
         }
         window.player.loadVideo(song.songID);
         SongServerAPI().classroom(classCode).playlist.position.set(song.songIndex);
+        newSong?.setSelected();
     }
     /** @public */
     get playable() {
@@ -429,12 +432,21 @@ class TeacherPlaylistSong extends PlaylistSongBase {
      * @returns {Promise<void>}
      */
     async onPlaybackButtonClicked() {
-        if (this.controller.songIndex != this.index || this.state !== PlaylistSongState.NOT_STARTED) {
+        if (this.controller.songIndex != this.index || this.state === PlaylistSongState.NOT_STARTED) {
             this.controller.changeSong(this);
         }
         else {
             this.controller.togglePlayback();
         }
+    }
+
+    setSelected() {
+        this.itemElement.setAttribute("data-selected", "");
+    }
+    
+    onSongChange() {
+        super.onSongChange();
+        this.itemElement.removeAttribute("data-selected");
     }
     /** @protected
      * @returns {Promise<void>}

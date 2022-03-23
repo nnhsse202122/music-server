@@ -137,8 +137,8 @@ class PlaylistSongBase {
         this.addButton.addEventListener("click", () => this.onAddButtonClicked());
         this.removeButton = this.itemElement.getElementsByClassName("song-remove")[0];
         this.removeButton.addEventListener("click", () => this.onRemoveButtonClicked());
-        this.updatePlaylistButton = this.itemElement.getElementsByClassName("song-update")[0];
-        this.updatePlaylistButton.addEventListener("click", () => this.onUpdatePlaylistButtonClicked());
+       // this.updatePlaylistButton = this.itemElement.getElementsByClassName("song-update")[0];
+        //this.updatePlaylistButton.addEventListener("click", () => this.onUpdatePlaylistButtonClicked());
     }
     /** @public */
     get state() {
@@ -282,16 +282,11 @@ function createPlaylistItem(container, position, title, type = null) {
     }
     playlistItem.setAttribute("data-playback", "not-started");
     playlistItem.innerHTML = `
-<div class="status">
-    <i class="fa-solid fa-plus"></i>
-    <i class="fa-solid fa-minus"></i>
-    <i class="fa-solid fa-arrow-right-arrow-left"></i>
-</div>
 <div class="position">
     ${position}
 </div>
 <div class="icon">
-    <i class="fa-solid fa-question"></i>
+    <i class="fa-solid fa-music"></i>
 </div>
 <div class="playlist-item-content">
     <div class="song-info">
@@ -326,10 +321,6 @@ function createPlaylistItem(container, position, title, type = null) {
             <button class="song-add">
                 <i class="fa-solid fa-circle-plus"></i>
                 <span>Add</span>
-            </button>
-            <button class="song-update">
-                <i class="fa-solid fa-upload"></i>
-                <span>Update Playlist</span>
             </button>
         </div>
     </div>
