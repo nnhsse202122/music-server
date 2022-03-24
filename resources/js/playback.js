@@ -344,7 +344,7 @@ function createPlaylistItem(container, position, title, type = null) {
     <i class="fa-solid fa-ellipsis-vertical"></i>
 </button>`;
     container.appendChild(playlistItem);
-    playlistItem.getElementsByClassName("song-title")[0].textContent = title.replace(/\&quot;/gi, '"');
+    playlistItem.getElementsByClassName("song-title")[0].textContent = title.replace(/\&quot;/gi, '"').replace(/\&#39;/gi, "'");
     return playlistItem;
 }
 
