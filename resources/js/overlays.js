@@ -517,14 +517,12 @@ class SubmitSongStudentOverlay extends OverlayModelBase {
             this.overlay.show("submit-song-success-model");
             SongSearchManager.resetCurrent();
         }
-        this._checkbox.checked = false;
     }
 
     /** @private
      * #returns {void}
      */
     _onCancelButtonClick() {
-        this._checkbox.checked = false;
         this.overlay.hide();
     }
 }
