@@ -437,7 +437,7 @@ class CreateClassOverlayModel extends OverlayModelBase {
             "name": name,
             "joinable": this._joinableCheckbox.checked,
             "allowSongSubmissions": this._submissionsEnabledCheckbox.checked,
-            "submissionsRequireTokens": this._submissionsEnabledCheckbox.checked,
+            "submissionsRequireTokens": this._submissionsRequireTokensCheckbox.checked,
             "playlistVisible": this._playlistVisibleCheckbox.checked
         });
         if (data.success) {
@@ -451,8 +451,6 @@ class CreateClassOverlayModel extends OverlayModelBase {
 /** @extends OverlayModelBase */
 class SubmitSongStudentOverlay extends OverlayModelBase {
     /** @private */
-    _checkbox;
-    /** @private */
     _submitButton;
     /** @private */
     _cancelButton;
@@ -460,7 +458,6 @@ class SubmitSongStudentOverlay extends OverlayModelBase {
     /** @public */
     constructor(overlay) {
         super(overlay, "submit-song-student-model");
-        this._checkbox = null;
         this._submitButton = null;
         this._cancelButton = null;
     }
@@ -480,11 +477,8 @@ class SubmitSongStudentOverlay extends OverlayModelBase {
     instantiateBody(bodyDiv) {
         let bodyContent = document.createElement("span");
         bodyContent.textContent = "Please confirm this song is 100% CLEAN: The song must not include obsecene language or inappropriate themes.";
-        this._checkbox = document.createElement("input");
-        this._checkbox.type = "checkbox";
 
         bodyDiv.appendChild(bodyContent);
-        bodyDiv.appendChild(this._checkbox);
     }
     /** @protected
      * @param {HTMLDivElement} actionsDiv
@@ -509,7 +503,6 @@ class SubmitSongStudentOverlay extends OverlayModelBase {
      * @returns {Promise<void>}
      */
     async _onSubmitButtonClick() {
-        if (!this._checkbox.checked) return;
         this.overlay.hide();
         this.overlay.show("loading");
 
