@@ -162,9 +162,10 @@
   }
   .song-results-container > .search-result > .song-actions {
       font-family: var(--font-primary);
-      display: block;
+      display: grid;
       justify-self: right;
       padding: 0px;
+      grid-template-columns: auto auto;
   }
   .song-results-container > .search-result > .song-actions > button {
       background: none;
@@ -178,6 +179,10 @@
       border-radius: 50%;
       cursor: pointer;
       transition: background-color 500ms;
+  }
+  .song-results-container > .search-result > .song-actions > button a {
+      text-decoration: none;
+      color: inherit;
   }
   .song-results-container > .search-result > .song-actions > button:hover {
       background-color: rgba(0, 0, 0, 0.2);

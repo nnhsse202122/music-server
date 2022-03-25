@@ -92,7 +92,9 @@ class SongSearchResult {
     /** @private */
     _div;
     /** @private */
-    _button;
+    _addSongButton;
+    /** @private */
+    _songLinkButton;
     /** @private */
     _manager;
 
@@ -103,8 +105,9 @@ class SongSearchResult {
     constructor(manager, div) {
         this._div = div;
         this._songTitle = div.getElementsByClassName("song-title")[0];
-        this._button = div.getElementsByClassName("song-actions")[0].getElementsByClassName("add-song")[0];
-        this._button.addEventListener("click", () => this._onResultClick());
+        this._addSongButton = div.getElementsByClassName("song-actions")[0].getElementsByClassName("add-song")[0];
+        this._addSongButton.addEventListener("click", () => this._onAddSongClick());
+        this._songLinkButton = div.getElementsByClassName("song-actions")[0].getElementsByClassName("song-link")[0];
         this._manager = manager;
         this._div.style.display = "none";
     }
@@ -130,10 +133,11 @@ class SongSearchResult {
         this._div.setAttribute("data-song-id", id);
         this._div.setAttribute("data-song-source", source);
         this._songTitle.textContent = title.replace(/\&quot;/gi, '"').replace(/\&#39;/gi, "'");
+        this._songLinkButton.children[0].setAttribute("href", `/songs/${source}/${id}`);
     }
 
     /** @private */
-    _onResultClick() {
+    _onAddSongClick() {
         let data = {
             "id": this._div.getAttribute("data-song-id"),
             "source": this._div.getAttribute("data-song-source")
