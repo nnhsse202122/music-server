@@ -10,7 +10,8 @@ const SEARCH_EXPIRE_MS = 1000 * 60 * 60 * 24 * 30;
 export type YoutubeVideo = {
     title: string,
     author: string,
-    id: string
+    id: string,
+    thumbnail: string | null
 };
 
 export type YoutubeSearch = {
@@ -24,6 +25,7 @@ type RawVideoCache = {
     author: string,
     id: string,
     etag: string,
+    thumbnail: string | null,
     expiresAt: long
 };
 
@@ -46,6 +48,10 @@ class VideoCache {
 
     public get expired(): boolean {
         return this.expiresAt < Date.now();
+    }
+
+    public get thumbnail(): string | null {
+        return this._data.thumbnail ?? null;
     }
 
     public get author(): string {
@@ -78,6 +84,7 @@ class VideoCache {
             let firstVideo = foundVideos.data.items[0];
             this._data.author = firstVideo.snippet!.channelTitle!;
             this._data.etag = firstVideo.etag!;
+            this._data.thumbnail = firstVideo.snippet!.thumbnails!.default!.url!,
             this._data.expiresAt = long(Date.now() + VIDEO_EXPIRE_MS);
             this._data.id = firstVideo.id!;
             this._data.title = firstVideo.snippet!.title!;
@@ -90,7 +97,8 @@ class VideoCache {
         return {
             "author": this.author,
             "id": this.id,
-            "title": this.title
+            "title": this.title,
+            "thumbnail": this.thumbnail
         };
     }
 }
@@ -158,6 +166,7 @@ class SearchCache {
                         "id": searchedVideo.id!.videoId!,
                         "title": searchedVideo.snippet!.title!,
                         "author": searchedVideo.snippet!.channelTitle!,
+                        "thumbnail": searchedVideo.snippet!.thumbnails!.default!.url!,
                         "expiresAt": long(Date.now() + VIDEO_EXPIRE_MS)
                     });
                 }
@@ -325,6 +334,7 @@ export default class YoutubeCache {
             let data: RawVideoCache = {
                 author: firstVideo.snippet!.channelTitle!,
                 etag: firstVideo.etag!,
+                thumbnail: firstVideo.snippet!.thumbnails!.default!.url!,
                 expiresAt: long(Date.now() + VIDEO_EXPIRE_MS),
                 id: firstVideo.id!,
                 title: firstVideo.snippet!.title!
@@ -392,6 +402,7 @@ export default class YoutubeCache {
                     "id": searchedVideo.id!.videoId!,
                     "title": searchedVideo.snippet!.title!,
                     "author": searchedVideo.snippet!.channelTitle!,
+                    "thumbnail": searchedVideo.snippet!.thumbnails!.default!.url!,
                 });
                 
                 if (!await this._videoDB.contains(searchedVideo.id!.videoId!)) {
@@ -400,6 +411,7 @@ export default class YoutubeCache {
                         "id": searchedVideo.id!.videoId!,
                         "title": searchedVideo.snippet!.title!,
                         "author": searchedVideo.snippet!.channelTitle!,
+                        "thumbnail": searchedVideo.snippet!.thumbnails!.default!.url!,
                         "expiresAt": long(Date.now() + VIDEO_EXPIRE_MS)
                     });
                 }
