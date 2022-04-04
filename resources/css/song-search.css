@@ -149,7 +149,7 @@
       width: calc(100% - 40px); /** ensure no overflow */
       padding: 10px 20px;
       display: grid;
-      grid-template-columns: auto 20%;
+      grid-template-columns: 128px auto 20%;
       align-items: center;
       gap: 10px;
   }

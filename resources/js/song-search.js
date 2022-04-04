@@ -65,7 +65,7 @@ class SongSearchManager {
         let data = response.data;
         for (let index = 0; index < data.length && index < this.m_results.length; index++) {
             let song = data[index];
-            this.m_results[index].show(song.id, "youtube", song.title);
+            this.m_results[index].show(song.id, "youtube", song.title, song.thumbnail);
         }
     }
 
@@ -96,6 +96,8 @@ class SongSearchResult {
     /** @private */
     _songLinkButton;
     /** @private */
+    _image;
+    /** @private */
     _manager;
 
     /** @public
@@ -105,6 +107,7 @@ class SongSearchResult {
     constructor(manager, div) {
         this._div = div;
         this._songTitle = div.getElementsByClassName("song-title")[0];
+        this._image = div.getElementsByClassName("song-image")[0].children[1];
         this._addSongButton = div.getElementsByClassName("song-actions")[0].getElementsByClassName("add-song")[0];
         this._addSongButton.addEventListener("click", () => this._onAddSongClick());
         this._songLinkButton = div.getElementsByClassName("song-actions")[0].getElementsByClassName("song-link")[0];
@@ -126,9 +129,11 @@ class SongSearchResult {
      * @param {string} id 
      * @param {string} source 
      * @param {string} title 
+     * @param {string|null} thumbnail 
      * @returns {void}
      */
-    show(id, source, title) {
+    show(id, source, title, thumbnail) {
+        this._image.src = thumbnail;
         this._div.removeAttribute("style");
         this._div.setAttribute("data-song-id", id);
         this._div.setAttribute("data-song-source", source);
