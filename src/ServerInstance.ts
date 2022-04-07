@@ -11,6 +11,8 @@ import DataBaseManager from "./data/storage/DataBaseManager";
 import SongSource from "./data/playlists/SongSource";
 import APIController from "./api/APIController";
 
+const DISABLE_WITH_MESSAGE: string | null = "We are currently experiencing a security vunerability and are unable to serve you the requested page. Please try again later.";
+
 type ServerConfig = {
     port: number,
         domain: string
@@ -34,18 +36,28 @@ export default class ServerInstance {
     public constructor() {
         this._logger = new Logger("SERVER");
         this._app = express();
-        this._config = require("../config.json");
         this._controllers = [];
         this._routers = [];
-        this._initialized = false;
+        this._config = require("../config.json");
+        if (!DISABLE_WITH_MESSAGE) {
+            this._initialized = false;
 
-        this._app.use(cookieParser());
-        this._app.set("view engine", "ejs");
-        this._app.use("/resources", express.static(pathUtil.resolve(__dirname, "../resources")));
-        this._app.set("views", pathUtil.resolve(__dirname, "../views/ejs"));
-        this._app.use(express.json());
-
-        this._db = new DataBaseManager();
+            this._app.use(cookieParser());
+            this._app.set("view engine", "ejs");
+            this._app.use("/resources", express.static(pathUtil.resolve(__dirname, "../resources")));
+            this._app.set("views", pathUtil.resolve(__dirname, "../views/ejs"));
+            this._app.use(express.json());
+    
+            this._db = new DataBaseManager();
+        }
+        else {
+            // @ts-ignore
+            this._db = undefined;
+            this._app.all(/.*/, (req, res) => {
+                res.send(DISABLE_WITH_MESSAGE);
+            });
+            this._initialized = true;
+        }
     }
 
     public get db(): DataBaseManager {
