@@ -11,7 +11,16 @@ import DataBaseManager from "./data/storage/DataBaseManager";
 import SongSource from "./data/playlists/SongSource";
 import APIController from "./api/APIController";
 
-const DISABLE_WITH_MESSAGE: string | null = "We are currently experiencing a security vunerability and are unable to serve you the requested page. Please try again later.";
+var DISABLE_WITH_MESSAGE: string | null = null;
+
+fetch("https://raw.githubusercontent.com/nnhsse202122/music-server/main/global-message.txt", {
+    method: "GET"
+}).then((res) => res.text())
+.then((content) => {
+    DISABLE_WITH_MESSAGE = content;
+}).catch((err) => {
+    // we should handle error here, but whatever...
+});
 
 type ServerConfig = {
     port: number,
