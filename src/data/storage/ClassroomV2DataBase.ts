@@ -4,6 +4,11 @@ import IClassroomV2 from "./interfaces/IClassroomV2";
 import ClassroomV2Model from "./models/ClassroomV2Model";
 import { i32 as int } from 'typed-numbers';
 import ClassroomPlaylistSongV2 from "../classrooms/ClassroomPlaylistV2Song";
+import Classroom from "../classrooms/Classroom";
+import { getSongsAsClassSongs } from "../extensions/ClassroomPlaylistExtensions";
+import DataBaseManager from "./DataBaseManager";
+import Role from "../users/Role";
+import SongModificationType from "../classrooms/SongModificationType";
 
 function cloneClassroomSong(song: ClassroomPlaylistSongV2): ClassroomPlaylistSongV2 {
     return {
@@ -100,6 +105,13 @@ function updateDBClass(classroom: ClassroomV2, classDB: IClassroomV2): void {
 
 export default class ClassroomDataBase extends CollectionDataBase<string, ClassroomV2> {
 
+    private readonly _manager: DataBaseManager;
+
+    public constructor(manager: DataBaseManager) {
+        super();
+        this._manager = manager;
+    }
+
     private async _get(code: string): Promise<IClassroomV2> {
         let fetchedClassroom = await ClassroomV2Model.findById(code).exec();
         if (fetchedClassroom === null) {
@@ -130,7 +142,57 @@ export default class ClassroomDataBase extends CollectionDataBase<string, Classr
         return (await ClassroomV2Model.findById(code).exec()) != null;
     }
 
+    public async convertV1(classroom: Classroom): Promise<ClassroomV2> {
+        return {
+            "code": classroom.code,
+            "name": classroom.name,
+            "owner": classroom.owner,
+            "settings": {
+                "allowSongSubmissions": classroom.settings.allowSongSubmissions,
+                "joinable": classroom.settings.joinable,
+                "playlistVisible": classroom.settings.playlistVisible,
+                "submissionsRequireTokens": classroom.settings.submissionsRequireTokens
+            },
+            "students": classroom.students.map((student) => {
+                return {
+                    "email": student.email,
+                    "name": student.name,
+                    "tokens": student.tokens
+                };
+            }),
+            "playlist": {
+                "currentSong": {
+                    "fromPriority": false,
+                    "index": classroom.playlist.currentSongPosition
+                },
+                "songs": (await getSongsAsClassSongs(classroom.playlist, this._manager.playlists, classroom.owner, Role.Teacher))
+                    .filter((song) => song.modification?.type != SongModificationType.DELETED)
+                    .map((song) => {
+                        return {
+                            "id": song.id,
+                            "title": song.title,
+                            "source": song.source,
+                            "requested_by": {
+                                "email": song.requested_by!.email,
+                                "name": song.requested_by!.name
+                            }
+                        };
+                    }),
+                "priority": []
+            }
+        }
+    }
+
     public async get(code: string): Promise<ClassroomV2> {
+        if (!await this.contains(code)) {
+            let v1 = await this._manager.classrooms.get(code);
+            if (v1 != null) {
+                let v2 = await this.convertV1(v1);
+                await this.add(v2.code, v2);
+                return v2;
+            }
+            throw new Error("No classroom with code '" + code + "'");
+        }
         return dbClassToClassroom(await this._get(code)); 
     }
 

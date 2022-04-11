@@ -25,7 +25,7 @@ export default class DataBaseManager {
         this._users = new UserDataBase();
         this._sessions = new SessionsDataBase();
         this._classrooms = new ClassroomDataBase();
-        this._classroomsV2 = new ClassroomV2DataBase();
+        this._classroomsV2 = new ClassroomV2DataBase(this);
     }
 
     public async connect(): Promise<void> {

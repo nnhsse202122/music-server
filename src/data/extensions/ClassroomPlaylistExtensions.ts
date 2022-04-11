@@ -19,6 +19,10 @@ import SongTeacherView from "../classrooms/SongTeacherView";
 import Role from "../users/Role";
 import SongToAdd from "../classrooms/SongToAdd";
 import seedrandom from "seedrandom";
+import ClassroomPlaylistV2 from "../classrooms/ClassroomPlaylistV2";
+import ClassroomSongV2 from "../classrooms/ClassroomSongV2";
+import SongTeacherViewV2 from "../classrooms/SongTeacherViewV2";
+import SongStudentViewV2 from "../classrooms/SongStudentViewV2";
 
 
 export function generateModifications(originalSongs: Song[], playlist: ClassroomSong[]) {
@@ -322,6 +326,19 @@ function getSongsAsStudent(playlist: ClassroomPlaylist, playlistSongs: Song[]): 
     });
 }
 
+function getSongsAsStudentV2(playlist: ClassroomPlaylistV2): SongStudentViewV2[] {
+    return playlist.songs.map((song, index) => {
+        return {
+            "id": song.id,
+            "from_priority": undefined,
+            "requested_by": undefined,
+            "source": song.source,
+            "title": song.title,
+            "position": int(index + 1)
+        };
+    });
+}
+
 function getSongsAsTeacher(playlist: ClassroomPlaylist, playlistSongs: Song[]): SongTeacherView[] {
     return getSongsAsBase(playlist, playlistSongs, false, (song) => {
         return {
@@ -332,6 +349,45 @@ function getSongsAsTeacher(playlist: ClassroomPlaylist, playlistSongs: Song[]): 
             "title": song.title
         };
     });
+}
+
+function getSongsAsTeacherV2(playlist: ClassroomPlaylistV2): SongTeacherViewV2[] {
+    return playlist.priority.map((song, index) => {
+        return {
+            "from_priority": true,
+            "position": int(index + 1),
+            "id": song.id,
+            "requested_by": {
+                "email": song.requested_by.email,
+                "name": song.requested_by.name
+            },
+            "source": song.source,
+            "title": song.title
+        }
+    }).concat(playlist.songs.map((song, index) => {
+        return {
+            "from_priority": false,
+            "position": int(index + 1),
+            "id": song.id,
+            "requested_by": {
+                "email": song.requested_by.email,
+                "name": song.requested_by.name
+            },
+            "source": song.source,
+            "title": song.title
+        };
+    }));
+}
+
+export function getSongsAsClassSongsV2(playlist: ClassroomPlaylistV2, role: Role): ClassroomSongV2[] {
+    switch (role) {
+        case Role.Teacher:
+            return getSongsAsTeacherV2(playlist);
+        case Role.Student:
+            return getSongsAsStudentV2(playlist);
+    }
+
+    return [];
 }
 
 export async function getSongsAsClassSongs(playlist: ClassroomPlaylist, playlistDB: PlaylistDataBase, classroomOwnerEmail: string, role: Role): Promise<ClassroomSong[]> {
