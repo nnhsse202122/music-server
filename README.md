@@ -12,20 +12,21 @@ If you want to run the server on your computer locally, here are the steps. Note
 3. In the VScode terminal, enter the command `npm install`. This will install all the packages you need.
 4. Create a .env file in the root directory with the following key/value pairs:
 ```
-API_KEY = AIzaSyAG3nT5L784K1a2hyKj7DyRSqbGhELWyAs
-PRODUCTION = false
+API_KEY = # YOUTUBE API KEY
+TEST = 1234
+PRODUCTION = false # whether or not to use production or dev settings
 #PRODUCTION
-PRODUCTION_CLIENT_ID = 841301118000-eqmi8tjuvjg75g1i44mgln591qa3b0fv.apps.googleusercontent.com
-PRODUCTION_OAUTH_CLIENT_SECRET = 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
-PRODUCTION_API_DOMAIN = http://127.0.0.1:3030 # CHANGE THIS
-PRODUCTION_MONGO_URI = mongodb+srv://admin:admin123@dev.imaax.mongodb.net/main?retryWrites=true #Can be changed later
-PRODUCTION_REDIRECT_URI = http://127.0.0.1:3030/account/auth #CHANGE THIS
+PRODUCTION_CLIENT_ID = # PRODUCTION GOOGLE OAUTH CLIENT ID
+PRODUCTION_OAUTH_CLIENT_SECRET = # PRODUCTION GOOGLE OAUTH CLIENT SECRET
+PRODUCTION_API_DOMAIN = # PRODUCTION API DOMAIN NAME
+PRODUCTION_MONGO_URI = # PRODUCTION MONGO DATABASE URI
+PRODUCTION_REDIRECT_URI = # PRODUCTION OAUTH REDIRECT URI. SHOULD BE IN FORMAT protocol://domain/account/auth. For example: http://127.0.0.1:3030/account/auth
 #DEV
-DEV_CLIENT_ID = 463074896854-u9fusso7nl6s691143493asmnig1bgms.apps.googleusercontent.com
-DEV_OAUTH_CLIENT_SECRET = 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
-DEV_API_DOMAIN = http://127.0.0.1:3030
-DEV_MONGO_URI = mongodb+srv://admin:admin123@dev.imaax.mongodb.net/main?retryWrites=true
-DEV_REDIRECT_URI = http://127.0.0.1:3030/account/auth
+DEV_CLIENT_ID = # DEV GOOGLE OAUTH CLIENT ID
+DEV_OAUTH_CLIENT_SECRET = # DEV GOOGLE OAUTH CLIENT SECRET
+DEV_API_DOMAIN = # DEV API DOMAIN NAME
+DEV_MONGO_URI = # DEV MONGO DATABASE URI
+DEV_REDIRECT_URI = # DEV OAUTH REDIRECT URI. SHOULD BE IN FORMAT protocol://domain/account/auth. For example: http://127.0.0.1:3030/account/auth
 ```
 ### Running the Program:
 1. First, you will need to build the program. To do this, you will need to run the command `npm run build`, which will compile the typescript files into javascript files.

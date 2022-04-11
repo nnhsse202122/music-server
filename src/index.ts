@@ -25,7 +25,23 @@ else {
 
 Logger.handler = new ConsoleLogHandler();
 
-let server = new ServerInstance();
-server.initialize().then(() => {
-    server.start();
-});
+function waitForReady(): Promise<void> {
+    return new Promise((res) => {
+        setTimeout(() => {
+            if (ServerInstance.ready) {
+                res();
+            }
+            else {
+                waitForReady().then(res);
+            }
+        }, 100);
+    });
+}
+
+waitForReady().then(() => {
+    let server = new ServerInstance();
+    server.initialize().then(() => {
+        server.start();
+    });
+})
+
