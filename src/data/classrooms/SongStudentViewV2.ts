@@ -1,7 +1,7 @@
 import ClassroomSongV2 from "./ClassroomSongV2";
 
-type SongStudentView = ClassroomSongV2 & {
+type SongStudentViewV2 = ClassroomSongV2 & {
     requested_by: undefined,
     from_priority: undefined
 };
-export default SongStudentView;
+export default SongStudentViewV2;
