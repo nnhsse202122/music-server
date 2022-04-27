@@ -51,6 +51,9 @@ class GetRoute extends APIRoute<StudentInClass[], ClassroomStudentsEndpoint> {
         return this.success(classroom.students);
     }
 }
+/**
+ * Handles post requests for the classroom endpoint to join a class.
+ */
 class PostRoute extends APIRoute<JoinedClassroom, ClassroomStudentsEndpoint> {
     public constructor(endpoint: ClassroomStudentsEndpoint) {
         super(endpoint, RequestMethod.POST);
