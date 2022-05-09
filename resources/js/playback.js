@@ -32,15 +32,19 @@ class PlaylistControllerBase {
      * @param {PlaylistSongBase | null} song
      * @returns {void}
      */
-    changeSong(song) {
-        if (song != null && this.songIndex === song.songIndex && song.state !== PlaylistSongState.NOT_STARTED)
+    async changeSong(song) {
+        if (song != null && this.currentSong === song && song.state !== PlaylistSongState.NOT_STARTED)
             return this.togglePlayback();
         if (!this.canChangeToSong(song))
             return;
         if (song == null)
             return;
         this.currentSong?.onSongChange();
-        this.songIndex = song.songIndex;
+        let res = await SongServerAPI(2).classroom(classCode).playlist.currentSong.set(song.songIndex);
+        if (res.success) {
+            this.setCurrentSong(res.data);
+        }
+        this.currentSong.setSelected();
         this.currentSong?.play();
         this._playSong(song);
     }

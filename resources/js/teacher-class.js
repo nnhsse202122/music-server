@@ -308,14 +308,13 @@ class TeacherPlaylistController extends PlaylistControllerBase {
      * @param {PlaylistSongBase} song
      * @returns {void}
      */
-    _playSong(song) {
+    async _playSong(song) {
         let newSong = this.currentSong;
         console.log(newSong);
         if (newSong != null) {
             document.getElementById("now-playing-text").textContent = newSong.title;
         }
         window.player.loadVideo(song.songID);
-        SongServerAPI(2).classroom(classCode).playlist.currentSong.set(song.songIndex);
         newSong?.setSelected();
     }
     /** @public */

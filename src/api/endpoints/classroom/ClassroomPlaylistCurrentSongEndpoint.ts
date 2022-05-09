@@ -12,6 +12,9 @@ import SetClassroomPlaylistRequest from "../../requests/SetClassroomPlaylistRequ
 import APIResponse from "../../responses/APIResponse";
 import ClassroomPlaylistResponse from "../../responses/ClassroomPlaylistResponse";
 import { i32 as int } from "typed-numbers";
+import SongTeacherViewV2 from "../../../data/classrooms/SongTeacherViewV2";
+import { assertContentIsJSON, assertJSONBodyFieldIsNumber } from "../EndpointAssert";
+import SetCurrentSongRequest from "../../requests/SetCurrentSongRequest";
 
 class GetRoute extends APIRoute<ClassroomSongV2, ClassroomPlaylistCurrentSongEndpoint> {
 
@@ -80,18 +83,97 @@ class GetRoute extends APIRoute<ClassroomSongV2, ClassroomPlaylistCurrentSongEnd
     }
 }
 
+class PostRoute extends APIRoute<ClassroomSongV2, ClassroomPlaylistCurrentSongEndpoint> {
+
+    public constructor(endpoint: ClassroomPlaylistCurrentSongEndpoint) {
+        super(endpoint, RequestMethod.POST);
+    }
+
+    protected async doHandle(req: Request): Promise<APIResponse<ClassroomSongV2>> {
+        let failResponse = assertContentIsJSON(this, req) ??
+            assertJSONBodyFieldIsNumber(this, req, "/index");
+        
+        if (failResponse != null) {
+            return failResponse;
+        }
+
+        let body = req.body as SetCurrentSongRequest;
+
+        let sessionInfo = await this.verifySession(req);
+        if (!sessionInfo.verified) {
+            return sessionInfo.response;
+        }
+
+        let session = sessionInfo.session;
+        let code = req.params.code;
+
+        let userInfo = await this.getUserFromSession(session);
+        if (!userInfo.verified) {
+            return userInfo.response;
+        }
+
+        let user = userInfo.user;
+        if (user.type !== Role.Teacher) {
+            return this.fail("api.restrictions.teachers", {});
+        }
+
+        if (!isInClassCode(user, code)) {
+            return this.fail("api.classroom.not_found", {});
+        }
+
+        let classroom: ClassroomV2;
+        try {
+            classroom = await this.server.db.classroomsV2.get(code);
+        }
+        catch {
+            return this.fail("api.classroom.not_found", {});
+        }
+
+        if (body.index < 0 || body.index >= classroom.playlist.songs.length) {
+            return this.fail("api.body.field.number", {});
+        }
+
+        if (classroom.playlist.currentSong.fromPriority) {
+            classroom.playlist.priority.splice(0, 1);
+        }
+
+        classroom.playlist.currentSong = {
+            "fromPriority": false,
+            "index": int(body.index)
+        };
+
+        await this.server.db.classroomsV2.set(code, classroom);
+        let currentSong: SongTeacherViewV2;
+        let s = classroom.playlist.songs[classroom.playlist.currentSong.index];
+        currentSong = {
+            "from_priority": false,
+            "id": s.id,
+            "position": int(classroom.playlist.currentSong.index + 1),
+            "title": s.title,
+            "source": s.source,
+            "requested_by": {
+                "email": s.requested_by.email,
+                "name": s.requested_by.name
+            }
+        };
+        return this.success(currentSong);
+    }
+}
 
 export default class ClassroomPlaylistCurrentSongEndpoint extends APIEndpoint {
 
     private readonly _get: GetRoute;
+    private readonly _post: PostRoute;
 
     public constructor(controller: APIController) {
         super(controller, "/classrooms/:code/playlist/current-song", "classroom-playlist", 2);
 
         this._get = new GetRoute(this);
+        this._post = new PostRoute(this);
     }
 
     protected setup(): void {
         this.addRoute(this._get);
+        this.addRoute(this._post);
     }
 }
