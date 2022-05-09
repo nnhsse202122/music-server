@@ -25,7 +25,7 @@ class GetRoute extends WebRoute<ClassModel> {
             return;
         }
 
-        let classResponse = await SongServerAPI().classrooms.find(code).get(auth);
+        let classResponse = await SongServerAPI(2).classrooms.find(code).get(auth);
         if (!classResponse.success) {
             res.redirect("/classes");
             return;

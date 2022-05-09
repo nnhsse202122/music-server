@@ -55,7 +55,7 @@ class GetRoute extends APIRoute<ClassroomPlaylistResponseV2, ClassroomPlaylistEn
 
         let currentSong: SongTeacherViewV2;
         if (classroom.playlist.currentSong.fromPriority) {
-            let s = classroom.playlist.priority[classroom.playlist.currentSong.index];
+            let s = classroom.playlist.priority[0];
             currentSong = {
                 "from_priority": true,
                 "id": s.id,

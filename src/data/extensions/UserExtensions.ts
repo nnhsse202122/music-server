@@ -1,4 +1,5 @@
 import Classroom from "../classrooms/Classroom";
+import ClassroomV2 from "../classrooms/ClassroomV2";
 import User from "../users/User";
 
 export function isInClassCode(user: User, code: string) {
@@ -14,5 +15,9 @@ export function isInClassCode(user: User, code: string) {
 }
 
 export function isInClass(user: User, classroom: Classroom): boolean {
+    return isInClassCode(user, classroom.code);
+}
+
+export function isInClassV2(user: User, classroom: ClassroomV2): boolean {
     return isInClassCode(user, classroom.code);
 }

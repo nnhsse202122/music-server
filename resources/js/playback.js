@@ -87,7 +87,7 @@ class PlaylistSongBase {
     detailsButton = undefined;
     /** @public */
     get deleted() {
-        return this.song.modification?.type == SongServer.API.SongModificationType.DELETED;
+        return false;
     }
     /** @public */
     get songIndex() {
@@ -112,19 +112,7 @@ class PlaylistSongBase {
         this.controller = controller;
         this._state = PlaylistSongState.NOT_STARTED;
         if (controller.isTeacher) {
-            let type = null;
-            if (song.modification != null) {
-                if (song.modification.type === SongServer.API.SongModificationType.ADDED) {
-                    type = "added";
-                }
-                else if (song.modification.type === SongServer.API.SongModificationType.MOVED) {
-                    type = "moved";
-                }
-                else if (song.modification.type === SongServer.API.SongModificationType.DELETED) {
-                    type = "removed";
-                }
-            }
-            this.itemElement = createTeacherPlaylistItem(controller.container, index + 1, song.title, { email: song.requested_by.email, name: song.requested_by.name }, type);
+            this.itemElement = createTeacherPlaylistItem(controller.container, index + 1, song.title, { email: song.requested_by.email, name: song.requested_by.name });
         }
         else {
             this.itemElement = createStudentPlaylistItem(controller.container, index + 1, song.title);
@@ -133,8 +121,8 @@ class PlaylistSongBase {
         this.playbackButton.addEventListener("click", () => this.onPlaybackButtonClicked());
         this.detailsButton = this.itemElement.getElementsByClassName("song-details")[0];
         this.detailsButton.addEventListener("click", () => this.onDetailsButtonClicked());
-        this.addButton = this.itemElement.getElementsByClassName("song-add")[0];
-        this.addButton.addEventListener("click", () => this.onAddButtonClicked());
+        //this.addButton = this.itemElement.getElementsByClassName("song-add")[0];
+        //this.addButton.addEventListener("click", () => this.onAddButtonClicked());
         this.removeButton = this.itemElement.getElementsByClassName("song-remove")[0];
         this.removeButton.addEventListener("click", () => this.onRemoveButtonClicked());
        // this.updatePlaylistButton = this.itemElement.getElementsByClassName("song-update")[0];
@@ -248,8 +236,8 @@ class PlaylistSongBase {
  * @param {"added" | "removed" | "moved" | null} type
  * @returns {HTMLDivElement}
  */
-function createTeacherPlaylistItem(container, position, title, submittedBy, type = null) {
-    let item = createPlaylistItem(container, position, title, type);
+function createTeacherPlaylistItem(container, position, title, submittedBy) {
+    let item = createPlaylistItem(container, position, title, false);
     item.getElementsByClassName("submit-by-name")[0].textContent = submittedBy.name;
     item.getElementsByClassName("submit-by-email")[0].textContent = submittedBy.email;
     return item;
@@ -260,25 +248,20 @@ function createTeacherPlaylistItem(container, position, title, submittedBy, type
  * @returns {HTMLDivElement}
  */
 function createStudentPlaylistItem(container, position, title) {
-    let item = createPlaylistItem(container, position, title, "student");
+    let item = createPlaylistItem(container, position, title, true);
     return item;
 }
 /** @param {HTMLElement} container
  * @param {number} position
  * @param {string} title
- * @param {"added" | "removed" | "moved" | "student" | null} type
+ * @param {boolean} isStudent
  * @returns {HTMLDivElement}
  */
-function createPlaylistItem(container, position, title, type = null) {
+function createPlaylistItem(container, position, title, isStudent) {
     let playlistItem = document.createElement("div");
     playlistItem.classList.add("playlist-item");
-    if (type != null) {
-        if (type !== "student") {
-            playlistItem.setAttribute("data-type", type);
-        }
-        else {
-            playlistItem.setAttribute("data-student", "");
-        }
+    if (isStudent) {
+        playlistItem.setAttribute("data-student", "");
     }
     playlistItem.setAttribute("data-playback", "not-started");
     playlistItem.innerHTML = `
@@ -317,10 +300,6 @@ function createPlaylistItem(container, position, title, type = null) {
             <button class="song-remove">
                 <i class="fa-solid fa-trash"></i>
                 <span>Remove</span>
-            </button>
-            <button class="song-add">
-                <i class="fa-solid fa-circle-plus"></i>
-                <span>Add</span>
             </button>
         </div>
     </div>

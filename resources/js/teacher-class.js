@@ -28,7 +28,7 @@
         removeIcon.classList.add("fa-solid", "fa-user-xmark");
         removeButton.appendChild(removeIcon);
         removeButton.addEventListener("click", async () => {
-            let response = await SongServerAPI().classroom(classCode).students.find(student.email).remove();
+            let response = await SongServerAPI(2).classroom(classCode).students.find(student.email).remove();
             if (!response.success) {
                 throw new Error(response.message);
             }
@@ -46,7 +46,7 @@
         tokenCountText.type = "number";
         tokenCountText.value = new String(student.tokens);
         tokenCountText.addEventListener("change", async () => {
-            let response = await SongServerAPI().classroom(classCode).students.find(student.email).tokens.set(Math.max(parseInt(tokenCountText.value), 0));
+            let response = await SongServerAPI(2).classroom(classCode).students.find(student.email).tokens.set(Math.max(parseInt(tokenCountText.value), 0));
             if (!response.success) {
                 window.alert("Failed to set tokens from user: " + response.message);
                 throw new Error(response.message);
@@ -59,7 +59,7 @@
         decrementTokenButton.appendChild(decrementTokenButtonIcon);
         decrementTokenButton.classList.add("decrement-token");
         decrementTokenButton.addEventListener("click", async () => {
-            let response = await SongServerAPI().classroom(classCode).students.find(student.email).tokens.set(Math.max(parseInt(tokenCountText.value) - 1, 0));
+            let response = await SongServerAPI(2).classroom(classCode).students.find(student.email).tokens.set(Math.max(parseInt(tokenCountText.value) - 1, 0));
             if (!response.success) {
                 window.alert("Failed to set tokens from user: " + response.message);
                 throw new Error(response.message);
@@ -72,7 +72,7 @@
         incrementTokenButton.appendChild(incrementTokenButtonIcon);
         incrementTokenButton.classList.add("increment-token");
         incrementTokenButton.addEventListener("click", async () => {
-            let response = await SongServerAPI().classroom(classCode).students.find(student.email).tokens.set(parseInt(tokenCountText.value) + 1);
+            let response = await SongServerAPI(2).classroom(classCode).students.find(student.email).tokens.set(parseInt(tokenCountText.value) + 1);
             if (!response.success) {
                 window.alert("Failed to set tokens from user: " + response.message);
                 throw new Error(response.message);
@@ -100,7 +100,7 @@ removeAllStudentsButton.addEventListener("click", () => {
 /** @returns {Promise<void>} */
 async function loadStudents() {
     window.overlayManager.show("loading");
-    let response = await SongServerAPI().classroom(classCode).students.list();
+    let response = await SongServerAPI(2).classroom(classCode).students.list();
     if (!response.success) {
         window.overlayManager.hide();
         throw new Error(response.message);
@@ -122,7 +122,6 @@ function onSongDragStart(ev) {
     let evTarget = ev.target;
     let playlistItem = evTarget.parentElement.parentElement;
     let songID = playlistItem.getAttribute("song-id");
-    console.log("SONGID: " + songID);
     ev.dataTransfer.setData("text/plain", songID ?? "");
 }
 /** @param {DragEvent} ev
@@ -194,6 +193,8 @@ function onSongDrop(ev, index) {
 /** @extends PlaylistControllerBase */
 class TeacherPlaylistController extends PlaylistControllerBase {
     /** @private */
+    _currentSong = undefined;
+    /** @private */
     playlistSongs = undefined;
     /** @private */
     _playing = undefined;
@@ -228,14 +229,16 @@ class TeacherPlaylistController extends PlaylistControllerBase {
     }
     /** @public
      * @param {SongServer.API.ClassSongInfo[]} songs
-     * @param {number} position
+     * @param {SongServer.API.CurrentSong} currentSong
      * @returns {Promise<void>}
      */
-    async refresh(songs, position) {
-        let currentSong = this.currentSong;
-        currentSong?.onSongChange();
-        let currentSongID = currentSong?.songID;
-        let currentSongSource = currentSong?.songSource;
+    async refresh(songs, currentSong) {
+        let curSong = this.currentSong;
+        console.groupCollapsed("Song Refresh");
+        console.log(currentSong);
+        curSong?.onSongChange();
+        let currentSongID = curSong?.songID;
+        let currentSongSource = curSong?.songSource;
         this.playlistSongs = [];
         playlistContainer.innerHTML = `<div id="playlist-container-empty" style="display: none">
     Your playlist is empty!
@@ -249,21 +252,35 @@ class TeacherPlaylistController extends PlaylistControllerBase {
             console.log("No songs found :(");
             document.getElementById("playlist-container-empty").style.display = "block";
         }
-        this.songIndex = position;
-        currentSong = this.currentSong;
-        if (this._playing && currentSong?.state === PlaylistSongState.PLAYING && (currentSongID !== (currentSong?.songID) || (currentSongSource !== (currentSong?.songSource)))) {
-            currentSong?.play();
+        this.setCurrentSong(currentSong);
+        curSong = this.currentSong;
+        if (this._playing && curSong?.state === PlaylistSongState.PLAYING && (currentSongID !== (curSong?.songID) || (currentSongSource !== (curSong?.songSource)))) {
+            curSong?.play();
         }
         ;
+        console.log(this.currentSong);
         document.getElementById("now-playing-text").textContent = this.currentSong?.title ?? "";
         this.currentSong?.setSelected();
+        console.groupEnd();
     }
     /** @public */
     get currentSong() {
-        if (this.songIndex < 0 || this.songIndex >= this.playlistSongs.length)
-            return null;
-        return this.playlistSongs[this.songIndex];
+        if (this._currentSong == null) return null;
+
+        if (!this._currentSong.from_priority) {
+            return this.playlistSongs[this._currentSong.position - 1];
+        }
+        return new PriorityPlaylistSong(this._currentSong, this);
     }
+    /** 
+     * @public
+     * @param {SongServer.API.CurrentSong} song
+     */
+    setCurrentSong(song) {
+        console.log(song);
+        this._currentSong = song;
+    }
+
     /** @protected
      * @returns {void}
      */
@@ -293,11 +310,12 @@ class TeacherPlaylistController extends PlaylistControllerBase {
      */
     _playSong(song) {
         let newSong = this.currentSong;
+        console.log(newSong);
         if (newSong != null) {
             document.getElementById("now-playing-text").textContent = newSong.title;
         }
         window.player.loadVideo(song.songID);
-        SongServerAPI().classroom(classCode).playlist.position.set(song.songIndex);
+        SongServerAPI(2).classroom(classCode).playlist.currentSong.set(song.songIndex);
         newSong?.setSelected();
     }
     /** @public */
@@ -366,48 +384,48 @@ class TeacherPlaylistController extends PlaylistControllerBase {
     /** @public
      * @returns {void}
      */
-    nextSong() {
+    async nextSong() {
         this.currentSong?.onSongChange();
-        this.songIndex++;
-        if (this.songIndex >= this.playlistSongs.length) {
-            this.songIndex = 0;
+        let nextSongResponse = await SongServerAPI(2).classroom(classCode).playlist.nextSong();
+        if (!nextSongResponse.success) {
+            console.log(nextSongResponse);
+            throw new Error(nextSongResponse.message);
         }
+
+        this.setCurrentSong(nextSongResponse.data);
+        
         let nextSong = this.currentSong;
         if (!this.playable)
             return;
-        if (nextSong == null || nextSong.deleted) {
-            this.nextSong();
-        }
-        else {
-            this.currentSong?.play();
-            if (nextSong != null)
-                this._playSong(nextSong);
-        }
+        
+        this.currentSong?.play();
+        if (nextSong != null)
+            this._playSong(nextSong);
     }
     /** @public
      * @returns {void}
      */
-    previousSong() {
+    async previousSong() {
         this.currentSong?.onSongChange();
-        this.songIndex--;
-        if (this.songIndex < 0) {
-            this.songIndex = this.playlistSongs.length - 1;
+        let previousSongResponse = await SongServerAPI(2).classroom(classCode).playlist.previousSong();
+        if (!previousSongResponse.success) {
+            console.log(previousSongResponse);
+            throw new Error(previousSongResponse.message);
         }
+
+        this.setCurrentSong(previousSongResponse.data);
+        
         let previousSong = this.currentSong;
         if (!this.playable)
             return;
-        if (previousSong == null || previousSong.deleted) {
-            this.previousSong();
-        }
-        else {
-            this.currentSong?.play();
-            if (previousSong != null)
-                this._playSong(previousSong);
-        }
+        
+        this.currentSong?.play();
+        if (previousSong != null)
+            this._playSong(previousSong);
     }
 
     async shuffle() {
-        let res = await SongServerAPI().classroom(classCode).playlist.shuffle();
+        let res = await SongServerAPI(2).classroom(classCode).playlist.shuffle();
         if (res.success) {
             refreshPlaylist();
         }
@@ -418,9 +436,6 @@ class TeacherPlaylistSong extends PlaylistSongBase {
     /** @public */
     constructor(song, index, controller) {
         super(song, index, controller);
-        if (controller.songIndex === index) {
-            this.state = PlaylistSongState.PLAYING;
-        }
     }
     /** @protected
      * @returns {void}
@@ -458,10 +473,11 @@ class TeacherPlaylistSong extends PlaylistSongBase {
 var playlistController = new TeacherPlaylistController();
 /** @returns {Promise<void>} */
 async function refreshPlaylist() {
-    let songs = await SongServerAPI().classroom(classCode).playlist.songs.get();
-    let position = await SongServerAPI().classroom(classCode).playlist.position.get();
-    if (songs.success && position.success) {
-        window.playlistController?.refresh(songs.data, position.data);
+    let songs = await SongServerAPI(2).classroom(classCode).playlist.songs.get();
+    let currentSong = await SongServerAPI(2).classroom(classCode).playlist.currentSong.get();
+    if (songs.success && currentSong.success) {
+        console.log(currentSong);
+        window.playlistController?.refresh(songs.data, currentSong.data);
     }
     console.log(songs);
 }
@@ -481,7 +497,9 @@ else {
 revertSettings();
 refreshPlaylist();
 
-
+document.getElementById("player-visibility-button").addEventListener("click", () => {
+    document.getElementsByClassName("player-container")[0].classList.toggle("hidden");
+});
 
 
 

@@ -22,6 +22,8 @@ import FetchedUser from "../data/playlists/FetchedUser";
 import GottenClassroom from "../api/responses/GottenClassroom";
 import CreateClassroomRequest from "../api/requests/CreateClassroomRequest";
 import CreatedClassroomResponse from "../api/responses/CreatedClassroomResponse";
+import ClassroomSongV2 from "../data/classrooms/ClassroomSongV2";
+import SetCurrentSongRequest from "../api/requests/SetCurrentSongRequest";
 
 type FailAPIResponse = {
     success: false,
@@ -59,7 +61,7 @@ type ClassroomsEndpoint = {
 type ClassroomEndpoint = {
     students: StudentsEndpoint,
     settings: ClassroomSettingsEndpoint,
-    playlist: ClassroomPlaylistEndpoint,
+    playlist: ClassroomPlaylistEndpointV2,
     get: AuthorizedAPIRequestHandler<GottenClassroom>,
     delete: AuthorizedAPIRequestHandler<boolean>
 }
@@ -94,6 +96,20 @@ type ClassroomPlaylistEndpoint = {
     songs: ClassroomPlaylistSongsEndpoint
 };
 
+type ClassroomPlaylistEndpointV2 = {
+    currentSong: ClassroomPlaylistCurrentSongEndpoint,
+    shuffle: AuthorizedAPIRequestHandler<ClassroomSongV2[]>,
+    nextSong: AuthorizedAPIRequestHandler<ClassroomSongV2>,
+    previousSong: AuthorizedAPIRequestHandler<ClassroomSongV2>,
+    addSong: AuthorizedAPIRequestHandlerWithBody<AddClassroomSongRequest, ClassroomSongV2[] | null>,
+    removeSong: AuthorizedAPIRequestHandlerWithBody<RemoveClassroomSongRequest, ClassroomSongV2[]>
+};
+
+type ClassroomPlaylistCurrentSongEndpoint = {
+    get: AuthorizedAPIRequestHandler<ClassroomSongV2>,
+    set: AuthorizedAPIRequestHandlerWithBody<SetCurrentSongRequest, ClassroomSongV2>,
+};
+
 type ClassroomPlaylistPositionEndpoint = {
     get: AuthorizedAPIRequestHandler<int>,
     set: AuthorizedAPIRequestHandlerWithBody<SetClassroomSongPositionRequest, int>
@@ -115,7 +131,7 @@ type UserEndpoint<TUser> = {
     get: AuthorizedAPIRequestHandler<TUser>
 };
 
-const SongServerAPI = (apiVersion: int = int(1)): SongServerAPIEndpoints => { 
+const SongServerAPI = (apiVersion: int | number = int(1)): SongServerAPIEndpoints => { 
 
     async function handleReq<TData, TBody = any>(path: string, method: string, authorization: string | undefined, body: TBody | undefined = undefined): PendingAPIResponse<TData> {
         if (path.startsWith("/")) path = path.substring(1);
@@ -198,33 +214,28 @@ const SongServerAPI = (apiVersion: int = int(1)): SongServerAPIEndpoints => {
                         }
                     },
                     "playlist": {
-                        "get": async (auth: string): PendingAPIResponse<ClassroomPlaylistResponse> => {
-                            return await handleReq(`/classrooms/${code}/playlist`, "GET", auth);
+                        "addSong": async (body: AddClassroomSongRequest, auth: string): PendingAPIResponse<ClassroomSongV2[] | null> => {
+                            return await handleReq(`/classrooms/${code}/playlist/songs`, "POST", auth, body);
                         },
-                        "position": {
-                            "get": async (auth: string): PendingAPIResponse<int> => {
-                                return await handleReq(`/classrooms/${code}/playlist/position`, "GET", auth);
+                        "currentSong": {
+                            "get": async (auth: string): PendingAPIResponse<ClassroomSongV2> => {
+                                return await handleReq(`/classrooms/${code}/playlist/current-song`, "GET", auth);
                             },
-                            "set": async (body: SetClassroomSongPositionRequest, auth: string): PendingAPIResponse<int> => {
-                                return await handleReq(`/classrooms/${code}/playlist/position`, "POST", auth, body);
+                            "set": async (body: SetCurrentSongRequest, auth: string): PendingAPIResponse<ClassroomSongV2> => {
+                                return await handleReq(`/classrooms/${code}/playlist/current-song`, "POST", auth, body);
                             }
                         },
-                        "shuffle": async (auth: string): PendingAPIResponse<ClassroomSong[]> => {
+                        "nextSong": async (auth: string): PendingAPIResponse<ClassroomSongV2> => {
+                            return await handleReq(`/classrooms/${code}/playlist/next-song`, "POST", auth);
+                        },
+                        "previousSong": async (auth: string): PendingAPIResponse<ClassroomSongV2> => {
+                            return await handleReq(`/classrooms/${code}/playlist/previous-song`, "POST", auth);
+                        },
+                        "removeSong": async (body: RemoveClassroomSongRequest, auth: string): PendingAPIResponse<ClassroomSongV2[]> => {
+                            return await handleReq(`/classrooms/${code}/playlist/songs`, "DELETE", auth, body);
+                        },
+                        "shuffle": async (auth: string): PendingAPIResponse<ClassroomSongV2[]> => {
                             return await handleReq(`/classrooms/${code}/playlist/shuffle`, "POST", auth);
-                        },
-                        "songs": {
-                            "get": async (auth: string): PendingAPIResponse<ClassroomSong[]> => {
-                                return await handleReq(`/classrooms/${code}/playlist/songs`, "GET", auth);
-                            },
-                            "add": async (body: AddClassroomSongRequest, auth: string): PendingAPIResponse<ClassroomSong[]> => {
-                                return await handleReq(`/classrooms/${code}/playlist/songs`, "POST", auth, body);
-                            },
-                            "move": async (body: MoveClassroomSongRequest, auth: string): PendingAPIResponse<ClassroomSong[]> => {
-                                return await handleReq(`/classrooms/${code}/playlist/songs`, "PUT", auth, body);
-                            },
-                            "delete": async (body: RemoveClassroomSongRequest, auth: string): PendingAPIResponse<ClassroomSong[]> => {
-                                return await handleReq(`/classrooms/${code}/playlist/songs`, "DELETE", auth, body);
-                            }
                         }
                     }
                 }

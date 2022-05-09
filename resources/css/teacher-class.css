@@ -1,9 +1,6 @@
 body {
     --side-bar-width: max(10%, 300px);
-    background-image: url("/resources/img/background.png");
-    background-attachment: scroll;
-    background-size: cover;
-    background-size: 40%;
+    background-color: rgb(165 165 165);
 }
 
 #player {
@@ -549,6 +546,36 @@ body {
     gap: 40px;
 }
 
+.player-container.hidden > #player-visibility-button {
+    transform: translateY(calc(15vh + 20px + 2px));
+}
+.player-container.hidden > #player-visibility-button > .fa-chevron-down {
+    display: none;
+}
+.player-container:not(.hidden) > #player-visibility-button > .fa-chevron-up {
+    display: none;
+}
+.player-container.hidden .player-controls {
+    transform: translateY(calc(15vh + 20px + 2px));
+}
+
+.player-container > #player-visibility-button {
+    position: fixed;
+    transform: translateY(0px);
+    bottom: calc(15vh + calc(10px * 2));
+    left: calc(var(--side-bar-width) * 0.5 - 5% + 50%);
+    width: 10%;
+    height: 30px;
+    background-color: white;
+    z-index: 1000000;
+    border: 2px solid rgba(0, 0, 0, 0.5);
+    border-bottom: 2px solid white;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+}
+
 .player-controls {
     padding: 10px;
     background-color: white;
@@ -557,7 +584,17 @@ body {
     grid-template-columns: repeat(5, var(--player-control-item-size));
     min-width: 400px;
     gap: 10px;
-    position: sticky;
+    transform: translateY(0px);
+    position: fixed;
+    bottom: 0px;
+    height: 15vh;
+    left: var(--side-bar-width);
+    right: 0px;
+    z-index: 999999;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-top: 2px solid rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease-in-out;
 }
 
 .player-controls > .player-control {

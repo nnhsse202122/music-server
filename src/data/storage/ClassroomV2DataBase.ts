@@ -33,7 +33,7 @@ function dbClassToClassroom(classroom: IClassroomV2): ClassroomV2 {
                 "fromPriority": classroom.playlist.currentSong?.fromPriority ?? false
             },
             "priority": classroom.playlist.priority.map(cloneClassroomSong),
-            "songs": classroom.playlist.priority.map(cloneClassroomSong)
+            "songs": classroom.playlist.songs.map(cloneClassroomSong)
         },
         "settings": {
             "allowSongSubmissions": classroom.settings.allowSongSubmissions,
@@ -81,6 +81,8 @@ function classroomToDBClass(classroom: ClassroomV2): IClassroomV2 {
 }
 
 function updateDBClass(classroom: ClassroomV2, classDB: IClassroomV2): void {
+    console.log(JSON.stringify(classroom, undefined, 4));
+
     classDB.name = classroom.name;
     classDB.owner = classroom.owner;
     classDB.playlist.currentSong = {
@@ -88,7 +90,7 @@ function updateDBClass(classroom: ClassroomV2, classDB: IClassroomV2): void {
         "fromPriority": classroom.playlist.currentSong?.fromPriority ?? false
     };
     classDB.playlist.priority = classroom.playlist.priority.map(cloneClassroomSong);
-    classDB.playlist.songs = classroom.playlist.priority.map(cloneClassroomSong);
+    classDB.playlist.songs = classroom.playlist.songs.map(cloneClassroomSong);
     classDB.settings.allowSongSubmissions = classroom.settings.allowSongSubmissions;
     classDB.settings.joinable = classroom.settings.joinable;
     classDB.settings.playlistVisible = classroom.settings.playlistVisible;
@@ -133,7 +135,8 @@ export default class ClassroomDataBase extends CollectionDataBase<string, Classr
         let classDB = await this._get(code);
 
         updateDBClass(classroom, classDB);
-        await classDB.save();
+        let newClass = await classDB.save();
+        console.log(JSON.stringify(newClass, undefined, 4));
 
         return true;
     }

@@ -1,7 +1,7 @@
 import { Request } from "express";
-import Classroom from "../../../data/classrooms/Classroom";
-import ClassroomSong from "../../../data/classrooms/ClassroomSong";
-import { shuffleSongs } from "../../../data/extensions/ClassroomPlaylistExtensions";
+import ClassroomSongV2 from "../../../data/classrooms/ClassroomSongV2";
+import ClassroomV2 from "../../../data/classrooms/ClassroomV2";
+import { shuffleSongsV2 } from "../../../data/extensions/ClassroomPlaylistExtensions";
 import { isInClassCode } from "../../../data/extensions/UserExtensions";
 import Role from "../../../data/users/Role";
 import APIEndpoint from "../../../mvc/api/APIEndpoint";
@@ -9,14 +9,15 @@ import APIRoute from "../../../mvc/api/APIRoute";
 import RequestMethod from "../../../mvc/requests/RequestMethod";
 import APIController from "../../APIController";
 import APIResponse from "../../responses/APIResponse";
+import { i32 as int } from "typed-numbers";
 
 
-class PostRoute extends APIRoute<ClassroomSong[], ClassroomPlaylistShuffleEndpoint> {
-    public constructor(endpoint: ClassroomPlaylistShuffleEndpoint) {
+class PostRoute extends APIRoute<ClassroomSongV2[], ClassroomPlaylistShuffleEndpointV2> {
+    public constructor(endpoint: ClassroomPlaylistShuffleEndpointV2) {
         super(endpoint, RequestMethod.POST);
     }
 
-    protected async doHandle(req: Request): Promise<APIResponse<ClassroomSong[]>> {
+    protected async doHandle(req: Request): Promise<APIResponse<ClassroomSongV2[]>> {
         let sessionInfo = await this.verifySession(req);
         if (!sessionInfo.verified) {
             return sessionInfo.response;
@@ -40,27 +41,39 @@ class PostRoute extends APIRoute<ClassroomSong[], ClassroomPlaylistShuffleEndpoi
             return this.fail("api.classroom.not_found", {});
         }
 
-        let classroom: Classroom;
+        let classroom: ClassroomV2;
         try {
-            classroom = await this.server.db.classrooms.get(code);
+            classroom = await this.server.db.classroomsV2.get(code);
         }
         catch {
             return this.fail("api.classroom.not_found", {});
         }
 
         let classroomPlaylist = classroom.playlist;
-        let result = await shuffleSongs(classroomPlaylist, this.server.db.playlists, classroom.owner);
-        await this.server.db.classrooms.set(code, classroom);
-        return this.success(result);
+        shuffleSongsV2(classroomPlaylist);
+        await this.server.db.classroomsV2.set(code, classroom);
+        return this.success(classroom.playlist.songs.map((song, index) => {
+            return {
+                "id": song.id,
+                "title": song.title,
+                "source": song.source,
+                "requested_by": {
+                    "email": song.requested_by.email,
+                    "name": song.requested_by.name,
+                },
+                "from_priority": false,
+                "position": int(index + 1)
+            };
+        }));
     }
 }
 
-export default class ClassroomPlaylistShuffleEndpoint extends APIEndpoint {
+export default class ClassroomPlaylistShuffleEndpointV2 extends APIEndpoint {
 
     private readonly _post: PostRoute;
 
     public constructor(controller: APIController) {
-        super(controller, "/classrooms/:code/playlist/shuffle", "classroom-playlist-shuffle", 1);
+        super(controller, "/classrooms/:code/playlist/shuffle", "classroom-playlist-shuffle", 2);
         this._post = new PostRoute(this);
     }
 

@@ -16,40 +16,46 @@ const ClassroomV2Schema: Schema = new Schema<IClassroomV2>({
     },
     playlist: {
         type: {
-            songs: [
-                { 
-                    type: {
-                        id: { type: String, required: true },
-                        requested_by: {
-                            type: {
-                                email: { type: String, required: true },
-                                name: { type: String, required: true }
+            songs: {
+                type: [
+                    { 
+                        type: {
+                            id: { type: String, required: true },
+                            requested_by: {
+                                type: {
+                                    email: { type: String, required: true },
+                                    name: { type: String, required: true }
+                                },
+                                required: true
                             },
-                            required: true
+                            source: { type: String, required: true },
+                            title: { type: String, required: true }
                         },
-                        source: { type: String, required: true },
-                        title: { type: String, required: true }
-                    },
-                    required: true
-                }
-            ],
-            priority: [
-                { 
-                    type: {
-                        id: { type: String, required: true },
-                        requested_by: {
-                            type: {
-                                email: { type: String, required: true },
-                                name: { type: String, required: true }
+                        required: true
+                    }
+                ],
+                required: true
+            },
+            priority: {
+                type: [
+                    { 
+                        type: {
+                            id: { type: String, required: true },
+                            requested_by: {
+                                type: {
+                                    email: { type: String, required: true },
+                                    name: { type: String, required: true }
+                                },
+                                required: true
                             },
-                            required: true
+                            source: { type: String, required: true },
+                            title: { type: String, required: true }
                         },
-                        source: { type: String, required: true },
-                        title: { type: String, required: true }
-                    },
-                    required: true
-                }
-            ],
+                        required: true
+                    }
+                ],
+                required: true
+            },
             currentSong: {
                 type: {
                     index: { type: Number, required: true },

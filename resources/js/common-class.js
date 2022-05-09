@@ -148,7 +148,7 @@ controller.addButton("delete", () => {
 /** @returns {Promise<void>} */
 async function revertSettings() {
     window.overlayManager.show("loading");
-    let response = await SongServerAPI().classroom(classCode).settings.get();
+    let response = await SongServerAPI(2).classroom(classCode).settings.get();
     if (!response.success) {
         window.overlayManager.hide();
         window.alert("Error whilst fetching settings: " + response.message);
@@ -165,7 +165,7 @@ async function revertSettings() {
 /** @returns {Promise<void>} */
 async function saveSettings() {
     window.overlayManager.show("loading");
-    let response = await SongServerAPI().classroom(classCode).settings.set({
+    let response = await SongServerAPI(2).classroom(classCode).settings.set({
         "name": classNameInput.value,
         "allowSongSubmissions": classSubmitEnabledCheckbox.checked,
         "submissionsRequireTokens": classSubmitTokensCheckbox.checked,
@@ -188,7 +188,7 @@ deleteNoButton.addEventListener("click", () => {
     controller.toggle("overview");
 });
 deleteYesButton.addEventListener("click", async () => {
-    let result = await SongServerAPI().classroom(classCode).delete();
+    let result = await SongServerAPI(2).classroom(classCode).delete();
     if (result.success) {
         goBack();
     }

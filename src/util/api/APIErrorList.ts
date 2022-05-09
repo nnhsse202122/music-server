@@ -26,6 +26,11 @@ export let apiErrors = {
         "status": 403,
         "parameters": [],
     } as APIErrorInfo<"You aren't allowed to view the songs in the playlist.", 403, []>,
+    "api.classroom.student.not_found": {
+        "message": "Failed to find student! Email: {email}",
+        "status": 404,
+        "parameters": ["email"],
+    } as APIErrorInfo<"Failed to find student! Email: {email}", 404, ["email"]>,
     "api.classroom.playlist.song.invalid_source": {
         "message": "Invalid song source! Source: {source}",
         "status": 400,

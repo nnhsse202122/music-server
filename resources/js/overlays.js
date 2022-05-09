@@ -88,7 +88,7 @@ class JoinClassOverlayModel extends OverlayModelBase {
             this._joinErrorText.textContent = "A class code is required";
             return;
         }
-        let data = await SongServerAPI().classroom(code).students.join();
+        let data = await SongServerAPI(2).classroom(code).students.join();
         if (data.success) {
             window.location.reload();
         }
@@ -148,9 +148,10 @@ class DeleteSongFromPlaylistOverlayModel extends OverlayModelBase {
      */
     async _onDeleteButtonClicked() {
         this.overlay.show("loading");
-        let req = await SongServerAPI().classroom(classCode).playlist.songs.delete(this.getData("song-index"));
-        if (req.success) {
-            window.playlistController.refresh(req.data.songs, req.data.songPosition);
+        let req = await SongServerAPI(2).classroom(classCode).playlist.songs.delete(this.getData("song-index"));
+        let currentSongReq = await SongServerAPI(2).classroom(classCode).playlist.currentSong.get();
+        if (req.success && currentSongReq.success) {
+            window.playlistController.refresh(req.data.songs, currentSongReq.data);
         }
         this.overlay.hide();
     }
@@ -212,7 +213,7 @@ class DeleteAllStudentsOverlayModel extends OverlayModelBase {
      */
     async _onDeleteButtonClicked() {
         this.overlay.show("loading");
-        let response = await SongServerAPI().classroom(classCode).students.removeAll();
+        let response = await SongServerAPI(2).classroom(classCode).students.removeAll();
         if (!response.success) {
             throw new Error(response.message);
         }
@@ -506,7 +507,7 @@ class SubmitSongStudentOverlay extends OverlayModelBase {
         this.overlay.hide();
         this.overlay.show("loading");
 
-        let req = await SongServerAPI().classroom(classCode).playlist.songs.add({
+        let req = await SongServerAPI(2).classroom(classCode).playlist.songs.add({
             "id": this.getData("id"),
             "source": this.getData("source")
         });
@@ -584,7 +585,7 @@ class SubmitSongTeacherOverlay extends OverlayModelBase {
         this.overlay.hide();
         this.overlay.show("loading");
 
-        let req = await SongServerAPI().classroom(classCode).playlist.songs.add({
+        let req = await SongServerAPI(2).classroom(classCode).playlist.songs.add({
             "id": this.getData("id"),
             "source": this.getData("source")
         });
@@ -594,6 +595,12 @@ class SubmitSongTeacherOverlay extends OverlayModelBase {
         else {
             this.overlay.show("submit-song-success-model");
             SongSearchManager.resetCurrent();
+            let currentSongReq = await SongServerAPI(2).classroom(classCode).playlist.currentSong.get();
+            if (!currentSongReq.success) {
+                this.overlay.show("submit-song-fail-model", { message: data.message });
+            }
+
+            window.playlistController.refresh(req.data, currentSongReq.data);
         }
     }
 
@@ -704,6 +711,57 @@ class SubmitSongSuccessOverlayModel extends OverlayModelBase {
         this.overlay.hide();
     }
 }
+/** @extends OverlayModelBase */
+class ReloginOverlayModel extends OverlayModelBase {
+    /** @private */
+    _confirmButton = undefined;
+    /** @public */
+    constructor(overlay) {
+        super(overlay, "relogin-model");
+        this._confirmButton = null;
+    }
+    /** @protected
+     * @param {HTMLDivElement} titleDiv
+     * @returns {void}
+     */
+    instantiateTitle(titleDiv) {
+        let titleSpan = document.createElement("span");
+        titleSpan.textContent = "Authorization Expired";
+        titleDiv.appendChild(titleSpan);
+    }
+    /** @protected
+     * @param {HTMLDivElement} bodyDiv
+     * @returns {void}
+     */
+    instantiateBody(bodyDiv) {
+        bodyDiv.textContent = "You must login again to perform this action. Click the checkmark below to login again...";
+    }
+    /** @protected
+     * @param {HTMLDivElement} actionsDiv
+     * @returns {void}
+     */
+    instantiateActions(actionsDiv) {
+        this._confirmButton = document.createElement("button");
+        this._confirmButton.classList.add("action");
+        this._confirmButton.classList.add("yes");
+        this._confirmButton.addEventListener("click", async () => await this._onConfirmButtonClick());
+        this._confirmButton.innerHTML = `<i class="fa-solid fa-check"></i>`;
+        actionsDiv.appendChild(this._confirmButton);
+    }
+    /** @private
+     * @returns {void}
+     */
+    _onCancelButtonClick() {
+        this.overlay.hide();
+    }
+    /** @private
+     * @returns {void}
+     */
+    _onConfirmButtonClick() {
+        this.overlay.hide();
+        window.location.reload();
+    }
+}
 var overlayManager = new Overlay();
 overlayManager.addOverlay(JoinClassOverlayModel);
 overlayManager.addOverlay(CreateClassOverlayModel);
@@ -715,3 +773,4 @@ overlayManager.addOverlay(SubmitSongStudentOverlay);
 overlayManager.addOverlay(SubmitSongTeacherOverlay);
 overlayManager.addOverlay(SubmitSongFailOverlayModel);
 overlayManager.addOverlay(SubmitSongSuccessOverlayModel);
+overlayManager.addOverlay(ReloginOverlayModel);
