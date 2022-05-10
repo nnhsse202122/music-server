@@ -137,7 +137,7 @@ class SongSearchResult {
         this._div.removeAttribute("style");
         this._div.setAttribute("data-song-id", id);
         this._div.setAttribute("data-song-source", source);
-        this._songTitle.textContent = title.replace(/\&quot;/gi, '"').replace(/\&#39;/gi, "'");
+        this._songTitle.textContent = title.replace(/\&quot;/gi, '"').replace(/\&#39;/gi, "'").replace(/\&amp;/gi, "&");
         this._songLinkButton.children[0].setAttribute("href", `/songs/${source}/${id}`);
     }
 

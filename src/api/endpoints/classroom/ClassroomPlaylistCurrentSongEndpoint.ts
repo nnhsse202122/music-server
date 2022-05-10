@@ -64,6 +64,8 @@ class GetRoute extends APIRoute<ClassroomSongV2, ClassroomPlaylistCurrentSongEnd
                 "source": currentSong.source,
                 "title": currentSong.title,
                 "position": int(currentSongRef.index + 1),
+                "is_liked": currentSong.likes.includes(user.email),
+                "likes": undefined,
                 "requested_by": undefined
             });
         }
@@ -74,6 +76,8 @@ class GetRoute extends APIRoute<ClassroomSongV2, ClassroomPlaylistCurrentSongEnd
                 "source": currentSong.source,
                 "title": currentSong.title,
                 "position": int(currentSongRef.index + 1),
+                "is_liked": undefined,
+                "likes": int(currentSong.likes.length),
                 "requested_by": {
                     "email": currentSong.requested_by.email,
                     "name": currentSong.requested_by.name
@@ -148,8 +152,10 @@ class PostRoute extends APIRoute<ClassroomSongV2, ClassroomPlaylistCurrentSongEn
         currentSong = {
             "from_priority": false,
             "id": s.id,
+            "is_liked": undefined,
             "position": int(classroom.playlist.currentSong.index + 1),
             "title": s.title,
+            "likes": int(s.likes.length),
             "source": s.source,
             "requested_by": {
                 "email": s.requested_by.email,

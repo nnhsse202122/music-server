@@ -437,18 +437,14 @@ body {
 
 .playlist-item > .playlist-item-content > .song-info > .song-actions {
     display: grid;
-    --playlist-action-count: 3;
+    --playlist-action-count: 4;
     grid-template-columns: repeat(var(--playlist-action-count), calc(100% / var(--playlist-action-count)));
     justify-items: center;
     align-items: center;
 }
 
-.playlist-item[data-student] > .playlist-item-content > .song-info > .song-actions {
-    display: none;
-}
-
 .playlist-item[data-type] > .playlist-item-content > .song-info > .song-actions {
-    --playlist-action-count: 3;
+    --playlist-action-count: 4;
 }
 
 .playlist-item > .playlist-item-content > .song-info > .song-actions > button {

@@ -327,12 +327,14 @@ function getSongsAsStudent(playlist: ClassroomPlaylist, playlistSongs: Song[]): 
     });
 }
 
-function getSongsAsStudentV2(playlist: ClassroomPlaylistV2): SongStudentViewV2[] {
+function getSongsAsStudentV2(playlist: ClassroomPlaylistV2, email: string): SongStudentViewV2[] {
     return playlist.songs.map((song, index) => {
         return {
             "id": song.id,
             "from_priority": undefined,
             "requested_by": undefined,
+            "is_liked": song.likes.includes(email),
+            "likes": undefined,
             "source": song.source,
             "title": song.title,
             "position": int(index + 1)
@@ -355,8 +357,6 @@ function getSongsAsTeacher(playlist: ClassroomPlaylist, playlistSongs: Song[]): 
 function getSongsAsTeacherV2(playlist: ClassroomPlaylistV2): SongTeacherViewV2[] {
     console.log("The playlist is not sus:\n" + JSON.stringify(playlist));
     return playlist.priority.map((song, index) => {
-        console.log("Prio");
-        console.log(song);
         return {
             "from_priority": true,
             "position": int(index + 1),
@@ -365,12 +365,12 @@ function getSongsAsTeacherV2(playlist: ClassroomPlaylistV2): SongTeacherViewV2[]
                 "email": song.requested_by.email,
                 "name": song.requested_by.name
             },
+            "likes": int(song.likes.length),
+            "is_liked": undefined,
             "source": song.source,
             "title": song.title
         }
     }).concat(playlist.songs.map((song, index) => {
-        console.log("Normal");
-        console.log(song);
         return {
             "from_priority": false,
             "position": int(index + 1),
@@ -379,20 +379,22 @@ function getSongsAsTeacherV2(playlist: ClassroomPlaylistV2): SongTeacherViewV2[]
                 "email": song.requested_by.email,
                 "name": song.requested_by.name
             },
+            "likes": int(song.likes.length),
+            "is_liked": undefined,
             "source": song.source,
             "title": song.title
         };
     }));
 }
 
-export function getSongsAsClassSongsV2(playlist: ClassroomPlaylistV2, role: Role): ClassroomSongV2[] {
+export function getSongsAsClassSongsV2(playlist: ClassroomPlaylistV2, role: Role, email: string): ClassroomSongV2[] {
     console.log(role);
     switch (role) {
         case Role.Teacher:
             console.log("I am teacher. I should do teacher stuff");
             return getSongsAsTeacherV2(playlist);
         case Role.Student:
-            return getSongsAsStudentV2(playlist);
+            return getSongsAsStudentV2(playlist, email);
     }
 
     return [];

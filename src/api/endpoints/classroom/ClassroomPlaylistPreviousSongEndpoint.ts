@@ -84,6 +84,8 @@ class PostRoute extends APIRoute<ClassroomSongV2, ClassroomPlaylistPreviousSongE
                 "position": int(classroom.playlist.currentSong.index + 1),
                 "title": s.title,
                 "source": s.source,
+                "is_liked": undefined,
+                "likes": int(s.likes.length),
                 "requested_by": {
                     "email": s.requested_by.email,
                     "name": s.requested_by.name
@@ -98,6 +100,8 @@ class PostRoute extends APIRoute<ClassroomSongV2, ClassroomPlaylistPreviousSongE
                 "position": int(classroom.playlist.currentSong.index + 1),
                 "title": s.title,
                 "source": s.source,
+                "is_liked": undefined,
+                "likes": int(s.likes.length),
                 "requested_by": {
                     "email": s.requested_by.email,
                     "name": s.requested_by.name

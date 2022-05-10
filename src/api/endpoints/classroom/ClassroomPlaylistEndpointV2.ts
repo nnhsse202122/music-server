@@ -62,6 +62,8 @@ class GetRoute extends APIRoute<ClassroomPlaylistResponseV2, ClassroomPlaylistEn
                 "position": int(classroom.playlist.currentSong.index + 1),
                 "title": s.title,
                 "source": s.source,
+                "likes": int(s.likes.length),
+                "is_liked": undefined,
                 "requested_by": {
                     "email": s.requested_by.email,
                     "name": s.requested_by.name
@@ -75,6 +77,8 @@ class GetRoute extends APIRoute<ClassroomPlaylistResponseV2, ClassroomPlaylistEn
                 "id": s.id,
                 "position": int(classroom.playlist.currentSong.index + 1),
                 "title": s.title,
+                "is_liked": undefined,
+                "likes": int(s.likes.length),
                 "source": s.source,
                 "requested_by": {
                     "email": s.requested_by.email,
@@ -94,6 +98,8 @@ class GetRoute extends APIRoute<ClassroomPlaylistResponseV2, ClassroomPlaylistEn
                         "name": song.requested_by.name,
                         "email": song.requested_by.email
                     },
+                    "likes": int(song.likes.length),
+                    "is_liked": undefined,
                     "from_priority": false,
                     "position": int(index + 1)
                 };

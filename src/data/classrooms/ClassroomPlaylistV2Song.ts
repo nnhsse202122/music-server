@@ -5,7 +5,8 @@ type ClassroomPlaylistSongV2 = {
     id: string,
     title: string,
     source: SongSource,
-    requested_by: BasicUser
+    requested_by: BasicUser,
+    likes: string[]
 }
 
 export default ClassroomPlaylistSongV2;

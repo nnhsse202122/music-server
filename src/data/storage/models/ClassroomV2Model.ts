@@ -29,7 +29,13 @@ const ClassroomV2Schema: Schema = new Schema<IClassroomV2>({
                                 required: true
                             },
                             source: { type: String, required: true },
-                            title: { type: String, required: true }
+                            title: { type: String, required: true },
+                            likes: {
+                                type: [
+                                    { type: String, required: true }
+                                ],
+                                required: true
+                            }
                         },
                         required: true
                     }

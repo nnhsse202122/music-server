@@ -57,6 +57,8 @@ class PostRoute extends APIRoute<ClassroomSongV2[], ClassroomPlaylistShuffleEndp
                 "id": song.id,
                 "title": song.title,
                 "source": song.source,
+                "is_liked": undefined,
+                "likes": int(song.likes.length),
                 "requested_by": {
                     "email": song.requested_by.email,
                     "name": song.requested_by.name,

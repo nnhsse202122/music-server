@@ -228,6 +228,77 @@ class DeleteAllStudentsOverlayModel extends OverlayModelBase {
     }
 }
 /** @extends OverlayModelBase */
+class DeleteStudentOverlayModel extends OverlayModelBase {
+    /** @private */
+    _deleteButton = undefined;
+    /** @private */
+    _cancelButton = undefined;
+    /** @public */
+    constructor(overlay) {
+        super(overlay, "are-you-sure-student");
+        this._deleteButton = null;
+        this._cancelButton = null;
+    }
+    /** @protected
+     * @param {HTMLDivElement} titleDiv
+     * @returns {void}
+     */
+    instantiateTitle(titleDiv) {
+        let titleSpan = document.createElement("span");
+        titleSpan.textContent = "Are You Sure?";
+        titleDiv.appendChild(titleSpan);
+    }
+    /** @protected
+     * @param {HTMLDivElement} bodyDiv
+     * @returns {void}
+     */
+    instantiateBody(bodyDiv) {
+        bodyDiv.textContent = "This will remove all songs submitted by this student and remove them from your class.";
+    }
+    /** @protected
+     * @param {HTMLDivElement} actionsDiv
+     * @returns {void}
+     */
+    instantiateActions(actionsDiv) {
+        this._deleteButton = document.createElement("button");
+        this._deleteButton.classList.add("action");
+        this._deleteButton.classList.add("yes");
+        this._deleteButton.addEventListener("click", () => this._onDeleteButtonClicked());
+        this._deleteButton.innerHTML = `<i class="fa-solid fa-check"></i>`;
+        this._cancelButton = document.createElement("button");
+        this._cancelButton.classList.add("action");
+        this._cancelButton.classList.add("no");
+        this._cancelButton.addEventListener("click", () => this._onCancelButtonClicked());
+        this._cancelButton.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+        actionsDiv.appendChild(this._cancelButton);
+        actionsDiv.appendChild(this._deleteButton);
+    }
+    /** @private
+     * @returns {Promise<void>}
+     */
+    async _onDeleteButtonClicked() {
+        this.overlay.show("loading");
+        let response = await SongServerAPI(2).classroom(classCode).students.find(this.getData("email")).remove();
+        if (!response.success) {
+            this.overlay.hide();
+            throw new Error(response.message);
+        }
+        if (response.data) {
+            await loadStudents();
+        }
+        else {
+            window.alert("Failed to delete user!");
+        }
+        this.overlay.hide();
+    }
+    /** @private
+     * @returns {void}
+     */
+    _onCancelButtonClicked() {
+        this.overlay.hide();
+    }
+}
+/** @extends OverlayModelBase */
 class LoadingOverlayModel extends OverlayModelBase {
     /** @public */
     constructor(overlay) {
@@ -762,10 +833,76 @@ class ReloginOverlayModel extends OverlayModelBase {
         window.location.reload();
     }
 }
+/** @extends OverlayModelBase */
+class DeleteClassOverlayModel extends OverlayModelBase {
+    /** @private */
+    _deleteButton = undefined;
+    /** @private */
+    _cancelButton = undefined;
+    /** @public */
+    constructor(overlay) {
+        super(overlay, "are-you-sure-class");
+        this._deleteButton = null;
+        this._cancelButton = null;
+    }
+    /** @protected
+     * @param {HTMLDivElement} titleDiv
+     * @returns {void}
+     */
+    instantiateTitle(titleDiv) {
+        let titleSpan = document.createElement("span");
+        titleSpan.textContent = "Are You Sure?";
+        titleDiv.appendChild(titleSpan);
+    }
+    /** @protected
+     * @param {HTMLDivElement} bodyDiv
+     * @returns {void}
+     */
+    instantiateBody(bodyDiv) {
+        bodyDiv.textContent = "This will permanently delete the class. Are you sure you want to do this? This cannot be undone.";
+    }
+    /** @protected
+     * @param {HTMLDivElement} actionsDiv
+     * @returns {void}
+     */
+    instantiateActions(actionsDiv) {
+        this._deleteButton = document.createElement("button");
+        this._deleteButton.classList.add("action");
+        this._deleteButton.classList.add("yes");
+        this._deleteButton.addEventListener("click", () => this._onDeleteButtonClicked());
+        this._deleteButton.innerHTML = `<i class="fa-solid fa-check"></i>`;
+        this._cancelButton = document.createElement("button");
+        this._cancelButton.classList.add("action");
+        this._cancelButton.classList.add("no");
+        this._cancelButton.addEventListener("click", () => this._onCancelButtonClicked());
+        this._cancelButton.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+        actionsDiv.appendChild(this._cancelButton);
+        actionsDiv.appendChild(this._deleteButton);
+    }
+    /** @private
+     * @returns {Promise<void>}
+     */
+    async _onDeleteButtonClicked() {
+        this.overlay.show("loading");
+        let req = await SongServerAPI(2).classroom(classCode).delete();
+        let currentSongReq = await SongServerAPI(2).classroom(classCode).playlist.currentSong.get();
+        if (req.success && currentSongReq.success) {
+            window.playlistController.refresh(req.data.songs, currentSongReq.data);
+        }
+        this.overlay.hide();
+    }
+    /** @private
+     * @returns {void}
+     */
+    _onCancelButtonClicked() {
+        this.overlay.hide();
+    }
+}
 var overlayManager = new Overlay();
 overlayManager.addOverlay(JoinClassOverlayModel);
 overlayManager.addOverlay(CreateClassOverlayModel);
 overlayManager.addOverlay(DeleteSongFromPlaylistOverlayModel);
+overlayManager.addOverlay(DeleteStudentOverlayModel);
 overlayManager.addOverlay(DeleteAllStudentsOverlayModel);
 overlayManager.addOverlay(LoadingOverlayModel);
 overlayManager.addOverlay(SettingsSavedOverlayModel);

@@ -116,7 +116,7 @@ class PlaylistSongBase {
         this.controller = controller;
         this._state = PlaylistSongState.NOT_STARTED;
         if (controller.isTeacher) {
-            this.itemElement = createTeacherPlaylistItem(controller.container, index + 1, song.title, { email: song.requested_by.email, name: song.requested_by.name });
+            this.itemElement = createTeacherPlaylistItem(controller.container, index + 1, song.title, { email: song.requested_by.email, name: song.requested_by.name }, song.likes);
         }
         else {
             this.itemElement = createStudentPlaylistItem(controller.container, index + 1, song.title);
@@ -237,11 +237,11 @@ class PlaylistSongBase {
  * @param {number} position
  * @param {string} title
  * @param {{ name: string, email: string }} submittedBy
- * @param {"added" | "removed" | "moved" | null} type
+ * @param {number} likes
  * @returns {HTMLDivElement}
  */
-function createTeacherPlaylistItem(container, position, title, submittedBy) {
-    let item = createPlaylistItem(container, position, title, false);
+function createTeacherPlaylistItem(container, position, title, submittedBy, likes = 0) {
+    let item = createPlaylistItem(container, position, title, likes);
     item.getElementsByClassName("submit-by-name")[0].textContent = submittedBy.name;
     item.getElementsByClassName("submit-by-email")[0].textContent = submittedBy.email;
     return item;
@@ -249,24 +249,12 @@ function createTeacherPlaylistItem(container, position, title, submittedBy) {
 /** @param {HTMLElement} container
  * @param {number} position
  * @param {string} title
+ * @param {number} likes
  * @returns {HTMLDivElement}
  */
-function createStudentPlaylistItem(container, position, title) {
-    let item = createPlaylistItem(container, position, title, true);
-    return item;
-}
-/** @param {HTMLElement} container
- * @param {number} position
- * @param {string} title
- * @param {boolean} isStudent
- * @returns {HTMLDivElement}
- */
-function createPlaylistItem(container, position, title, isStudent) {
+function createPlaylistItem(container, position, title, likes = 0) {
     let playlistItem = document.createElement("div");
     playlistItem.classList.add("playlist-item");
-    if (isStudent) {
-        playlistItem.setAttribute("data-student", "");
-    }
     playlistItem.setAttribute("data-playback", "not-started");
     playlistItem.innerHTML = `
 <div class="position">
@@ -279,6 +267,10 @@ function createPlaylistItem(container, position, title, isStudent) {
     <div class="song-info">
         <div class="song-title"></div>
         <div class="song-actions">
+            <button class="song-likes">
+                <i class="fa-solid fa-thumbs-up"></i>
+                <span>${likes} Like${(likes === 1 ? "" : "s")}</span>
+            </button>
             <button class="song-playback">
                 <div class="play">
                     <i class="fa-solid fa-pause"></i>
@@ -327,7 +319,7 @@ function createPlaylistItem(container, position, title, isStudent) {
     <i class="fa-solid fa-ellipsis-vertical"></i>
 </button>`;
     container.appendChild(playlistItem);
-    playlistItem.getElementsByClassName("song-title")[0].textContent = title.replace(/\&quot;/gi, '"').replace(/\&#39;/gi, "'");
+    playlistItem.getElementsByClassName("song-title")[0].textContent = title.replace(/\&quot;/gi, '"').replace(/\&#39;/gi, "'").replace(/\&amp;/gi, "&");
     return playlistItem;
 }
 

@@ -59,7 +59,7 @@ class GetRoute extends APIRoute<ClassroomSongV2[], ClassroomPlaylistSongsEndpoin
 
         console.log(JSON.stringify(classroom, undefined, 4));
 
-        let songs = getSongsAsClassSongsV2(classroom.playlist, user.type);
+        let songs = getSongsAsClassSongsV2(classroom.playlist, user.type, user.email);
         return this.success(songs);
     }
 } 
@@ -240,10 +240,11 @@ class PostRoute extends APIRoute<ClassroomSongV2[] | null, ClassroomPlaylistSong
                 "id": songToAdd.id,
                 "source": songToAdd.source,
                 "title": songToAdd.title,
+                "likes": [],
                 "requested_by": songToAdd.requested_by
             });
             await this.server.db.classroomsV2.set(code, classroom);
-            return this.success(getSongsAsClassSongsV2(classroom.playlist, user.type));
+            return this.success(getSongsAsClassSongsV2(classroom.playlist, user.type, user.email));
         }
         catch(err) {
             return this.fail("api.classroom.playlist.song.add.fail", {});
@@ -298,7 +299,7 @@ class DeleteRoute extends APIRoute<RemoveClassroomSongResponseV2, ClassroomPlayl
         deleteSongV2(classroom.playlist, body.index);
         await this.server.db.classroomsV2.set(code, classroom);
         return this.success({
-            "songs": getSongsAsClassSongsV2(classroom.playlist, user.type),
+            "songs": getSongsAsClassSongsV2(classroom.playlist, user.type, user.email),
             "currentSong": classroom.playlist.currentSong
         });
     }

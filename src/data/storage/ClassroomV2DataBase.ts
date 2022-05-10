@@ -17,6 +17,7 @@ function cloneClassroomSong(song: ClassroomPlaylistSongV2): ClassroomPlaylistSon
             "email": song.requested_by.email,
             "name": song.requested_by.name
         },
+        "likes": song.likes.map((s) => s),
         "source": song.source,
         "title": song.title
     };
@@ -178,7 +179,8 @@ export default class ClassroomDataBase extends CollectionDataBase<string, Classr
                             "requested_by": {
                                 "email": song.requested_by!.email,
                                 "name": song.requested_by!.name
-                            }
+                            },
+                            "likes": []
                         };
                     }),
                 "priority": []
