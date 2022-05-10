@@ -324,6 +324,16 @@ body {
     font-family: var(--font-primary);
     color: white;
 }
+.playlist-container > .playlist-title > button {
+    background: inherit;
+    color: inherit;
+    text-align: center;
+    border-radius: 3rem;
+    font-size: 75%;
+    vertical-align: middle;
+    cursor: pointer;
+    border: none;
+}
 
 .playlist-item-container {
     padding: 10px;
