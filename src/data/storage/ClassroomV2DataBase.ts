@@ -40,13 +40,18 @@ function dbClassToClassroom(classroom: IClassroomV2): ClassroomV2 {
             "allowSongSubmissions": classroom.settings.allowSongSubmissions,
             "joinable": classroom.settings.joinable,
             "playlistVisible": classroom.settings.playlistVisible,
-            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens
+            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens,
+            "likesEnabled": classroom.settings.likesEnabled ?? false,
+            "priorityEnabled": classroom.settings.priorityEnabled ?? false,
+            "priorityCost": classroom.settings.priorityCost ?? int(0),
+            "likesVisible": classroom.settings.likesVisible ?? false
         },
         "students": classroom.students.map((student) => {
             return {
                 "email": student.email,
                 "name": student.name,
-                "tokens": student.tokens
+                "tokens": student.tokens,
+                "likes": student.likes ?? int(0)
             };
         })
     };
@@ -68,7 +73,11 @@ function classroomToDBClass(classroom: ClassroomV2): IClassroomV2 {
             "allowSongSubmissions": classroom.settings.allowSongSubmissions,
             "joinable": classroom.settings.joinable,
             "playlistVisible": classroom.settings.playlistVisible,
-            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens
+            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens,
+            "likesEnabled": classroom.settings.likesEnabled,
+            "priorityEnabled": classroom.settings.priorityEnabled,
+            "priorityCost": classroom.settings.priorityCost,
+            "likesVisible": classroom.settings.likesVisible
         },
         "students": classroom.students.map((student) => {
             return {
@@ -94,13 +103,18 @@ function updateDBClass(classroom: ClassroomV2, classDB: IClassroomV2): void {
     classDB.playlist.songs = classroom.playlist.songs.map(cloneClassroomSong);
     classDB.settings.allowSongSubmissions = classroom.settings.allowSongSubmissions;
     classDB.settings.joinable = classroom.settings.joinable;
+    classDB.settings.likesVisible = classroom.settings.likesVisible;
+    classDB.settings.likesEnabled = classroom.settings.likesEnabled;
+    classDB.settings.priorityEnabled = classroom.settings.priorityEnabled;
     classDB.settings.playlistVisible = classroom.settings.playlistVisible;
+    classDB.settings.priorityCost = classroom.settings.priorityCost;
     classDB.settings.submissionsRequireTokens = classroom.settings.submissionsRequireTokens;
     classDB.students = classroom.students.map((student) => {
         return {
             "email": student.email,
             "name": student.name,
-            "tokens": student.tokens
+            "tokens": student.tokens,
+            "likes": student.likes ?? int(0)
         };
     });
 }
@@ -155,13 +169,18 @@ export default class ClassroomDataBase extends CollectionDataBase<string, Classr
                 "allowSongSubmissions": classroom.settings.allowSongSubmissions,
                 "joinable": classroom.settings.joinable,
                 "playlistVisible": classroom.settings.playlistVisible,
-                "submissionsRequireTokens": classroom.settings.submissionsRequireTokens
+                "submissionsRequireTokens": classroom.settings.submissionsRequireTokens,
+                "priorityEnabled": false,
+                "likesEnabled": false,
+                "priorityCost": int(0),
+                "likesVisible": false
             },
             "students": classroom.students.map((student) => {
                 return {
                     "email": student.email,
                     "name": student.name,
-                    "tokens": student.tokens
+                    "tokens": student.tokens,
+                    "likes": student.likes ?? 0
                 };
             }),
             "playlist": {

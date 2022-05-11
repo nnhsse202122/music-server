@@ -24,11 +24,20 @@
             <input type="checkbox" class="settings-value" id="class-playlist-visible" <%= classroom.settings.playlistVisible ? "checked" : "" %>/>
         </div>
         <div class="settings-item">
-            <div class="settings-title">Playlist</div>
-            <select class="settings-value" id="class-playlist-items">
-                <!-- TODO: IMPLEMENT PLAYLISTS -->
-                <option>None</option>
-            </select>
+            <div class="settings-title">Enable Likes</div>
+            <input type="checkbox" class="settings-value" id="class-likes" <%= classroom.settings.likesEnabled ? "checked" : "" %>/>
+        </div>
+        <div class="settings-item" id="class-like-count-container">
+            <div class="settings-title">Enable Like Count Visibility</div>
+            <input type="checkbox" class="settings-value" id="class-like-count"/>
+        </div>
+        <div class="settings-item">
+            <div class="settings-title">Enable Song Bumping</div>
+            <input type="checkbox" class="settings-value" id="class-priority" <%= classroom.settings.priorityEnabled ? "checked" : "" %>/>
+        </div>
+        <div class="settings-item" id="class-priority-cost-container">
+            <div class="settings-title">Song Bump Token Cost</div>
+            <input type="number" class="settings-value" id="class-priority-cost" value="<%= classroom.settings.priorityCost %>"/>
         </div>
     </div>
     <div class="settings-actions">

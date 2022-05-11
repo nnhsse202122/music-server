@@ -59,7 +59,8 @@ class GetRoute extends APIRoute<StudentInClass, ClassroomStudentEndpointV2> {
         return this.success({
             "email": student.email,
             "name": student.name,
-            "tokens": student.tokens
+            "tokens": student.tokens,
+            "likes": student.likes
         });
     }
 }

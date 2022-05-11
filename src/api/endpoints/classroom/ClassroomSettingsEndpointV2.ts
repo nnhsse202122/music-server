@@ -11,7 +11,8 @@ import SetClassroomSettingsRequest from "../../requests/SetClassroomSettingsRequ
 import UpdateClassroomSettingsRequest from "../../requests/UpdateClassroomSettingsRequest";
 import APIResponse from "../../responses/APIResponse";
 import ClassroomSettingsResponse from "../../responses/ClassroomSettingsResponse";
-import { assertContentIsJSON, assertJSONBodyFieldIsBoolean, assertJSONBodyFieldIsString, assertJSONBodyIsntNull } from "../EndpointAssert";
+import { assertContentIsJSON, assertJSONBodyFieldIsBoolean, assertJSONBodyFieldIsNumber, assertJSONBodyFieldIsString, assertJSONBodyIsntNull } from "../EndpointAssert";
+import { i32 as int } from "typed-numbers";
 
 class GetRoute extends APIRoute<ClassroomSettingsResponse, ClassroomSettingsEndpointV2> {
     public constructor(endpoint: ClassroomSettingsEndpointV2) {
@@ -50,7 +51,10 @@ class GetRoute extends APIRoute<ClassroomSettingsResponse, ClassroomSettingsEndp
             "joinable": classroom.settings.joinable,
             "name": classroom.name,
             "playlistVisible": classroom.settings.playlistVisible,
-            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens
+            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens,
+            "likesEnabled": classroom.settings.likesEnabled,
+            "priorityEnabled": classroom.settings.priorityEnabled,
+            "priorityCost": classroom.settings.priorityCost
         });
     }
 }
@@ -67,7 +71,11 @@ class PostRoute extends APIRoute<ClassroomSettingsResponse, ClassroomSettingsEnd
             assertJSONBodyFieldIsBoolean(this, req, "/allowSongSubmissions") ??
             assertJSONBodyFieldIsBoolean(this, req, "/submissionsRequireTokens") ??
             assertJSONBodyFieldIsBoolean(this, req, "/joinable") ??
-            assertJSONBodyFieldIsBoolean(this, req, "/playlistVisible");
+            assertJSONBodyFieldIsBoolean(this, req, "/playlistVisible") ??
+            assertJSONBodyFieldIsNumber(this, req, "/priorityCost") ??
+            assertJSONBodyFieldIsBoolean(this, req, "/priorityEnabled") ??
+            assertJSONBodyFieldIsBoolean(this, req, "/likesVisible") ??
+            assertJSONBodyFieldIsBoolean(this, req, "/likesEnabled");
 
         if (failResponse != null) {
             return failResponse;
@@ -114,7 +122,11 @@ class PostRoute extends APIRoute<ClassroomSettingsResponse, ClassroomSettingsEnd
             "allowSongSubmissions": body.allowSongSubmissions,
             "joinable": body.joinable,
             "playlistVisible": body.playlistVisible,
-            "submissionsRequireTokens": body.submissionsRequireTokens
+            "submissionsRequireTokens": body.submissionsRequireTokens,
+            "likesEnabled": body.likesEnabled,
+            "priorityEnabled": body.priorityEnabled,
+            "priorityCost": int(body.priorityCost),
+            "likesVisible": body.likesVisible
         };
         classroom.name = name;
 
@@ -125,7 +137,10 @@ class PostRoute extends APIRoute<ClassroomSettingsResponse, ClassroomSettingsEnd
             "joinable": classroom.settings.joinable,
             "name": classroom.name,
             "playlistVisible": classroom.settings.playlistVisible,
-            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens
+            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens,
+            "priorityCost": classroom.settings.priorityCost,
+            "priorityEnabled": classroom.settings.priorityEnabled,
+            "likesEnabled": classroom.settings.likesEnabled
         });
     }
 }
@@ -163,6 +178,18 @@ class PutRoute extends APIRoute<ClassroomSettingsResponse, ClassroomSettingsEndp
         }
         if (body.playlistVisible !== undefined) {
             failResponse ??= assertJSONBodyFieldIsBoolean(this, req, "/playlistVisible");
+        }
+        if (body.priorityEnabled !== undefined) {
+            failResponse ??= assertJSONBodyFieldIsBoolean(this, req, "/priorityEnabled");
+        }
+        if (body.likesEnabled !== undefined) {
+            failResponse ??= assertJSONBodyFieldIsBoolean(this, req, "/likesEnabled");
+        }
+        if (body.likesVisible !== undefined) {
+            failResponse ??= assertJSONBodyFieldIsBoolean(this, req, "/likesVisible");
+        }
+        if (body.priorityCost !== undefined) {
+            failResponse ??= assertJSONBodyFieldIsNumber(this, req, "/priorityCost");
         }
 
         if (failResponse != null) {
@@ -208,6 +235,11 @@ class PutRoute extends APIRoute<ClassroomSettingsResponse, ClassroomSettingsEndp
         classroom.settings.submissionsRequireTokens = body.submissionsRequireTokens ?? classroom.settings.submissionsRequireTokens;
         classroom.settings.joinable = body.joinable ?? classroom.settings.joinable;
         classroom.settings.playlistVisible = body.playlistVisible ?? classroom.settings.playlistVisible;
+        classroom.settings.likesEnabled = body.likesEnabled ?? classroom.settings.likesEnabled;
+        classroom.settings.priorityEnabled = body.priorityEnabled ?? classroom.settings.priorityEnabled;
+        classroom.settings.priorityCost = int(body.priorityCost ?? classroom.settings.priorityCost);
+        classroom.settings.likesEnabled = body.likesEnabled ?? classroom.settings.likesEnabled;
+        classroom.settings.likesVisible = body.likesVisible ?? classroom.settings.likesVisible;
         classroom.name = name;
 
         await this.server.db.classroomsV2.set(code, classroom);
@@ -217,7 +249,10 @@ class PutRoute extends APIRoute<ClassroomSettingsResponse, ClassroomSettingsEndp
             "joinable": classroom.settings.joinable,
             "name": classroom.name,
             "playlistVisible": classroom.settings.playlistVisible,
-            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens
+            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens,
+            "likesEnabled": classroom.settings.likesEnabled,
+            "priorityCost": classroom.settings.priorityCost,
+            "priorityEnabled": classroom.settings.priorityEnabled
         });
     }
 }
@@ -262,7 +297,11 @@ class DeleteRoute extends APIRoute<ClassroomSettingsResponse, ClassroomSettingsE
             "allowSongSubmissions": true,
             "joinable": false,
             "playlistVisible": false,
-            "submissionsRequireTokens": false
+            "submissionsRequireTokens": false,
+            "likesEnabled": false,
+            "priorityCost": int(0),
+            "priorityEnabled": false,
+            "likesVisible": false
         };
 
         await this.server.db.classroomsV2.set(code, classroom);
@@ -272,7 +311,11 @@ class DeleteRoute extends APIRoute<ClassroomSettingsResponse, ClassroomSettingsE
             "joinable": classroom.settings.joinable,
             "name": classroom.name,
             "playlistVisible": classroom.settings.playlistVisible,
-            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens
+            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens,
+            "likesEnabled": classroom.settings.likesEnabled,
+            "priorityCost": classroom.settings.priorityCost,
+            "priorityEnabled": classroom.settings.priorityEnabled,
+            "likesVisible": classroom.settings.likesVisible
         });
     }
 }

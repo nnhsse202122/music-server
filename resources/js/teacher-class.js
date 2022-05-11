@@ -115,6 +115,12 @@ let classNameInput = document.getElementById("class-name");
 let classSubmitEnabledCheckbox = document.getElementById("class-submit-enabled");
 let classSubmitTokensContainer = document.getElementById("class-submit-tokens-container");
 let classSubmitTokensCheckbox = document.getElementById("class-submit-tokens");
+let classLikeCountVisibilityCheckbox = document.getElementById("class-like-count");
+let classLikeCountVisibilityContainer = document.getElementById("class-like-count-container");
+let classPriorityCostContainer = document.getElementById("class-priority-cost-container");
+let classLikesEnabledCheckbox = document.getElementById("class-likes");
+let classPriorityEnabledCheckbox = document.getElementById("class-priority");
+let classPriorityCostInput = document.getElementById("class-priority-cost");
 let classJoinsCheckbox = document.getElementById("class-joins");
 let classPlaylistVisibleCheckbox = document.getElementById("class-playlist-visible");
 let removeAllStudentsYesButton = document.getElementById("remove-all-students-yes");
@@ -125,6 +131,12 @@ let playlistContainer = document.getElementById("playlist-container");
 classSubmitEnabledCheckbox.addEventListener("change", () => {
     updateSettings();
 });
+classPriorityEnabledCheckbox.addEventListener("change", () => {
+    updateSettings();
+});
+classLikesEnabledCheckbox.addEventListener("change", () => {
+    updateSettings();
+});
 /** @returns {void} */
 function updateSettings() {
     if (classSubmitEnabledCheckbox.checked) {
@@ -133,7 +145,21 @@ function updateSettings() {
     else {
         classSubmitTokensContainer.classList.add("disabled");
     }
+    if (classPriorityEnabledCheckbox.checked) {
+        classPriorityCostContainer.classList.remove("disabled");
+    }
+    else {
+        classPriorityCostContainer.classList.add("disabled");
+    }
+    if (classLikesEnabledCheckbox.checked) {
+        classLikeCountVisibilityContainer.classList.remove("disabled");
+    }
+    else {
+        classLikeCountVisibilityContainer.classList.add("disabled");
+    }
+    classPriorityCostInput.disabled = !classPriorityEnabledCheckbox.checked;
     classSubmitTokensCheckbox.disabled = !classSubmitEnabledCheckbox.checked;
+    classLikeCountVisibilityCheckbox.disabled = !classLikesEnabledCheckbox.checked;
 }
 let controller = new SidebarController();
 controller.addButton("overview", () => {
@@ -159,6 +185,10 @@ async function revertSettings() {
     classSubmitTokensCheckbox.checked = response.data.submissionsRequireTokens;
     classJoinsCheckbox.checked = response.data.joinable;
     classPlaylistVisibleCheckbox.checked = response.data.playlistVisible;
+    classLikesEnabledCheckbox.checked = response.data.likesEnabled;
+    classPriorityEnabledCheckbox.checked = response.data.priorityEnabled;
+    classPriorityCostInput.value = response.data.priorityCost;
+    classLikeCountVisibilityCheckbox.chcked = response.data.likesVisible;
     updateSettings();
     window.overlayManager.hide();
 }
@@ -170,7 +200,11 @@ async function saveSettings() {
         "allowSongSubmissions": classSubmitEnabledCheckbox.checked,
         "submissionsRequireTokens": classSubmitTokensCheckbox.checked,
         "joinable": classJoinsCheckbox.checked,
-        "playlistVisible": classPlaylistVisibleCheckbox.checked
+        "playlistVisible": classPlaylistVisibleCheckbox.checked,
+        "likesEnabled": classLikesEnabledCheckbox.checked,
+        "priorityEnabled": classPriorityEnabledCheckbox.checked,
+        "priorityCost": parseInt("" + classPriorityCostInput.value),
+        "likesVisible": classLikeCountVisibilityCheckbox.checked
     });
     if (!response.success) {
         window.overlayManager.hide();

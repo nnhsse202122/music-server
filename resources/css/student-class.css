@@ -87,6 +87,13 @@
     word-break: break-all;
 }
 
+.playlist-body[data-likes-hidden] .playlist-item > .playlist-item-content > .song-info > .song-actions > .song-likes {
+    display: none;
+}
+.playlist-body[data-priority-hidden] .playlist-item > .playlist-item-content > .song-info > .song-actions > .song-force-play {
+    display: none;
+}
+
 .playlist-item > .playlist-item-content > .song-info > .song-actions {
     display: grid;
     --playlist-action-count: 2;

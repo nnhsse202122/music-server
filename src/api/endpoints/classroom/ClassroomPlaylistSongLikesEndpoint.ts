@@ -64,6 +64,10 @@ class PostRoute extends APIRoute<boolean, ClassroomPlaylistSongLikesEndpoint> {
             return this.fail("api.classroom.playlist.hidden", {});
         }
 
+        if (!classroom.settings.likesEnabled) {
+            return this.fail("api.playlist.song.likes.disabled", {});
+        }
+
         if (body.index < 0 || body.index >= classroom.playlist.songs.length) {
             return this.fail("api.body.field.number", {});
         }

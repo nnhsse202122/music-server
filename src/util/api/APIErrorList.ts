@@ -81,6 +81,11 @@ export let apiErrors = {
         "status": 404,
         "parameters": [],
     } as APIErrorInfo<"Playlist not found.", 404, []>,
+    "api.playlist.song.likes.disabled": {
+        "message": "Likes are disabled",
+        "status": 403,
+        "parameters": [],
+    } as APIErrorInfo<"Likes are disabled", 403, []>,
     "api.playlist.song.liked": {
         "message": "You already liked that song. L + Ratio",
         "status": 400,

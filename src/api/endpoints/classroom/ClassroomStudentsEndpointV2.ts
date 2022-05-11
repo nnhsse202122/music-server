@@ -97,7 +97,8 @@ class PostRoute extends APIRoute<JoinedClassroom, ClassroomStudentsEndpointV2> {
         classroom.students.push({
             "email": user.email,
             "name": user.name,
-            "tokens": int(0)
+            "tokens": int(0),
+            "likes": int(0),
         });
 
         await this.server.db.classroomsV2.set(code, classroom);
@@ -154,7 +155,8 @@ class DeleteRoute extends APIRoute<boolean, ClassroomStudentsEndpointV2> {
         classroom.students.push({
             "email": user.email,
             "name": user.name,
-            "tokens": int(0)
+            "tokens": int(0),
+            "likes": int(0),
         });
 
         return this.success((await removeAllStudentsV2(classroom, this.server.db.classroomsV2, this.server.db.users)).success);

@@ -10,7 +10,11 @@ const ClassroomV2Schema: Schema = new Schema<IClassroomV2>({
             allowSongSubmissions: { type: Boolean, required: true },
             submissionsRequireTokens: { type: Boolean, required: true },
             playlistVisible: { type: Boolean, required: true },
-            joinable: { type: Boolean, required: true }
+            joinable: { type: Boolean, required: true },
+            likesEnabled: { type: Boolean, required: true },
+            priorityEnabled: { type: Boolean, required: true },
+            priorityCost: { type: Number, required: true },
+            likesVisible: { type: Boolean, required: true }
         },
         required: true
     },
