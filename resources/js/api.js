@@ -176,10 +176,10 @@ const SongServerAPI = (apiVersion = 1) => {
                         }
                     },
                     "nextSong": async (auth = null) => {
-                        return await postReq(`/classroom/${code}/playlist/next-song/`, auth);
+                        return await postReq(`/classrooms/${code}/playlist/next-song/`, auth);
                     },
                     "previousSong": async (auth = null) => {
-                        return await postReq(`/classroom/${code}/playlist/previous-song/`, auth);
+                        return await postReq(`/classrooms/${code}/playlist/previous-song/`, auth);
                     },
                     "shuffle": async (auth = null) => {
                         return await postReq(`/classrooms/${code}/playlist/shuffle/`, auth);
@@ -193,6 +193,12 @@ const SongServerAPI = (apiVersion = 1) => {
                                 "oldIndex": oldIndex,
                                 "newIndex": newIndex
                             });
+                        },
+                        "likeSong": async (index, auth = null) => {
+                            return await postReq(`/classrooms/${code}/playlist/songs/likes`, auth, { "index": index });
+                        },
+                        "prioritizeSong": async (index, auth = null) => {
+                            return await postReq(`/classrooms/${code}/playlist/songs/prioritize`, auth, { "index": index });
                         },
                         "add": async (song, auth = null) => {
                             return await postReq(`/classrooms/${code}/playlist/songs`, auth, song);

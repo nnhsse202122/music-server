@@ -63,8 +63,20 @@ function refreshPlaylist() {
             document.getElementById("playlist-container-empty").style.display = "block";
         }
 
-        data.data.forEach((song) => {
-            createPlaylistItem(playlistContainer, song.position, song.title, song.is_liked);
+        data.data.forEach((song, index) => {
+            let item = createPlaylistItem(playlistContainer, song.position, song.title, song.is_liked);
+            item.getElementsByClassName("song-likes")[0].addEventListener("click", async () => {
+                window.overlayManager.show("loading");
+                let req = await SongServerAPI(2).classroom(classCode).playlist.songs.likeSong(index);
+                if (!req.success) {
+                    alert("Failed to like song: " + req.message);
+                    window.overlayManager.hide();
+                    return;
+                }
+                window.overlayManager.hide();
+
+                refreshPlaylist();
+            });
         });
     });
 }

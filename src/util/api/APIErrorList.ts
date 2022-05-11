@@ -81,6 +81,11 @@ export let apiErrors = {
         "status": 404,
         "parameters": [],
     } as APIErrorInfo<"Playlist not found.", 404, []>,
+    "api.playlist.song.liked": {
+        "message": "You already liked that song. L + Ratio",
+        "status": 400,
+        "parameters": [],
+    } as APIErrorInfo<"You already liked that song. L + Ratio", 400, []>,
     "api.playlist.delete.fail": {
         "message": "Only the owner of the playlist can delete the playlist.",
         "status": 403,

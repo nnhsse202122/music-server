@@ -117,7 +117,7 @@ export default class ClassroomPlaylistPreviousSongEndpoint extends APIEndpoint {
     private readonly _post: PostRoute;
 
     public constructor(controller: APIController) {
-        super(controller, "/classroom/:code/playlist/previous-song", "previous-class-playlist-song", 2);
+        super(controller, "/classrooms/:code/playlist/previous-song", "previous-class-playlist-song", 2);
 
         this._post = new PostRoute(this);
     }
