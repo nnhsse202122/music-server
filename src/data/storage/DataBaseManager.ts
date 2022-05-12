@@ -35,6 +35,7 @@ export default class DataBaseManager {
 
         let connection = await mongoose.connect(process.env.MONGO_URI);
         console.log("Mongo db connected!");
+        // yay we connected!
     }
 
     public get classroomsV2(): ClassroomV2DataBase {

@@ -67,7 +67,7 @@ function classroomToDBClass(classroom: ClassroomV2): IClassroomV2 {
                 "fromPriority": classroom.playlist.currentSong?.fromPriority ?? false
             },
             "priority": classroom.playlist.priority.map(cloneClassroomSong),
-            "songs": classroom.playlist.priority.map(cloneClassroomSong)
+            "songs": classroom.playlist.songs.map(cloneClassroomSong)
         },
         "settings": {
             "allowSongSubmissions": classroom.settings.allowSongSubmissions,
@@ -91,8 +91,6 @@ function classroomToDBClass(classroom: ClassroomV2): IClassroomV2 {
 }
 
 function updateDBClass(classroom: ClassroomV2, classDB: IClassroomV2): void {
-    console.log(JSON.stringify(classroom, undefined, 4));
-
     classDB.name = classroom.name;
     classDB.owner = classroom.owner;
     classDB.playlist.currentSong = {

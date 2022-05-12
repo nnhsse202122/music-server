@@ -152,6 +152,12 @@ class DeleteRoute extends APIRoute<boolean, ClassroomStudentsEndpointV2> {
             return this.fail("api.classroom.not_found", {});
         }
 
+        // what the fuck is this?
+        // explain to me why this is here
+        // why is this here
+        // please explain to me why this is here
+        // i want to know why this is here
+        // for real: why is this here
         classroom.students.push({
             "email": user.email,
             "name": user.name,

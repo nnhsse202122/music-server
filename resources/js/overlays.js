@@ -505,7 +505,7 @@ class CreateClassOverlayModel extends OverlayModelBase {
             this._createErrorText.textContent = "A class code is required";
             return;
         }
-        let data = await SongServerAPI().createClassroom({
+        let data = await SongServerAPI(2).createClassroom({
             "name": name,
             "joinable": this._joinableCheckbox.checked,
             "allowSongSubmissions": this._submissionsEnabledCheckbox.checked,

@@ -171,7 +171,6 @@ class PostRoute extends APIRoute<ClassroomSong[] | null, ClassroomPlaylistSongsE
         };
 
         let songs = await getSongsAsClassSongs(classroom.playlist, this.server.db.playlists, classroom.owner, Role.Student);
-        console.log(songs);
         if (songs.some((s) => {
             return s.id === songToAdd.id && s.source == songToAdd.source
         })) {

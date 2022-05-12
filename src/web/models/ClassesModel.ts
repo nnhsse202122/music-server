@@ -28,9 +28,6 @@ class GetRoute extends WebRoute<ClassesModel> {
         let classes: GottenClassroom[];
         if (classesResponse.success) {
             classes = classesResponse.data;
-            for (let index = 0; index < classes.length; index++) {
-                console.log(classes[index]);
-            }
         }
         else {
             classes = [];

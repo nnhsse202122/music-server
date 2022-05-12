@@ -388,10 +388,8 @@ function getSongsAsTeacherV2(playlist: ClassroomPlaylistV2): SongTeacherViewV2[]
 }
 
 export function getSongsAsClassSongsV2(playlist: ClassroomPlaylistV2, role: Role, email: string): ClassroomSongV2[] {
-    console.log(role);
     switch (role) {
         case Role.Teacher:
-            console.log("I am teacher. I should do teacher stuff");
             return getSongsAsTeacherV2(playlist);
         case Role.Student:
             return getSongsAsStudentV2(playlist, email);
@@ -402,7 +400,6 @@ export function getSongsAsClassSongsV2(playlist: ClassroomPlaylistV2, role: Role
 
 export async function getSongsAsClassSongs(playlist: ClassroomPlaylist, playlistDB: PlaylistDataBase, classroomOwnerEmail: string, role: Role): Promise<ClassroomSong[]> {
     let playlistSongs: Song[] = await getSongs(playlist, playlistDB, classroomOwnerEmail);
-
     switch (role) {
         case Role.Teacher:
             return getSongsAsTeacher(playlist, playlistSongs);
@@ -514,7 +511,6 @@ export function deleteSongV2(playlist: ClassroomPlaylistV2, index: int): void {
 }
 
 export async function deleteSong(playlist: ClassroomPlaylist, playlistDB: PlaylistDataBase, classroomOwnerEmail: string, index: int): Promise<ClassroomSong[]> {
-    console.log("Deleting a song! Wow!");
     if (playlist.currentSongPosition >= index) {
         playlist.currentSongPosition--;
     }
@@ -522,14 +518,12 @@ export async function deleteSong(playlist: ClassroomPlaylist, playlistDB: Playli
         "index": index,
         "type": SongModificationType.DELETED
     };
-    console.log(playlist.modifications);
     playlist.modifications.push(deleteMod);
 
     let playlistSongs = await getSongs(playlist, playlistDB, classroomOwnerEmail);
     let songs = getSongsAsGeneric(playlist, playlistSongs);
 
     playlist.modifications = generateModifications(playlistSongs, songs);
-    console.log(playlist.modifications);
 
     let newSongs = getSongsAsTeacher(playlist, playlistSongs);
     if (playlist.currentSongPosition >= newSongs.length) {
@@ -578,12 +572,19 @@ export async function shuffleSongs(playlist: ClassroomPlaylist, playlistDB: Play
 }
 
 export function shuffleSongsV2(playlist: ClassroomPlaylistV2): void {
+    // for some reason the reference to the current song gets lost sometimes when shuffling
+    // why is this happening?
+    // todo: find out why
+    // todo: fix this bug
+
+    // create a map to map all indexes of the original songs to the shuffled songs
     let indexMap: number[] = [];
     let random = seedrandom();
     for (let i = 0; i < playlist.songs.length; i++) {
         indexMap.push(i);
     }
 
+    // shuffle the map
     for (let i = 0; i < indexMap.length; i++) {
         let randomIndex = Math.floor(random() * (indexMap.length - i));
         indexMap.push(...indexMap.splice(indexMap[randomIndex], 1));
@@ -592,10 +593,14 @@ export function shuffleSongsV2(playlist: ClassroomPlaylistV2): void {
     console.log("index map:");
     console.log(indexMap);
 
+    // update the reference to the current song
     playlist.currentSong.index = int(indexMap[playlist.currentSong.index]);
+
+    // update the songs
     let newSongs: ClassroomPlaylistSongV2[] = [];
     for (let i = 0; i < indexMap.length; i++) {
         newSongs.push(playlist.songs[indexMap[i]])
     }
+    // yay!
     playlist.songs = newSongs;
 }
