@@ -61,16 +61,22 @@ class PostRoute extends APIRoute<ClassroomSongV2, ClassroomPlaylistPreviousSongE
                 };
             }
             else if (classroom.playlist.currentSong.index > -1) {
+                let newIndex = classroom.playlist.currentSong.index - 1;
+                if (newIndex < 0) newIndex = classroom.playlist.songs.length - 1;
+
                 classroom.playlist.currentSong = {
                     "fromPriority": false,
-                    "index": int((classroom.playlist.currentSong.index - 1) % classroom.playlist.songs.length)
+                    "index": int(newIndex)
                 };
             }
         }
         else {
+            let newIndex = classroom.playlist.currentSong.index - 1;
+            if (newIndex < 0) newIndex = classroom.playlist.songs.length - 1;
+
             classroom.playlist.currentSong = {
                 "fromPriority": false,
-                "index": int((classroom.playlist.currentSong.index - 1) % classroom.playlist.songs.length)
+                "index": int(newIndex)
             };
         }
 

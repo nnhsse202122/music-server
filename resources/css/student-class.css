@@ -71,6 +71,11 @@
     display: grid;
     place-content: center;
 }
+.playlist-item > .icon > img {
+    width: 64px;
+    height: auto;
+    border-radius: 25%;
+}
 
 .playlist-item > .playlist-item-content > .song-info {
     display: grid;

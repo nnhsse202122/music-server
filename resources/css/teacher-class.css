@@ -107,11 +107,13 @@ body {
 .student-table .student-email,
 .student-table .student-name,
 .student-table .student-tokens,
+.student-table .student-likes,
 .student-table .student-remove {
     text-align: center;
     color: black;
 }
-.student-table .student-tokens {
+.student-table .student-tokens > div,
+.student-table .student-likes > div {
     display: grid;
     align-items: center;
     justify-items: center;
@@ -119,7 +121,8 @@ body {
     /* font-size: 21px; */
 }
 
-.student-table .student-tokens > button {
+.student-table .student-tokens > div > button,
+.student-table .student-likes > div > button {
     border: none;
     background: none;
     cursor: pointer;
@@ -127,7 +130,8 @@ body {
     transition: color 200ms;
 }
 
-.student-table .student-tokens > .token-count {
+.student-table .student-tokens > div > .token-count,
+.student-table .student-likes > div > .like-count {
     font-family: var(--font-secondary);
     padding: 0px;
     margin: 0px;
@@ -139,11 +143,13 @@ body {
     background: none;
 }
 
-.student-table .student-tokens > .decrement-token:hover {
+.student-table .student-tokens > div > .decrement-token:hover,
+.student-table .student-likes > div > .decrement-like:hover {
     color: #833;
 }
 
-.student-table .student-tokens > .increment-token:hover {
+.student-table .student-tokens > div > .increment-token:hover,
+.student-table .student-likes > div > .increment-like:hover {
     color: #383;
 }
 
@@ -362,7 +368,11 @@ body {
     display: none;
 }
 
-.playlist-item[data-selected] > .position {
+.playlist-item[data-selected] {
+    background-color: hsl(249, 70%, 90%);
+}
+
+.playlist-item[data-selected]> .position {
     color: hsl(249, 70%, 65%);
 }
 
@@ -380,6 +390,11 @@ body {
 .playlist-item > .icon {
     display: grid;
     place-content: center;
+}
+.playlist-item > .icon > img {
+    width: 64px;
+    height: auto;
+    border-radius: 25%;
 }
 
 .playlist-item[data-type]:not([data-student]) > .status {

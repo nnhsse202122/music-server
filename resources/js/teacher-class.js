@@ -252,6 +252,7 @@ deleteYesButton.addEventListener("click", async () => {
         let tr = document.createElement("tr");
         let tdName = document.createElement("td");
         let tdTokens = document.createElement("td");
+        let tdLikes = document.createElement("td");
         let tdRemove = document.createElement("td");
         let removeButton = document.createElement("button");
         let removeIcon = document.createElement("i");
@@ -262,6 +263,7 @@ deleteYesButton.addEventListener("click", async () => {
         });
         tdRemove.appendChild(removeButton);
         tdName.textContent = student.name;
+        let tokensContainer = document.createElement("div");
         let tokenCountText = document.createElement("input");
         tokenCountText.classList.add("token-count");
         tokenCountText.type = "number";
@@ -300,14 +302,61 @@ deleteYesButton.addEventListener("click", async () => {
             }
             tokenCountText.value = new String(response.data);
         });
-        tdTokens.appendChild(decrementTokenButton);
-        tdTokens.appendChild(tokenCountText);
-        tdTokens.appendChild(incrementTokenButton);
+        tokensContainer.appendChild(decrementTokenButton);
+        tokensContainer.appendChild(tokenCountText);
+        tokensContainer.appendChild(incrementTokenButton);
+        tdTokens.appendChild(tokensContainer);
+        
+        let likesContainer = document.createElement("div");
+        let likeCountText = document.createElement("input");
+        likeCountText.classList.add("like-count");
+        likeCountText.type = "number";
+        likeCountText.value = new String(student.likes);
+        likeCountText.addEventListener("change", async () => {
+            let response = await SongServerAPI(2).classroom(classCode).students.find(student.email).lkikes.set(Math.max(parseInt(likeCountText.value), 0));
+            if (!response.success) {
+                window.alert("Failed to set tokens from user: " + response.message);
+                throw new Error(response.message);
+            }
+            likeCountText.value = new String(response.data);
+        });
+        let decrementLikeButtonIcon = document.createElement("i");
+        decrementLikeButtonIcon.classList.add("fa-solid", "fa-minus");
+        let decrementLikeButton = document.createElement("button");
+        decrementLikeButton.appendChild(decrementLikeButtonIcon);
+        decrementLikeButton.classList.add("decrement-token");
+        decrementLikeButton.addEventListener("click", async () => {
+            let response = await SongServerAPI(2).classroom(classCode).students.find(student.email).likes.set(Math.max(parseInt(likeCountText.value) - 1, 0));
+            if (!response.success) {
+                window.alert("Failed to set tokens from user: " + response.message);
+                throw new Error(response.message);
+            }
+            likeCountText.value = new String(response.data);
+        });
+        let incrementLikeButtonIcon = document.createElement("i");
+        incrementLikeButtonIcon.classList.add("fa-solid", "fa-plus");
+        let incrementLikeButton = document.createElement("button");
+        incrementLikeButton.appendChild(incrementLikeButtonIcon);
+        incrementLikeButton.classList.add("increment-token");
+        incrementLikeButton.addEventListener("click", async () => {
+            let response = await SongServerAPI(2).classroom(classCode).students.find(student.email).likes.set(parseInt(likeCountText.value) + 1);
+            if (!response.success) {
+                window.alert("Failed to set tokens from user: " + response.message);
+                throw new Error(response.message);
+            }
+            likeCountText.value = new String(response.data);
+        });
+        likesContainer.appendChild(decrementLikeButton);
+        likesContainer.appendChild(likeCountText);
+        likesContainer.appendChild(incrementLikeButton);
+        tdLikes.appendChild(likesContainer);
         tdRemove.classList.add("student-remove");
         tdName.classList.add("student-name");
         tdTokens.classList.add("student-tokens");
+        tdLikes.classList.add("student-likes");
         tr.appendChild(tdName);
         tr.appendChild(tdTokens);
+        tr.appendChild(tdLikes);
         tr.appendChild(tdRemove);
         tableBody.appendChild(tr);
     }

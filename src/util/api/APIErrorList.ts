@@ -61,6 +61,11 @@ export let apiErrors = {
         "status": 404,
         "parameters": [],
     } as APIErrorInfo<"Song not found.", 404, []>,
+    "api.classroom.playlist.current_song.none": {
+        "message": "There is no current song. This is most likely because the playlist is empty.",
+        "status": 404,
+        "parameters": [],
+    } as APIErrorInfo<"There is no current song. This is most likely because the playlist is empty.", 404, []>,
     "api.classroom.delete.fail": {
         "message": "Only the owner of the classroom can delete the classroom.",
         "status": 403,

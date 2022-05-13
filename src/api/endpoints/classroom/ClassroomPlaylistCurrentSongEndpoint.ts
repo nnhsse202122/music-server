@@ -56,6 +56,9 @@ class GetRoute extends APIRoute<ClassroomSongV2, ClassroomPlaylistCurrentSongEnd
 
         let currentSongRef = classroom.playlist.currentSong;
         let currentSong = currentSongRef.fromPriority ? classroom.playlist.priority[0] : classroom.playlist.songs[currentSongRef.index];
+        if (currentSong == null) {
+            return this.fail("api.classroom.playlist.current_song.none", { });
+        }
 
         if (user.type === Role.Student) {
             return this.success({

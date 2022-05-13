@@ -121,6 +121,14 @@ class PlaylistSongBase {
         else {
             this.itemElement = createStudentPlaylistItem(controller.container, index + 1, song.title);
         }
+        /** @type {HTMLDivElement} */
+        let iconContainer = this.itemElement.getElementsByClassName("icon")[0];
+        if (song.source === "youtube") {
+            iconContainer.children[0].remove();
+            let icon = document.createElement("img");
+            icon.src = `https://i.ytimg.com/vi/${song.id}/default.jpg`;
+            iconContainer.appendChild(icon);
+        }
         this.playbackButton = this.itemElement.getElementsByClassName("song-playback")[0];
         this.playbackButton.addEventListener("click", () => this.onPlaybackButtonClicked());
         this.detailsButton = this.itemElement.getElementsByClassName("song-details")[0];

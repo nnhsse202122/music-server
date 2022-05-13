@@ -90,6 +90,14 @@ function refreshPlaylist() {
     
             data.data.forEach((song, index) => {
                 let item = createPlaylistItem(playlistContainer, song.position, song.title, song.is_liked);
+                /** @type {HTMLDivElement} */
+                let iconContainer = item.getElementsByClassName("icon")[0];
+                if (song.source === "youtube") {
+                    iconContainer.children[0].remove();
+                    let icon = document.createElement("img");
+                    icon.src = `https://i.ytimg.com/vi/${song.id}/default.jpg`;
+                    iconContainer.appendChild(icon);
+                }
                 item.getElementsByClassName("song-likes")[0].addEventListener("click", async () => {
                     window.overlayManager.show("loading");
                     let req = await SongServerAPI(2).classroom(classCode).playlist.songs.likeSong(index);
