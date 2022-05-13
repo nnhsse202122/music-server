@@ -14,6 +14,7 @@ import { i32 as int } from "typed-numbers";
 import User from "../../../data/users/User";
 import { removeAllStudents, removeStudent } from "../../../data/extensions/ClassroomV2Extensions";
 import ClassroomV2 from "../../../data/classrooms/ClassroomV2";
+import { removeAllStudentsV2, removeStudentV2 } from "../../../data/extensions/ClassroomExtensions";
 
 
 class GetRoute extends APIRoute<GottenClassroom, ClassroomEndpointV2> {
@@ -125,7 +126,7 @@ class DeleteRoute extends APIRoute<boolean, ClassroomEndpointV2> {
         }
 
         if (user.type === Role.Student) {
-            let removedStudentInfo = await removeStudent(classroom, this.server.db.classroomsV2, this.server.db.users, user);
+            let removedStudentInfo = await removeStudentV2(classroom, this.server.db.classroomsV2, this.server.db.users, user);
             return this.success(removedStudentInfo.success);
         }
 
@@ -133,8 +134,8 @@ class DeleteRoute extends APIRoute<boolean, ClassroomEndpointV2> {
             return this.fail("api.classrooms.delete.only_owner", {});
         }
 
-        let removedAllStudentsInfo = await removeAllStudents(classroom, this.server.db.classroomsV2, this.server.db.users);
-        let deleted = await this.server.db.classrooms.delete(classroom.code);
+        let removedAllStudentsInfo = await removeAllStudentsV2(classroom, this.server.db.classroomsV2, this.server.db.users);
+        let deleted = await this.server.db.classroomsV2.delete(classroom.code);
         return this.success(deleted && removedAllStudentsInfo.success);
     }
 }
