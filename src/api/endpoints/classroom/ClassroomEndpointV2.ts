@@ -135,7 +135,8 @@ class DeleteRoute extends APIRoute<boolean, ClassroomEndpointV2> {
         }
 
         let removedAllStudentsInfo = await removeAllStudentsV2(classroom, this.server.db.classroomsV2, this.server.db.users);
-        let deleted = await this.server.db.classroomsV2.delete(classroom.code);
+        user.classes = user.classes.filter((c) => c.code !== code);
+        let deleted = await this.server.db.users.set(user.email, user) && await this.server.db.classroomsV2.delete(classroom.code);
         return this.success(deleted && removedAllStudentsInfo.success);
     }
 }

@@ -506,6 +506,7 @@ class TeacherPlaylistController extends PlaylistControllerBase {
         let curSong = this.currentSong;
         console.groupCollapsed("Song Refresh");
         console.log(currentSong);
+        let oldState = curSong?.state ?? PlaylistSongState.NOT_STARTED;
         curSong?.onSongChange();
         let currentSongID = curSong?.songID;
         let currentSongSource = curSong?.songSource;
@@ -531,6 +532,9 @@ class TeacherPlaylistController extends PlaylistControllerBase {
         console.log(this.currentSong);
         document.getElementById("now-playing-text").textContent = this.currentSong?.title?.replace(/\&quot;/gi, '"')?.replace(/\&#39;/gi, "'")?.replace(/\&amp;/gi, "&") ?? "";
         this.currentSong?.setSelected();
+        if (this.currentSong?.songID === currentSongID && this.currentSong?.songSource === currentSongSource) {
+            this.currentSong.state = oldState;
+        }
         console.groupEnd();
     }
     /** @public */
