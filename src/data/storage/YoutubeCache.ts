@@ -11,7 +11,8 @@ export type YoutubeVideo = {
     title: string,
     author: string,
     id: string,
-    thumbnail: string | null
+    thumbnail: string | null,
+    duration: string
 };
 
 export type YoutubeSearch = {
@@ -26,7 +27,8 @@ type RawVideoCache = {
     id: string,
     etag: string,
     thumbnail: string | null,
-    expiresAt: long
+    expiresAt: long,
+    duration: string
 };
 
 type RawSearchCache = {
@@ -36,6 +38,22 @@ type RawSearchCache = {
     expiresAt: long,
     query: string
 };
+
+function formatVideoDuration(duration: string): string {
+    let dur = duration.substring(1);
+    let parts = dur.split("T");
+    let timestamp = parts.length === 1 ? parts[0] : parts[1];
+    let result = timestamp.replace(/H|M|S/g, ":");
+    if (result.endsWith(":")) result = result.substring(0, result.length - 1);
+
+    let resultParts = result.split(":");
+    result = resultParts.map((part) => part.padStart(2, "0")).join(":");
+
+    if (parts.length > 1) {
+        result = parts[0] + " " + result;
+    }
+    return result;
+}
 
 class VideoCache {
     private readonly _data: RawVideoCache;
@@ -74,6 +92,10 @@ class VideoCache {
         return this._data.expiresAt;
     }
 
+    public get duration(): string {
+        return formatVideoDuration(this._data.duration);
+    }
+
     public async refresh(): Promise<boolean> {
         let foundVideos = await youtube("v3").videos.list({
             "part": ["snippet", "status", "contentDetails"],
@@ -88,6 +110,7 @@ class VideoCache {
             this._data.expiresAt = long(Date.now() + VIDEO_EXPIRE_MS);
             this._data.id = firstVideo.id!;
             this._data.title = firstVideo.snippet!.title!;
+            this._data.duration = firstVideo.contentDetails!.duration!;
             return await this._db.setData(this.id, this._data);
         }
         return false;
@@ -98,7 +121,8 @@ class VideoCache {
             "author": this.author,
             "id": this.id,
             "title": this.title,
-            "thumbnail": this.thumbnail
+            "thumbnail": this.thumbnail,
+            "duration": this.duration
         };
     }
 }
@@ -330,17 +354,19 @@ export default class YoutubeCache {
             "key": this.apiKey
         });
         if (foundVideos.data.items != null) {
+            this.logger.debug("Successfully fetched...");
             let firstVideo = foundVideos.data.items[0];
             let data: RawVideoCache = {
                 author: firstVideo.snippet!.channelTitle!,
                 etag: firstVideo.etag!,
                 thumbnail: firstVideo.snippet!.thumbnails!.default!.url!,
                 expiresAt: long(Date.now() + VIDEO_EXPIRE_MS),
+                duration: firstVideo.contentDetails!.duration!,
                 id: firstVideo.id!,
                 title: firstVideo.snippet!.title!
             };
 
-            await this._videoDB.setData(data.id, data);
+            this.logger.debug("Saved: " + await this._videoDB.put(data.id, data));
             return new VideoCache(data, this._videoDB).toJSON();
         }
         return null;
@@ -397,23 +423,9 @@ export default class YoutubeCache {
         if (searchedVideos.data.items != null) {
             for (let index = 0; index < searchedVideos.data.items.length; index++) {
                 let searchedVideo = searchedVideos.data.items[index];
-
-                results.push({
-                    "id": searchedVideo.id!.videoId!,
-                    "title": searchedVideo.snippet!.title!,
-                    "author": searchedVideo.snippet!.channelTitle!,
-                    "thumbnail": searchedVideo.snippet!.thumbnails!.default!.url!,
-                });
-                
-                if (!await this._videoDB.contains(searchedVideo.id!.videoId!)) {
-                    await this._videoDB.add(searchedVideo.id!.videoId!, {
-                        "etag": searchedVideo.etag!,
-                        "id": searchedVideo.id!.videoId!,
-                        "title": searchedVideo.snippet!.title!,
-                        "author": searchedVideo.snippet!.channelTitle!,
-                        "thumbnail": searchedVideo.snippet!.thumbnails!.default!.url!,
-                        "expiresAt": long(Date.now() + VIDEO_EXPIRE_MS)
-                    });
+                let fetchedVideo = await this.fetch(searchedVideo.id!.videoId!);
+                if (fetchedVideo != null) {
+                    results.push(fetchedVideo);
                 }
             }
 
