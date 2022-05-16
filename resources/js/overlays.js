@@ -589,6 +589,7 @@ class SubmitSongStudentOverlay extends OverlayModelBase {
             this.overlay.show("submit-song-success-model");
             SongSearchManager.resetCurrent();
             refreshPlaylist();
+            refreshStudentInfo();
         }
     }
 
