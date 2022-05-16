@@ -26,6 +26,12 @@
     font-family: var(--font-secondary);
     font-size: 1.2em;
 }
+.student-info > .info-item > .info-item-value > i.fa-circle-check {
+    color: green;
+}
+.student-info > .info-item > .info-item-value > i.fa-circle-xmark {
+    color: red;
+}
 
 #playlist-container-empty {
     color: #F11;

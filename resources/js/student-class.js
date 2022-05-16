@@ -4,6 +4,8 @@ var songSearchManager = new SongSearchManager(false);
 async function refreshStudentInfo() {
     let tokensDiv = document.getElementById("student-tokens");
     let likesDiv = document.getElementById("student-likes");
+    let submissionsEnabledDiv = document.getElementById("student-submissions-enabled");
+    let submissionsRequireTokensDiv = document.getElementById("student-submissions-require-tokens");
 
     let likesResponse = await SongServerAPI(2).classroom(classCode).students.find(studentEmail).likes.get();
     if (!likesResponse.success) {
@@ -18,10 +20,40 @@ async function refreshStudentInfo() {
         return;
     }
 
+    let settingsResponse = await SongServerAPI(2).classroom(classCode).settings.get();
+    if (!settingsResponse.success) {
+        console.error("Failed to fetch class settings");
+        return;
+    }
+    let settings = settingsResponse.data;
+    console.log(settings);
+
     let tokens = tokensResponse.data;
 
     tokensDiv.textContent = tokens;
     likesDiv.textContent = likes;
+
+    let submissionsIcon = submissionsEnabledDiv.children[0];
+    let submissionsTokensIcon = submissionsRequireTokensDiv.children[0];
+
+    if (settings.allowSongSubmissions) {
+        submissionsIcon.classList.add("fa-circle-check");
+        submissionsIcon.classList.remove("fa-circle-xmark");
+    }
+    else {
+        submissionsIcon.classList.add("fa-circle-xmark");
+        submissionsIcon.classList.remove("fa-circle-check");
+    }
+    
+    if (settings.submissionsRequireTokens) {
+        submissionsTokensIcon.classList.add("fa-circle-check");
+        submissionsTokensIcon.classList.remove("fa-circle-xmark");
+    }
+    else {
+        submissionsTokensIcon.classList.add("fa-circle-xmark");
+        submissionsTokensIcon.classList.remove("fa-circle-check");
+    }
+
 }
 
 /** @param {HTMLElement} container
