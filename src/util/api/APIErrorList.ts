@@ -56,6 +56,11 @@ export let apiErrors = {
         "status": 400,
         "parameters": [],
     } as APIErrorInfo<"That song already exists in the playlist.", 400, []>,
+    "api.classroom.submissions.likes": {
+        "message": "You don't have enough likes.",
+        "status": 400,
+        "parameters": [],
+    } as APIErrorInfo<"You don't have enough likes.", 400, []>,
     "api.classroom.playlist.song.not_found": {
         "message": "Song not found.",
         "status": 404,

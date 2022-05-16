@@ -12,6 +12,7 @@ import Role from "../../../data/users/Role";
 import SongTeacherViewV2 from "../../../data/classrooms/SongTeacherViewV2";
 import { assertContentIsJSON, assertJSONBodyFieldIsNumber, assertJSONBodyIsntNull } from "../EndpointAssert";
 import LikeSongRequest from "../../requests/LikeSongRequest";
+import { getStudentFromUser } from "../../../data/extensions/ClassroomV2Extensions";
 
 class PostRoute extends APIRoute<boolean, ClassroomPlaylistSongLikesEndpoint> {
 
@@ -68,6 +69,12 @@ class PostRoute extends APIRoute<boolean, ClassroomPlaylistSongLikesEndpoint> {
             return this.fail("api.playlist.song.likes.disabled", {});
         }
 
+        let student = getStudentFromUser(classroom, user);
+
+        if (student.likes <= 0) {
+            return this.fail("api.classroom.submissions.likes", {});
+        }
+
         if (body.index < 0 || body.index >= classroom.playlist.songs.length) {
             return this.fail("api.body.field.number", {});
         }
@@ -76,6 +83,8 @@ class PostRoute extends APIRoute<boolean, ClassroomPlaylistSongLikesEndpoint> {
         if (song.likes.includes(user.email)) {
             return this.fail("api.playlist.song.liked", {});
         }
+
+        student.likes--;
 
         song.likes.push(user.email);
         classroom.playlist.songs.splice(body.index, 1);

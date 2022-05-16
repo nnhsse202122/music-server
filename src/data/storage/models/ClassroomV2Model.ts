@@ -82,7 +82,8 @@ const ClassroomV2Schema: Schema = new Schema<IClassroomV2>({
                 type: {
                     name: { type: String, required: true },
                     email: { type: String, required: true },
-                    tokens: { type: Number, required: true }
+                    tokens: { type: Number, required: true },
+                    likes: { type: Number, required: true }
                 },
                 required: true
             }
