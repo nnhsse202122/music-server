@@ -139,6 +139,16 @@ const SongServerAPI = (apiVersion = 1) => {
                                         "tokens": tokens
                                     });
                                 }
+                            },
+                            "likes": {
+                                "get": async (auth = null) => {
+                                    return await getReq(`/classrooms/${code}/students/${email}/likes`, auth);
+                                },
+                                "set": async (likes, auth = null) => {
+                                    return await postReq(`/classrooms/${code}/students/${email}/likes`, auth, {
+                                        "likes": likes
+                                    });
+                                }
                             }
                         };
                     },
