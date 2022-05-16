@@ -210,6 +210,7 @@ export default class ClassroomDataBase extends CollectionDataBase<string, Classr
             let v1 = await this._manager.classrooms.get(code);
             if (v1 != null) {
                 let v2 = await this.convertV1(v1);
+                await this._manager.classrooms.delete(code);
                 await this.add(v2.code, v2);
                 return v2;
             }
