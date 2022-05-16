@@ -1,6 +1,29 @@
 
 var songSearchManager = new SongSearchManager(false);
 
+async function refreshStudentInfo() {
+    let tokensDiv = document.getElementById("student-tokens");
+    let likesDiv = document.getElementById("student-likes");
+
+    let likesResponse = await SongServerAPI(2).classroom(classCode).students.find(studentEmail).likes.get();
+    if (!likesResponse.success) {
+        console.error("Failed to fetch student likes");
+        return;
+    }
+
+    let likes = likesResponse.data;
+    let tokensResponse = await SongServerAPI(2).classroom(classCode).students.find(studentEmail).tokens.get();
+    if (!tokensResponse.success) {
+        console.error("Failed to fetch student tokens");
+        return;
+    }
+
+    let tokens = tokensResponse.data;
+
+    tokensDiv.textContent = tokens;
+    likesDiv.textContent = likes;
+}
+
 /** @param {HTMLElement} container
  * @param {number} position
  * @param {string} title
@@ -109,6 +132,7 @@ function refreshPlaylist() {
                     window.overlayManager.hide();
     
                     refreshPlaylist();
+                    refreshStudentInfo();
                 });
             });
         });
@@ -116,3 +140,4 @@ function refreshPlaylist() {
 }
 
 refreshPlaylist();
+refreshStudentInfo();
