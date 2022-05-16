@@ -102,6 +102,10 @@ class DeleteRoute extends APIRoute<boolean, ClassroomStudentEndpointV2> {
             return this.fail("api.classroom.not_found", {});
         }
 
+        classroom.playlist.songs = classroom.playlist.songs.filter((song) => {
+            song.likes = song.likes.filter((liker) => liker != email);
+            return song.requested_by.email != email;
+        });
         let removeInfo = await removeStudentFromEmailV2(classroom, this.server.db.classroomsV2, this.server.db.users, email);
         return this.success(removeInfo.success);
     }
