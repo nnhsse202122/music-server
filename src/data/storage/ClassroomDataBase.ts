@@ -6,6 +6,7 @@ import SongMoved from "../classrooms/SongMoved";
 import CollectionDataBase from "./CollectionDataBase";
 import IClassroom from "./interfaces/IClassroom";
 import ClassroomModel from "./models/ClassroomModel";
+import { i32 as int } from "typed-numbers";
 
 function dbClassToClassroom(classroom: IClassroom): Classroom {
     return {
@@ -61,13 +62,18 @@ function dbClassToClassroom(classroom: IClassroom): Classroom {
             "allowSongSubmissions": classroom.settings.allowSongSubmissions,
             "joinable": classroom.settings.joinable,
             "playlistVisible": classroom.settings.playlistVisible,
-            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens
+            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens,
+            "priorityCost": classroom.settings.priorityCost ?? int(0),
+            "likesEnabled": classroom.settings.likesEnabled ?? false,
+            "priorityEnabled": classroom.settings.priorityEnabled ?? false,
+            "likesVisible": classroom.settings.likesVisible ?? false,
         },
         "students": classroom.students.map((student) => {
             return {
                 "email": student.email,
                 "name": student.name,
-                "tokens": student.tokens
+                "tokens": student.tokens,
+                "likes": student.likes ?? int(0)
             };
         })
     };
@@ -193,7 +199,8 @@ function updateDBClass(classroom: Classroom, classDB: IClassroom): void {
         return {
             "email": student.email,
             "name": student.name,
-            "tokens": student.tokens
+            "tokens": student.tokens,
+            "likes": student.likes ?? int(0)
         };
     });
 }

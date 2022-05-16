@@ -15,12 +15,22 @@ var DISABLE_WITH_MESSAGE: string | null = null;
 
 fetch("https://raw.githubusercontent.com/nnhsse202122/music-server/main/global-message.txt", {
     method: "GET"
-}).then((res) => res.text())
+}).then((res) => {
+    if (res.status === 200) {
+        return res;
+    }
+    throw new Error("Failed to fetch global message");
+})
+.then((res) => res.text())
 .then((content) => {
     DISABLE_WITH_MESSAGE = content;
+    console.log("DISABLE MESSAGE: " + content);
 }).catch((err) => {
     // we should handle error here, but whatever...
-});
+    ServerInstance.ready = true;
+}).finally(() => {
+    ServerInstance.ready = true;
+})
 
 type ServerConfig = {
     port: number,
@@ -41,6 +51,8 @@ export default class ServerInstance {
     private readonly _logger: Logger;
     private readonly _db: DataBaseManager;
     private _initialized: boolean;
+
+    public static ready: boolean = false;
 
     public constructor() {
         this._logger = new Logger("SERVER");

@@ -7,6 +7,7 @@ import ClassModel from "./models/ClassModel";
 import HomeModel from "./models/HomeModel";
 import LoginModel from "./models/LoginModel";
 import LogoutModel from "./models/LogoutModel";
+import SongsModel from "./models/SongsModel";
 
 
 export default class WebController extends Controller {
@@ -21,6 +22,7 @@ export default class WebController extends Controller {
         this.addModel(AuthModel);
         this.addModel(LoginModel);
         this.addModel(LogoutModel);
+        this.addModel(SongsModel);
     }
 
     protected addModel<TModel extends WebModel>(modelType: new (controller: WebController) => TModel): void {

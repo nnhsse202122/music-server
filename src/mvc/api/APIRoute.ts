@@ -29,13 +29,23 @@ export default abstract class APIRoute<TData, TEndpoint extends APIEndpoint> ext
 
     public readonly fail: GetAsAPIErrorFunction<typeof apiErrors>;
 
+    /**
+     * Initializes this api route
+     * @param endpoint The endpoint to use
+     * @param method The method this route handles
+     */
     protected constructor(endpoint: TEndpoint, method: RequestMethod) {
         super(endpoint, method);
 
         this.fail = getAsAPIError;
     }
 
+    /**
+     * Handles an API Request
+     * @param req The request to handle
+     */
     protected abstract doHandle(req: Request): Promise<APIResponse<TData>>;
+
     public async handle(req: Request, res: Response): Promise<void> {
         let response = await this.doHandle(req);
         if (response.success) {

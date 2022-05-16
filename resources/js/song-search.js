@@ -65,7 +65,7 @@ class SongSearchManager {
         let data = response.data;
         for (let index = 0; index < data.length && index < this.m_results.length; index++) {
             let song = data[index];
-            this.m_results[index].show(song.id, "youtube", song.title);
+            this.m_results[index].show(song.id, "youtube", song.title, song.thumbnail, song.author, song.duration);
         }
     }
 
@@ -90,9 +90,19 @@ class SongSearchResult {
     /** @private */
     _songTitle;
     /** @private */
+    _songAuthor;
+    /** @private */
+    _songDuration;
+    /** @private */
     _div;
     /** @private */
-    _button;
+    _addSongButton;
+    /** @private */
+    _songLinkButton;
+    /** @private */
+    _imageTemp;
+    /** @private */
+    _image;
     /** @private */
     _manager;
 
@@ -103,8 +113,13 @@ class SongSearchResult {
     constructor(manager, div) {
         this._div = div;
         this._songTitle = div.getElementsByClassName("song-title")[0];
-        this._button = div.getElementsByClassName("song-actions")[0].getElementsByClassName("add-song")[0];
-        this._button.addEventListener("click", () => this._onResultClick());
+        this._songAuthor = div.getElementsByClassName("song-author")[0];
+        this._songDuration = div.getElementsByClassName("song-duration")[0];
+        this._image = div.getElementsByClassName("song-image")[0].children[1];
+        this._imageTemp = div.getElementsByClassName("song-image")[0].children[0];
+        this._addSongButton = div.getElementsByClassName("song-actions")[0].getElementsByClassName("add-song")[0];
+        this._addSongButton.addEventListener("click", () => this._onAddSongClick());
+        this._songLinkButton = div.getElementsByClassName("song-actions")[0].getElementsByClassName("song-link")[0];
         this._manager = manager;
         this._div.style.display = "none";
     }
@@ -123,17 +138,25 @@ class SongSearchResult {
      * @param {string} id 
      * @param {string} source 
      * @param {string} title 
+     * @param {string|null} thumbnail 
+     * @param {string} author 
+     * @param {string} duration 
      * @returns {void}
      */
-    show(id, source, title) {
+    show(id, source, title, thumbnail, author, duration) {
+        this._image.src = thumbnail;
+        this._imageTemp.style.display = thumbnail == null ? "block" : "none";
         this._div.removeAttribute("style");
         this._div.setAttribute("data-song-id", id);
         this._div.setAttribute("data-song-source", source);
-        this._songTitle.textContent = title.replace(/\&quot;/gi, '"').replace(/\&#39;/gi, "'");
+        this._songAuthor.textContent = author;
+        this._songDuration.textContent = duration;
+        this._songTitle.textContent = title.replace(/\&quot;/gi, '"').replace(/\&#39;/gi, "'").replace(/\&amp;/gi, "&");
+        this._songLinkButton.children[0].setAttribute("href", `/songs/${source}/${id}`);
     }
 
     /** @private */
-    _onResultClick() {
+    _onAddSongClick() {
         let data = {
             "id": this._div.getAttribute("data-song-id"),
             "source": this._div.getAttribute("data-song-source")

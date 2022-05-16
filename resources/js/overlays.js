@@ -88,7 +88,7 @@ class JoinClassOverlayModel extends OverlayModelBase {
             this._joinErrorText.textContent = "A class code is required";
             return;
         }
-        let data = await SongServerAPI().classroom(code).students.join();
+        let data = await SongServerAPI(2).classroom(code).students.join();
         if (data.success) {
             window.location.reload();
         }
@@ -148,9 +148,10 @@ class DeleteSongFromPlaylistOverlayModel extends OverlayModelBase {
      */
     async _onDeleteButtonClicked() {
         this.overlay.show("loading");
-        let req = await SongServerAPI().classroom(classCode).playlist.songs.delete(this.getData("song-index"));
-        if (req.success) {
-            window.playlistController.refresh(req.data.songs, req.data.songPosition);
+        let req = await SongServerAPI(2).classroom(classCode).playlist.songs.delete(this.getData("song-index"));
+        let currentSongReq = await SongServerAPI(2).classroom(classCode).playlist.currentSong.get();
+        if (req.success && currentSongReq.success) {
+            window.playlistController.refresh(req.data.songs, currentSongReq.data);
         }
         this.overlay.hide();
     }
@@ -212,11 +213,82 @@ class DeleteAllStudentsOverlayModel extends OverlayModelBase {
      */
     async _onDeleteButtonClicked() {
         this.overlay.show("loading");
-        let response = await SongServerAPI().classroom(classCode).students.removeAll();
+        let response = await SongServerAPI(2).classroom(classCode).students.removeAll();
         if (!response.success) {
             throw new Error(response.message);
         }
         displayStudents([]);
+        this.overlay.hide();
+    }
+    /** @private
+     * @returns {void}
+     */
+    _onCancelButtonClicked() {
+        this.overlay.hide();
+    }
+}
+/** @extends OverlayModelBase */
+class DeleteStudentOverlayModel extends OverlayModelBase {
+    /** @private */
+    _deleteButton = undefined;
+    /** @private */
+    _cancelButton = undefined;
+    /** @public */
+    constructor(overlay) {
+        super(overlay, "are-you-sure-student");
+        this._deleteButton = null;
+        this._cancelButton = null;
+    }
+    /** @protected
+     * @param {HTMLDivElement} titleDiv
+     * @returns {void}
+     */
+    instantiateTitle(titleDiv) {
+        let titleSpan = document.createElement("span");
+        titleSpan.textContent = "Are You Sure?";
+        titleDiv.appendChild(titleSpan);
+    }
+    /** @protected
+     * @param {HTMLDivElement} bodyDiv
+     * @returns {void}
+     */
+    instantiateBody(bodyDiv) {
+        bodyDiv.textContent = "This will remove all songs submitted by this student and remove them from your class.";
+    }
+    /** @protected
+     * @param {HTMLDivElement} actionsDiv
+     * @returns {void}
+     */
+    instantiateActions(actionsDiv) {
+        this._deleteButton = document.createElement("button");
+        this._deleteButton.classList.add("action");
+        this._deleteButton.classList.add("yes");
+        this._deleteButton.addEventListener("click", () => this._onDeleteButtonClicked());
+        this._deleteButton.innerHTML = `<i class="fa-solid fa-check"></i>`;
+        this._cancelButton = document.createElement("button");
+        this._cancelButton.classList.add("action");
+        this._cancelButton.classList.add("no");
+        this._cancelButton.addEventListener("click", () => this._onCancelButtonClicked());
+        this._cancelButton.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+        actionsDiv.appendChild(this._cancelButton);
+        actionsDiv.appendChild(this._deleteButton);
+    }
+    /** @private
+     * @returns {Promise<void>}
+     */
+    async _onDeleteButtonClicked() {
+        this.overlay.show("loading");
+        let response = await SongServerAPI(2).classroom(classCode).students.find(this.getData("email")).remove();
+        if (!response.success) {
+            this.overlay.hide();
+            throw new Error(response.message);
+        }
+        if (response.data) {
+            await loadStudents();
+        }
+        else {
+            window.alert("Failed to delete user!");
+        }
         this.overlay.hide();
     }
     /** @private
@@ -433,7 +505,7 @@ class CreateClassOverlayModel extends OverlayModelBase {
             this._createErrorText.textContent = "A class code is required";
             return;
         }
-        let data = await SongServerAPI().createClassroom({
+        let data = await SongServerAPI(2).createClassroom({
             "name": name,
             "joinable": this._joinableCheckbox.checked,
             "allowSongSubmissions": this._submissionsEnabledCheckbox.checked,
@@ -506,7 +578,7 @@ class SubmitSongStudentOverlay extends OverlayModelBase {
         this.overlay.hide();
         this.overlay.show("loading");
 
-        let req = await SongServerAPI().classroom(classCode).playlist.songs.add({
+        let req = await SongServerAPI(2).classroom(classCode).playlist.songs.add({
             "id": this.getData("id"),
             "source": this.getData("source")
         });
@@ -516,6 +588,7 @@ class SubmitSongStudentOverlay extends OverlayModelBase {
         else {
             this.overlay.show("submit-song-success-model");
             SongSearchManager.resetCurrent();
+            refreshPlaylist();
         }
     }
 
@@ -584,7 +657,7 @@ class SubmitSongTeacherOverlay extends OverlayModelBase {
         this.overlay.hide();
         this.overlay.show("loading");
 
-        let req = await SongServerAPI().classroom(classCode).playlist.songs.add({
+        let req = await SongServerAPI(2).classroom(classCode).playlist.songs.add({
             "id": this.getData("id"),
             "source": this.getData("source")
         });
@@ -594,6 +667,12 @@ class SubmitSongTeacherOverlay extends OverlayModelBase {
         else {
             this.overlay.show("submit-song-success-model");
             SongSearchManager.resetCurrent();
+            let currentSongReq = await SongServerAPI(2).classroom(classCode).playlist.currentSong.get();
+            if (!currentSongReq.success) {
+                this.overlay.show("submit-song-fail-model", { message: data.message });
+            }
+
+            window.playlistController.refresh(req.data, currentSongReq.data);
         }
     }
 
@@ -704,10 +783,127 @@ class SubmitSongSuccessOverlayModel extends OverlayModelBase {
         this.overlay.hide();
     }
 }
+/** @extends OverlayModelBase */
+class ReloginOverlayModel extends OverlayModelBase {
+    /** @private */
+    _confirmButton = undefined;
+    /** @public */
+    constructor(overlay) {
+        super(overlay, "relogin-model");
+        this._confirmButton = null;
+    }
+    /** @protected
+     * @param {HTMLDivElement} titleDiv
+     * @returns {void}
+     */
+    instantiateTitle(titleDiv) {
+        let titleSpan = document.createElement("span");
+        titleSpan.textContent = "Authorization Expired";
+        titleDiv.appendChild(titleSpan);
+    }
+    /** @protected
+     * @param {HTMLDivElement} bodyDiv
+     * @returns {void}
+     */
+    instantiateBody(bodyDiv) {
+        bodyDiv.textContent = "You must login again to perform this action. Click the checkmark below to login again...";
+    }
+    /** @protected
+     * @param {HTMLDivElement} actionsDiv
+     * @returns {void}
+     */
+    instantiateActions(actionsDiv) {
+        this._confirmButton = document.createElement("button");
+        this._confirmButton.classList.add("action");
+        this._confirmButton.classList.add("yes");
+        this._confirmButton.addEventListener("click", async () => await this._onConfirmButtonClick());
+        this._confirmButton.innerHTML = `<i class="fa-solid fa-check"></i>`;
+        actionsDiv.appendChild(this._confirmButton);
+    }
+    /** @private
+     * @returns {void}
+     */
+    _onCancelButtonClick() {
+        this.overlay.hide();
+    }
+    /** @private
+     * @returns {void}
+     */
+    _onConfirmButtonClick() {
+        this.overlay.hide();
+        window.location.reload();
+    }
+}
+/** @extends OverlayModelBase */
+class DeleteClassOverlayModel extends OverlayModelBase {
+    /** @private */
+    _deleteButton = undefined;
+    /** @private */
+    _cancelButton = undefined;
+    /** @public */
+    constructor(overlay) {
+        super(overlay, "are-you-sure-class");
+        this._deleteButton = null;
+        this._cancelButton = null;
+    }
+    /** @protected
+     * @param {HTMLDivElement} titleDiv
+     * @returns {void}
+     */
+    instantiateTitle(titleDiv) {
+        let titleSpan = document.createElement("span");
+        titleSpan.textContent = "Are You Sure?";
+        titleDiv.appendChild(titleSpan);
+    }
+    /** @protected
+     * @param {HTMLDivElement} bodyDiv
+     * @returns {void}
+     */
+    instantiateBody(bodyDiv) {
+        bodyDiv.textContent = "This will permanently delete the class. Are you sure you want to do this? This cannot be undone.";
+    }
+    /** @protected
+     * @param {HTMLDivElement} actionsDiv
+     * @returns {void}
+     */
+    instantiateActions(actionsDiv) {
+        this._deleteButton = document.createElement("button");
+        this._deleteButton.classList.add("action");
+        this._deleteButton.classList.add("yes");
+        this._deleteButton.addEventListener("click", () => this._onDeleteButtonClicked());
+        this._deleteButton.innerHTML = `<i class="fa-solid fa-check"></i>`;
+        this._cancelButton = document.createElement("button");
+        this._cancelButton.classList.add("action");
+        this._cancelButton.classList.add("no");
+        this._cancelButton.addEventListener("click", () => this._onCancelButtonClicked());
+        this._cancelButton.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+        actionsDiv.appendChild(this._cancelButton);
+        actionsDiv.appendChild(this._deleteButton);
+    }
+    /** @private
+     * @returns {Promise<void>}
+     */
+    async _onDeleteButtonClicked() {
+        this.overlay.show("loading");
+        let req = await SongServerAPI(2).classroom(classCode).delete();
+        let currentSongReq = await SongServerAPI(2).classroom(classCode).playlist.currentSong.get();
+        if (req.success && currentSongReq.success) {
+            window.playlistController.refresh(req.data.songs, currentSongReq.data);
+        }
+        this.overlay.hide();
+    }
+    /** @private
+     * @returns {void}
+     */
+    _onCancelButtonClicked() {
+        this.overlay.hide();
+    }
+}
 var overlayManager = new Overlay();
 overlayManager.addOverlay(JoinClassOverlayModel);
 overlayManager.addOverlay(CreateClassOverlayModel);
 overlayManager.addOverlay(DeleteSongFromPlaylistOverlayModel);
+overlayManager.addOverlay(DeleteStudentOverlayModel);
 overlayManager.addOverlay(DeleteAllStudentsOverlayModel);
 overlayManager.addOverlay(LoadingOverlayModel);
 overlayManager.addOverlay(SettingsSavedOverlayModel);
@@ -715,3 +911,4 @@ overlayManager.addOverlay(SubmitSongStudentOverlay);
 overlayManager.addOverlay(SubmitSongTeacherOverlay);
 overlayManager.addOverlay(SubmitSongFailOverlayModel);
 overlayManager.addOverlay(SubmitSongSuccessOverlayModel);
+overlayManager.addOverlay(ReloginOverlayModel);

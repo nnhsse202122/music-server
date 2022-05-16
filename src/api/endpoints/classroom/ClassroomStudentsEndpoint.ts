@@ -51,6 +51,9 @@ class GetRoute extends APIRoute<StudentInClass[], ClassroomStudentsEndpoint> {
         return this.success(classroom.students);
     }
 }
+/**
+ * Handles post requests for the classroom endpoint to join a class.
+ */
 class PostRoute extends APIRoute<JoinedClassroom, ClassroomStudentsEndpoint> {
     public constructor(endpoint: ClassroomStudentsEndpoint) {
         super(endpoint, RequestMethod.POST);
@@ -94,7 +97,8 @@ class PostRoute extends APIRoute<JoinedClassroom, ClassroomStudentsEndpoint> {
         classroom.students.push({
             "email": user.email,
             "name": user.name,
-            "tokens": int(0)
+            "tokens": int(0),
+            "likes": int(0)
         });
 
         await this.server.db.classrooms.set(code, classroom);
@@ -151,7 +155,8 @@ class DeleteRoute extends APIRoute<boolean, ClassroomStudentsEndpoint> {
         classroom.students.push({
             "email": user.email,
             "name": user.name,
-            "tokens": int(0)
+            "tokens": int(0),
+            "likes": int(0)
         });
 
         return this.success((await removeAllStudents(classroom, this.server.db.classrooms, this.server.db.users)).success);

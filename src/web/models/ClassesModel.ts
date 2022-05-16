@@ -24,13 +24,10 @@ class GetRoute extends WebRoute<ClassesModel> {
             return;
         }
 
-        let classesResponse = await SongServerAPI().classrooms.list(auth);
+        let classesResponse = await SongServerAPI(2).classrooms.list(auth);
         let classes: GottenClassroom[];
         if (classesResponse.success) {
             classes = classesResponse.data;
-            for (let index = 0; index < classes.length; index++) {
-                console.log(classes[index]);
-            }
         }
         else {
             classes = [];

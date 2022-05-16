@@ -1,0 +1,84 @@
+<div class="playlist-item">
+    <div class="position">
+        <%- position %>
+    </div>
+    <div class="icon">
+        <% if (thumbnail == null) { %>
+            <i class="fa-solid fa-music"></i>
+        <% } else { %>
+            <img src="<%-thumbnail %>"/>
+        <% } %>
+        
+    </div>
+    <div class="playlist-item-content">
+        <div class="song-info">
+            <div class="song-title">
+                <%= title %>
+            </div>
+            <div class="song-actions">
+                <% if (isTeacher) { %>
+                    <button class="song-playback">
+                        <div class="play">
+                            <i class="fa-solid fa-pause"></i>
+                            <span>Pause</span>
+                        </div>
+                        <div class="paused">
+                            <i class="fa-solid fa-play"></i>
+                            <span>Play</span>
+                        </div>
+                        <div class="buffering">
+                            <i class="fa-solid fa-clock"></i>
+                            <span>Buffering</span>
+                        </div>
+                        <div class="not-started">
+                            <i class="fa-solid fa-play"></i>
+                            <span>Play</span>
+                        </div>
+                    </button>
+                    <button class="song-details">
+                        <i class="fa-solid fa-circle-info"></i>
+                        <span>Details</span>
+                    </button>
+                    <button class="song-remove">
+                        <i class="fa-solid fa-trash"></i>
+                        <span>Remove</span>
+                    </button>
+                    <button class="song-add">
+                        <i class="fa-solid fa-circle-plus"></i>
+                        <span>Add</span>
+                    </button>
+                <% } else { %>
+                    <button class="song-like" <%- (isLiked ? "data-liked" : "") %>>
+                        <i class="fa-regular fa-thumbs-up"></i>
+                        <i class="fa-solid fa-thumbs-up"></i>
+                    </button>
+                    <button class="song-bump" disabled>
+                        <i class="fa-solid fa-forward-fast"></i>
+                    </button>
+                <% } %>
+            </div>
+        </div>
+        <% if (isTeacher) { %>
+            <div class="song-details-container">
+                <div class="submit-by">
+                    <h3>Submitted By</h3>
+                    <div>
+                        <div>
+                            <i class="fa-solid fa-user"></i>
+                            <span class="submit-by-name"></span>
+                        </div>
+                        <div>
+                            <i class="fa-solid fa-envelope"></i>
+                            <span class="submit-by-email"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <% } %>
+    </div>
+    <% if (isTeacher) { %>
+        <button class="drag">
+            <i class="fa-solid fa-ellipsis-vertical"></i>
+        </button>
+    <% } %>
+</div>

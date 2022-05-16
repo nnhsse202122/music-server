@@ -13,6 +13,7 @@ If you want to run the server on your computer locally, here are the steps. Note
 4. Create a .env file in the root directory with the following key/value pairs:
 ```
 API_KEY = # YOUTUBE API KEY
+TEST = 1234
 PRODUCTION = false # whether or not to use production or dev settings
 #PRODUCTION
 PRODUCTION_CLIENT_ID = # PRODUCTION GOOGLE OAUTH CLIENT ID

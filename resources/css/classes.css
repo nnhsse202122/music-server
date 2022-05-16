@@ -1,8 +1,5 @@
 body {
-    background-image: url("/resources/img/background.png");
-    background-attachment: scroll;
-    background-size: cover;
-    background-size: 40%;
+    background-color: #DADADA;
 }
 
 .content {

@@ -57,7 +57,10 @@ const SongServerAPI = (apiVersion = 1) => {
                     authInfo = "Basic " + cookies.authorization;
                 }
                 else {
-                    authInfo =  "Basic OwO";
+                    setTimeout(() => {
+                        overlayManager.show("relogin-model");
+                    }, 0);
+                    throw new Error("No Authorization!");
                 }
             }
             else {
@@ -76,8 +79,15 @@ const SongServerAPI = (apiVersion = 1) => {
         try {
             let res = await fetch(url, req);
             response = await res.json();
+            console.group("API Response");
             console.debug(`Received response from %c${url}`, "color: gold");
             console.debug(response);
+            if (res.status == 401) {
+                setTimeout(() => {
+                    overlayManager.show("relogin-model");
+                }, 0);
+            }
+            console.groupEnd();
         }
         catch (err) {
             response = {
@@ -157,15 +167,19 @@ const SongServerAPI = (apiVersion = 1) => {
                     "get": async (auth = null) => {
                         return await getReq(`/classrooms/${code}/playlist/`, auth);
                     },
-                    "position": {
+                    "currentSong": {
                         "get": async (auth = null) => {
-                            return await getReq(`/classrooms/${code}/playlist/position`, auth);
+                            return await getReq(`/classrooms/${code}/playlist/current-song/`, auth);
                         },
-                        "set": async (position, auth = null) => {
-                            return await postReq(`/classrooms/${code}/playlist/position`, auth, {
-                                "position": position
-                            });
+                        "set": async (index, auth = null) => {
+                            return await postReq(`/classrooms/${code}/playlist/current-song/`, auth, { "index": index });
                         }
+                    },
+                    "nextSong": async (auth = null) => {
+                        return await postReq(`/classrooms/${code}/playlist/next-song/`, auth);
+                    },
+                    "previousSong": async (auth = null) => {
+                        return await postReq(`/classrooms/${code}/playlist/previous-song/`, auth);
                     },
                     "shuffle": async (auth = null) => {
                         return await postReq(`/classrooms/${code}/playlist/shuffle/`, auth);
@@ -179,6 +193,12 @@ const SongServerAPI = (apiVersion = 1) => {
                                 "oldIndex": oldIndex,
                                 "newIndex": newIndex
                             });
+                        },
+                        "likeSong": async (index, auth = null) => {
+                            return await postReq(`/classrooms/${code}/playlist/songs/likes`, auth, { "index": index });
+                        },
+                        "prioritizeSong": async (index, auth = null) => {
+                            return await postReq(`/classrooms/${code}/playlist/songs/prioritize`, auth, { "index": index });
                         },
                         "add": async (song, auth = null) => {
                             return await postReq(`/classrooms/${code}/playlist/songs`, auth, song);
@@ -198,6 +218,9 @@ const SongServerAPI = (apiVersion = 1) => {
         "youtube": {
             "search": async (query, auth = null) => {
                 return await getReq(`/yt/search?q=${encodeURIComponent(query)}`, auth);
+            },
+            "fetch": async (id, auth = null) => {
+                return await getReq(`/yt/videos/${id}`, auth);
             }
         }
     };

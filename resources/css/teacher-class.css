@@ -1,9 +1,6 @@
 body {
     --side-bar-width: max(10%, 300px);
-    background-image: url("/resources/img/background.png");
-    background-attachment: scroll;
-    background-size: cover;
-    background-size: 40%;
+    background-color: rgb(165 165 165);
 }
 
 #player {
@@ -110,11 +107,13 @@ body {
 .student-table .student-email,
 .student-table .student-name,
 .student-table .student-tokens,
+.student-table .student-likes,
 .student-table .student-remove {
     text-align: center;
     color: black;
 }
-.student-table .student-tokens {
+.student-table .student-tokens > div,
+.student-table .student-likes > div {
     display: grid;
     align-items: center;
     justify-items: center;
@@ -122,7 +121,8 @@ body {
     /* font-size: 21px; */
 }
 
-.student-table .student-tokens > button {
+.student-table .student-tokens > div > button,
+.student-table .student-likes > div > button {
     border: none;
     background: none;
     cursor: pointer;
@@ -130,7 +130,8 @@ body {
     transition: color 200ms;
 }
 
-.student-table .student-tokens > .token-count {
+.student-table .student-tokens > div > .token-count,
+.student-table .student-likes > div > .like-count {
     font-family: var(--font-secondary);
     padding: 0px;
     margin: 0px;
@@ -142,11 +143,13 @@ body {
     background: none;
 }
 
-.student-table .student-tokens > .decrement-token:hover {
+.student-table .student-tokens > div > .decrement-token:hover,
+.student-table .student-likes > div > .decrement-like:hover {
     color: #833;
 }
 
-.student-table .student-tokens > .increment-token:hover {
+.student-table .student-tokens > div > .increment-token:hover,
+.student-table .student-likes > div > .increment-like:hover {
     color: #383;
 }
 
@@ -327,6 +330,16 @@ body {
     font-family: var(--font-primary);
     color: white;
 }
+.playlist-container > .playlist-title > button {
+    background: inherit;
+    color: inherit;
+    text-align: center;
+    border-radius: 3rem;
+    font-size: 75%;
+    vertical-align: middle;
+    cursor: pointer;
+    border: none;
+}
 
 .playlist-item-container {
     padding: 10px;
@@ -355,7 +368,11 @@ body {
     display: none;
 }
 
-.playlist-item[data-selected] > .position {
+.playlist-item[data-selected] {
+    background-color: hsl(249, 70%, 90%);
+}
+
+.playlist-item[data-selected]> .position {
     color: hsl(249, 70%, 65%);
 }
 
@@ -373,6 +390,11 @@ body {
 .playlist-item > .icon {
     display: grid;
     place-content: center;
+}
+.playlist-item > .icon > img {
+    width: 64px;
+    height: auto;
+    border-radius: 25%;
 }
 
 .playlist-item[data-type]:not([data-student]) > .status {
@@ -440,18 +462,14 @@ body {
 
 .playlist-item > .playlist-item-content > .song-info > .song-actions {
     display: grid;
-    --playlist-action-count: 3;
+    --playlist-action-count: 4;
     grid-template-columns: repeat(var(--playlist-action-count), calc(100% / var(--playlist-action-count)));
     justify-items: center;
     align-items: center;
 }
 
-.playlist-item[data-student] > .playlist-item-content > .song-info > .song-actions {
-    display: none;
-}
-
 .playlist-item[data-type] > .playlist-item-content > .song-info > .song-actions {
-    --playlist-action-count: 3;
+    --playlist-action-count: 4;
 }
 
 .playlist-item > .playlist-item-content > .song-info > .song-actions > button {
@@ -549,6 +567,36 @@ body {
     gap: 40px;
 }
 
+.player-container.hidden > #player-visibility-button {
+    transform: translateY(calc(15vh + 20px + 2px));
+}
+.player-container.hidden > #player-visibility-button > .fa-chevron-down {
+    display: none;
+}
+.player-container:not(.hidden) > #player-visibility-button > .fa-chevron-up {
+    display: none;
+}
+.player-container.hidden .player-controls {
+    transform: translateY(calc(15vh + 20px + 2px));
+}
+
+.player-container > #player-visibility-button {
+    position: fixed;
+    transform: translateY(0px);
+    bottom: calc(15vh + calc(10px * 2));
+    left: calc(var(--side-bar-width) * 0.5 - 5% + 50%);
+    width: 10%;
+    height: 30px;
+    background-color: white;
+    z-index: 1000000;
+    border: 2px solid rgba(0, 0, 0, 0.5);
+    border-bottom: 2px solid white;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    cursor: pointer;
+    transition: transform 0.3s ease-in-out;
+}
+
 .player-controls {
     padding: 10px;
     background-color: white;
@@ -557,7 +605,17 @@ body {
     grid-template-columns: repeat(5, var(--player-control-item-size));
     min-width: 400px;
     gap: 10px;
-    position: sticky;
+    transform: translateY(0px);
+    position: fixed;
+    bottom: 0px;
+    height: 15vh;
+    left: var(--side-bar-width);
+    right: 0px;
+    z-index: 999999;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border-top: 2px solid rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease-in-out;
 }
 
 .player-controls > .player-control {

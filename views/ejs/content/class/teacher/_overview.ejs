@@ -1,4 +1,8 @@
 <div class="player-container">
+    <button id="player-visibility-button">
+        <i class="fa-solid fa-chevron-down"></i>
+        <i class="fa-solid fa-chevron-up"></i>
+    </button>
     <div class="player-controls">
         <div class="player-control now-playing">
             <div class="player-control-title">Now Playing</div>
@@ -57,14 +61,4 @@
     <%- include("../common/_song-search.ejs") %>
     <div id="player"></div>
 </div>
-<div class="playlist-container">
-    <div class="playlist-title">Playlist</div>
-    <div class="playlist-body" id="playlist-container">
-        <div id="playlist-container-empty">
-            Your playlist is empty!
-        </div>
-        <div class="playlist-item-container top" id="top-playlist-item" ondrop="onSongDrop(event, 0)" ondragover="onSongDragOver(event, 0)">
-            <i class="fa-solid fa-plus"></i>
-        </div>
-    </div>
-</div>
+<%- include("../common/_playlist", { defaultMessage: "Your playlist is empty!" }) %>

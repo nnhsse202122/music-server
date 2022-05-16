@@ -190,7 +190,11 @@ class PostRoute extends APIRoute<CreatedClassroomResponse, ClassroomsEndpoint> {
                 allowSongSubmissions: allowSongSubmissions,
                 submissionsRequireTokens: submissionsRequireTokens,
                 joinable: joinable,
-                playlistVisible: playlistVisible
+                playlistVisible: playlistVisible,
+                priorityCost: int(0),
+                priorityEnabled: false,
+                likesEnabled: false,
+                likesVisible: false
             },
             students: []
         };

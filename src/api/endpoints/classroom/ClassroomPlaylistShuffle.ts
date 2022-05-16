@@ -55,7 +55,7 @@ class PostRoute extends APIRoute<ClassroomSong[], ClassroomPlaylistShuffleEndpoi
     }
 }
 
-export default class ClassroomPlaylistShuffleEndpoint extends APIEndpoint{
+export default class ClassroomPlaylistShuffleEndpoint extends APIEndpoint {
 
     private readonly _post: PostRoute;
 

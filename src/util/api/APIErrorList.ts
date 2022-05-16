@@ -26,6 +26,11 @@ export let apiErrors = {
         "status": 403,
         "parameters": [],
     } as APIErrorInfo<"You aren't allowed to view the songs in the playlist.", 403, []>,
+    "api.classroom.student.not_found": {
+        "message": "Failed to find student! Email: {email}",
+        "status": 404,
+        "parameters": ["email"],
+    } as APIErrorInfo<"Failed to find student! Email: {email}", 404, ["email"]>,
     "api.classroom.playlist.song.invalid_source": {
         "message": "Invalid song source! Source: {source}",
         "status": 400,
@@ -56,6 +61,11 @@ export let apiErrors = {
         "status": 404,
         "parameters": [],
     } as APIErrorInfo<"Song not found.", 404, []>,
+    "api.classroom.playlist.current_song.none": {
+        "message": "There is no current song. This is most likely because the playlist is empty.",
+        "status": 404,
+        "parameters": [],
+    } as APIErrorInfo<"There is no current song. This is most likely because the playlist is empty.", 404, []>,
     "api.classroom.delete.fail": {
         "message": "Only the owner of the classroom can delete the classroom.",
         "status": 403,
@@ -76,6 +86,16 @@ export let apiErrors = {
         "status": 404,
         "parameters": [],
     } as APIErrorInfo<"Playlist not found.", 404, []>,
+    "api.playlist.song.likes.disabled": {
+        "message": "Likes are disabled",
+        "status": 403,
+        "parameters": [],
+    } as APIErrorInfo<"Likes are disabled", 403, []>,
+    "api.playlist.song.liked": {
+        "message": "You already liked that song. L + Ratio",
+        "status": 400,
+        "parameters": [],
+    } as APIErrorInfo<"You already liked that song. L + Ratio", 400, []>,
     "api.playlist.delete.fail": {
         "message": "Only the owner of the playlist can delete the playlist.",
         "status": 403,

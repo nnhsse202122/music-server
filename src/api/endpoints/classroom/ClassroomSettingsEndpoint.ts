@@ -11,6 +11,7 @@ import UpdateClassroomSettingsRequest from "../../requests/UpdateClassroomSettin
 import APIResponse from "../../responses/APIResponse";
 import ClassroomSettingsResponse from "../../responses/ClassroomSettingsResponse";
 import { assertContentIsJSON, assertJSONBodyFieldIsBoolean, assertJSONBodyFieldIsString, assertJSONBodyIsntNull } from "../EndpointAssert";
+import { i32 as int } from "typed-numbers";
 
 class GetRoute extends APIRoute<ClassroomSettingsResponse, ClassroomSettingsEndpoint> {
     public constructor(endpoint: ClassroomSettingsEndpoint) {
@@ -49,7 +50,10 @@ class GetRoute extends APIRoute<ClassroomSettingsResponse, ClassroomSettingsEndp
             "joinable": classroom.settings.joinable,
             "name": classroom.name,
             "playlistVisible": classroom.settings.playlistVisible,
-            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens
+            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens,
+            "priorityCost": classroom.settings.priorityCost,
+            "likesEnabled": classroom.settings.likesEnabled,
+            "priorityEnabled": classroom.settings.priorityEnabled,
         });
     }
 }
@@ -113,7 +117,11 @@ class PostRoute extends APIRoute<ClassroomSettingsResponse, ClassroomSettingsEnd
             "allowSongSubmissions": body.allowSongSubmissions,
             "joinable": body.joinable,
             "playlistVisible": body.playlistVisible,
-            "submissionsRequireTokens": body.submissionsRequireTokens
+            "submissionsRequireTokens": body.submissionsRequireTokens,
+            "priorityCost": classroom.settings.priorityCost,
+            "likesEnabled": classroom.settings.likesEnabled,
+            "priorityEnabled": classroom.settings.priorityEnabled,
+            "likesVisible": classroom.settings.likesVisible
         };
         classroom.name = name;
 
@@ -124,7 +132,10 @@ class PostRoute extends APIRoute<ClassroomSettingsResponse, ClassroomSettingsEnd
             "joinable": classroom.settings.joinable,
             "name": classroom.name,
             "playlistVisible": classroom.settings.playlistVisible,
-            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens
+            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens,
+            "priorityCost": classroom.settings.priorityCost,
+            "likesEnabled": classroom.settings.likesEnabled,
+            "priorityEnabled": classroom.settings.priorityEnabled,
         });
     }
 }
@@ -216,7 +227,10 @@ class PutRoute extends APIRoute<ClassroomSettingsResponse, ClassroomSettingsEndp
             "joinable": classroom.settings.joinable,
             "name": classroom.name,
             "playlistVisible": classroom.settings.playlistVisible,
-            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens
+            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens,
+            "priorityCost": classroom.settings.priorityCost,
+            "likesEnabled": classroom.settings.likesEnabled,
+            "priorityEnabled": classroom.settings.priorityEnabled,
         });
     }
 }
@@ -261,7 +275,11 @@ class DeleteRoute extends APIRoute<ClassroomSettingsResponse, ClassroomSettingsE
             "allowSongSubmissions": true,
             "joinable": false,
             "playlistVisible": false,
-            "submissionsRequireTokens": false
+            "submissionsRequireTokens": false,
+            "priorityCost": int(0),
+            "likesEnabled": false,
+            "priorityEnabled": false,
+            "likesVisible": false
         };
 
         await this.server.db.classrooms.set(code, classroom);
@@ -271,7 +289,10 @@ class DeleteRoute extends APIRoute<ClassroomSettingsResponse, ClassroomSettingsE
             "joinable": classroom.settings.joinable,
             "name": classroom.name,
             "playlistVisible": classroom.settings.playlistVisible,
-            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens
+            "submissionsRequireTokens": classroom.settings.submissionsRequireTokens,
+            "priorityCost": classroom.settings.priorityCost,
+            "likesEnabled": classroom.settings.likesEnabled,
+            "priorityEnabled": classroom.settings.priorityEnabled,
         });
     }
 }
