@@ -20,6 +20,7 @@ import ClassroomSettingsEndpoint from "./endpoints/classroom/ClassroomSettingsEn
 import ClassroomSettingsEndpointV2 from "./endpoints/classroom/ClassroomSettingsEndpointV2";
 import ClassroomStudentEndpoint from "./endpoints/classroom/ClassroomStudentEndpoint";
 import ClassroomStudentEndpointV2 from "./endpoints/classroom/ClassroomStudentEndpointV2";
+import ClassroomStudentLikesEndpoint from "./endpoints/classroom/ClassroomStudentLikesEndpoint";
 import ClassroomStudentsEndpoint from "./endpoints/classroom/ClassroomStudentsEndpoint";
 import ClassroomStudentsEndpointV2 from "./endpoints/classroom/ClassroomStudentsEndpointV2";
 import ClassroomStudentTokenEndpoint from "./endpoints/classroom/ClassroomStudentTokenEndpoint";
@@ -63,5 +64,6 @@ export default class APIController extends Controller {
         this.addModel(ClassroomStudentTokenEndpointV2);
         this.addModel(ClassroomPlaylistPreviousSongEndpoint);
         this.addModel(ClassroomPlaylistSongLikesEndpoint);
+        this.addModel(ClassroomStudentLikesEndpoint);
     }
 }
