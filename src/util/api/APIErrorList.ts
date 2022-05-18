@@ -61,6 +61,11 @@ export let apiErrors = {
         "status": 400,
         "parameters": [],
     } as APIErrorInfo<"You don't have enough likes.", 400, []>,
+    "api.beans.too_powerful": {
+        "message": "The beans are too powerful to be added to. Try increasing the bean capacity",
+        "status": 400,
+        "parameters": []
+    } as APIErrorInfo<"The beans are too powerful to be added to. Try increasing the bean capacity", 400, []>,
     "api.classroom.playlist.song.not_found": {
         "message": "Song not found.",
         "status": 404,

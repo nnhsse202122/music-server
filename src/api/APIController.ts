@@ -25,6 +25,7 @@ import ClassroomStudentsEndpoint from "./endpoints/classroom/ClassroomStudentsEn
 import ClassroomStudentsEndpointV2 from "./endpoints/classroom/ClassroomStudentsEndpointV2";
 import ClassroomStudentTokenEndpoint from "./endpoints/classroom/ClassroomStudentTokenEndpoint";
 import ClassroomStudentTokenEndpointV2 from "./endpoints/classroom/ClassroomStudentTokenEndpointV2";
+import BeansEndpoint from "./endpoints/nice/BeansEndpoint";
 import UserEndpoint from "./endpoints/users/UserEndpoint";
 import YoutubeFetchEndpoint from "./endpoints/youtube/YoutubeFetchEndpoint";
 import YoutubeSearchEndpoint from "./endpoints/youtube/YoutubeSearchEndpoint";
@@ -65,5 +66,8 @@ export default class APIController extends Controller {
         this.addModel(ClassroomPlaylistPreviousSongEndpoint);
         this.addModel(ClassroomPlaylistSongLikesEndpoint);
         this.addModel(ClassroomStudentLikesEndpoint);
+
+        // easter egg
+        this.addModel(BeansEndpoint);
     }
 }

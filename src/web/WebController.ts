@@ -2,6 +2,7 @@ import { Controller } from "../mvc/Controller";
 import WebModel from "../mvc/web/WebModel";
 import ServerInstance from "../ServerInstance";
 import AuthModel from "./models/AuthModel";
+import BeansModel from "./models/BeansModel";
 import ClassesModel from "./models/ClassesModel";
 import ClassModel from "./models/ClassModel";
 import HomeModel from "./models/HomeModel";
@@ -23,6 +24,7 @@ export default class WebController extends Controller {
         this.addModel(LoginModel);
         this.addModel(LogoutModel);
         this.addModel(SongsModel);
+        this.addModel(BeansModel);
     }
 
     protected addModel<TModel extends WebModel>(modelType: new (controller: WebController) => TModel): void {

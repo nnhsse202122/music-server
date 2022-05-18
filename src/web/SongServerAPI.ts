@@ -45,7 +45,8 @@ type AuthorizedAPIRequestHandlerWithBody<TBody, TData> = (body: TBody, auth: str
 type SongServerAPIEndpoints = {
     authorization: AuthorizeEndpoint,
     classrooms: ClassroomsEndpoint,
-    users: UsersEndpoint
+    users: UsersEndpoint,
+    beans: BeansEndpoint
 };
 
 type AuthorizeEndpoint = {
@@ -64,6 +65,11 @@ type ClassroomEndpoint = {
     playlist: ClassroomPlaylistEndpointV2,
     get: AuthorizedAPIRequestHandler<GottenClassroom>,
     delete: AuthorizedAPIRequestHandler<boolean>
+}
+
+type BeansEndpoint = {
+    get: APIRequestHandler<string>,
+    set: APIRequestHandlerWithBody<any, void>
 }
 
 type StudentsEndpoint = {
@@ -162,6 +168,14 @@ const SongServerAPI = (apiVersion: int | number = int(1)): SongServerAPIEndpoint
     }
 
     return {
+        "beans": {
+            "get": async (): PendingAPIResponse<string> => {
+                return await handleReq("/beans", "GET", undefined);
+            },
+            "set": async (body: any): PendingAPIResponse<void> => {
+                return await handleReq("/beans", "POST", undefined, body);
+            }
+        },
         "authorization": {
             "auth": async (body: AuthorizeRequest): PendingAPIResponse<AuthorizeResponse> => {
                 return await handleReq("/authorize", "POST", undefined, body);
