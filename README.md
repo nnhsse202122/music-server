@@ -1,5 +1,9 @@
-# Classroom-Music
-The Classroom Music web server allows a teacher to play a playlist of songs as chosen by their students. It has four different views: the sign-in, classroom selection, teacher, and student views. Each one serves a different function in playing music in the classroom.  
+# Classroom-Music Overview
+The Classroom Music web server allows a teacher to play a playlist of songs as chosen by their students. It has four different views: the sign-in, classroom selection, teacher, and student views. Each one serves a different function in playing music in the classroom. There are also other features that allow for more song interactions. Tokens can be used to reward students by allowing them to submit songs or let their song play next. Thumbs-ups will move a song up one position. 
+
+## How it works:
+The Music Server is built with TypeScript, EJS, MongoDB, and Express to provide both teachers and students with a seamless music-sharing experience.
+The API powers a majority of the experience, built with the framework of REST, which calls for endpoints that represent entities. These entities request methods for modifying those entities. 
 
 ## Usage:
 If you're simply interested in using or visiting the website, then you can visit https://musicserver.nnhsse.org/ The website will work on any modern web browser (Chrome/Firefox/Microsoft Edge) and should work on all major operating systems (Windows/MacOS/Linux). 
