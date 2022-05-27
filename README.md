@@ -51,7 +51,12 @@ You will now be at a google form-like page. Select `Public Data` and click next.
 
 Next, you will need to create google auth credentials. Go to `OAuth Consent Screen`, then then fill out the user form. Click `External`, then click `Create`
 
+Then fill out the form to create an oauth consent screen.
 
+Go back to the crentials tab, and create a crential of oauth client id. Fill out information, and copy the resulting clientID and clientSecret fields.
+These should be filled out in your `DEV_CLIENT_ID` and `DEV_OAUTH_CLIENT_SECRET` fields.
+
+Then ask Mr. Scmitt to setup mongo db, and then your env file will almost be ready
 
 Make sure you share this env file in a secure way and not on this github repo!
 
