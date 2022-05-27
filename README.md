@@ -17,7 +17,6 @@ If you want to run the server on your computer locally, here are the steps. Note
 4. Create a .env file in the root directory with the following key/value pairs:
 ```
 API_KEY = # YOUTUBE API KEY
-TEST = 1234
 PRODUCTION = false # whether or not to use production or dev settings
 #PRODUCTION
 PRODUCTION_CLIENT_ID = # PRODUCTION GOOGLE OAUTH CLIENT ID
@@ -32,6 +31,32 @@ DEV_API_DOMAIN = # DEV API DOMAIN NAME
 DEV_MONGO_URI = # DEV MONGO DATABASE URI
 DEV_REDIRECT_URI = # DEV OAUTH REDIRECT URI. SHOULD BE IN FORMAT protocol://domain/account/auth. For example: http://127.0.0.1:3030/account/auth
 ```
+
+#### Initial Setup
+The Music Server relies on 3 different APIs: Google Auth, MongoDB, and Youtube.
+
+Furthermore, development is split into `Development` and `Production`
+- Development is where you live develop code.
+- Production is where final builds are run.
+
+The purpose of this split is to allow for local development that won't affect the main app.
+
+First, there's the Youtube API key to be filled in `API_KEY`. First, go to the [google console dashboard](https://console.cloud.google.com/home/dashboard) and create a new project.
+
+Next, go to the APIs overview, and select the project in the dropdown menu at the top left if needed.
+
+Then, go to the library tab, and search for the Youtube data api v3, and enable it, then click create credentials when the screen shows up.
+
+You will now be at a google form-like page. Select `Public Data` and click next. You will be given an API key that you should copy and paste into the env file's `API_KEY` property.
+
+Next, you will need to create google auth credentials. Go to `OAuth Consent Screen`, then then fill out the user form. Click `External`, then click `Create`
+
+
+
+Make sure you share this env file in a secure way and not on this github repo!
+
+
+
 ### Running the Program:
 1. First, you will need to build the program. To do this, you will need to run the command `npm run build`, which will compile the typescript files into javascript files.
 2. In the VScode terminal, run the `index.js` file (by using the command `node index.js`).
