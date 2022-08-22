@@ -33,7 +33,7 @@
     color: var(--color-dark);
     font-size: 1.8rem;
     outline: 0;
-    width: 100%;
+    width: calc(100% - var(--btn-width));
     background: var(--color-light);
     padding: 0 1.6rem;
     border-radius: var(--rad) 0px 0px var(--rad);

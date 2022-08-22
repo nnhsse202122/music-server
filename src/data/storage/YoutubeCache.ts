@@ -52,7 +52,7 @@ function formatVideoDuration(duration: string): string {
     if (parts.length > 1) {
         result = parts[0] + " " + result;
     }
-    return result;
+    return result.trim();
 }
 
 class VideoCache {

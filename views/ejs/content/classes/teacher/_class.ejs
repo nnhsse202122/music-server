@@ -1,7 +1,11 @@
 
 <div class="class-info">
     <div class="class-title">
-        <span class="class-name"><%= classroom.name %></span>
+        <% if (classroom.name.length <= 16) { %>
+            <span class="class-name"><%= classroom.name %></span>
+        <% } else { %>
+            <span class="class-name" title="<%= classroom.name %>"><%= classroom.name.substring(0, 14) %></span>
+        <% } %>
     </div>
     <div class="class-body">
         <div class="class-code"><%= classroom.code %></div>
