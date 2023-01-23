@@ -24,7 +24,7 @@ class GetRoute extends WebRoute<ClassesModel> {
             return;
         }
 
-        let classesResponse = await SongServerAPI(2).classrooms.list(auth);
+        let classesResponse = await SongServerAPI().classrooms.list(auth);
         let classes: GottenClassroom[];
         if (classesResponse.success) {
             classes = classesResponse.data;

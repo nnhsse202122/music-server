@@ -231,7 +231,13 @@ export let apiErrors = {
         "message": "Server had an internal error.",
         "status": 500,
         "parameters": [],
-    } as APIErrorInfo< "Server had an internal error.", 500, []>
+    } as APIErrorInfo< "Server had an internal error.", 500, []>,
+
+    "api.route.not_found": {
+        "message": "Unknown API Endpoint/Route {route}",
+        "status": 404,
+        "parameters": ["route"],
+    } as APIErrorInfo<"Unknown API Endpoint/Route {route}", 404, ["route"]>
 }
 
 type ValuesIn<T extends any[]> = T[number];

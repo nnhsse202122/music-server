@@ -1,22 +1,6 @@
-
+"use strict";
 // handles overlaying the screen with popups and the such
-/** */
-class Overlay {
-    /** @private
-     * @readonly
-     */
-    _element = undefined;
-    /** @private
-     * @readonly
-     */
-    _overlays = undefined;
-    /** @private
-     * @readonly
-     */
-    _overlayElements = undefined;
-    /** @private */
-    _currentID = undefined;
-    /** @public */
+class OverlayManager {
     constructor() {
         this._element = document.createElement("div");
         this._element.id = "overlay";
@@ -27,10 +11,6 @@ class Overlay {
         this._overlays = new Map();
         this._overlayElements = new Map();
     }
-    /** @public
-     * @param {new (overlay: Overlay) => OverlayModelBase} ctor
-     * @returns {void}
-     */
     addOverlay(ctor) {
         let createdOverlay = new ctor(this);
         this._overlays.set(createdOverlay.id, createdOverlay);
@@ -39,11 +19,6 @@ class Overlay {
         element.style.display = "none";
         this._overlayElements.set(createdOverlay.id, element);
     }
-    /** @public
-     * @param {string} id
-     * @param {{ [x: string]: any }} data
-     * @returns {void}
-     */
     show(id, data = {}) {
         let current = this._overlayElements.get(this._currentID);
         let currentOverlay = this._overlays.get(this._currentID);
@@ -55,7 +30,6 @@ class Overlay {
         if (found != null) {
             let keys = Object.keys(data);
             let foundOverlay = this._overlays.get(id);
-            console.log("Reset " + id);
             foundOverlay?.resetData();
             for (let index = 0; index < keys.length; index++) {
                 foundOverlay?.setData(keys[index], data[keys[index]]);
@@ -66,9 +40,6 @@ class Overlay {
         }
         this._currentID = id;
     }
-    /** @public
-     * @returns {void}
-     */
     hide() {
         let current = this._overlayElements.get(this._currentID);
         let currentOverlay = this._overlays.get(this._currentID);
@@ -80,7 +51,3 @@ class Overlay {
         this._currentID = "";
     }
 }
-
-
-
-

@@ -27,7 +27,9 @@ import SetCurrentSongRequest from "../api/requests/SetCurrentSongRequest";
 
 type FailAPIResponse = {
     success: false,
-    code: number,
+    status: number,
+    id: string,
+    parameters: Record<string, string>,
     message: string
 };
 type SuccessAPIResponse<TData> = {
@@ -137,7 +139,7 @@ type UserEndpoint<TUser> = {
     get: AuthorizedAPIRequestHandler<TUser>
 };
 
-const SongServerAPI = (apiVersion: int | number = int(1)): SongServerAPIEndpoints => { 
+const SongServerAPI = (apiVersion: int | number = int(2)): SongServerAPIEndpoints => { 
 
     async function handleReq<TData, TBody = any>(path: string, method: string, authorization: string | undefined, body: TBody | undefined = undefined): PendingAPIResponse<TData> {
         if (path.startsWith("/")) path = path.substring(1);

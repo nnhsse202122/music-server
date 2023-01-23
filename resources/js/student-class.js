@@ -1,41 +1,34 @@
-
+"use strict";
+// @ts-ignore
 var songSearchManager = new SongSearchManager(false);
-
 async function refreshStudentInfo() {
     let tokensDiv = document.getElementById("student-tokens");
     let likesDiv = document.getElementById("student-likes");
     let submissionsEnabledDiv = document.getElementById("student-submissions-enabled");
     let submissionsRequireTokensDiv = document.getElementById("student-submissions-require-tokens");
-
-    let likesResponse = await SongServerAPI(2).classroom(classCode).students.find(studentEmail).likes.get();
+    let likesResponse = await SongServerAPI().classrooms.find(classCode).students.find(studentEmail).likes.get();
     if (!likesResponse.success) {
         console.error("Failed to fetch student likes");
         return;
     }
-
     let likes = likesResponse.data;
-    let tokensResponse = await SongServerAPI(2).classroom(classCode).students.find(studentEmail).tokens.get();
+    let tokensResponse = await SongServerAPI().classrooms.find(classCode).students.find(studentEmail).tokens.get();
     if (!tokensResponse.success) {
         console.error("Failed to fetch student tokens");
         return;
     }
-
-    let settingsResponse = await SongServerAPI(2).classroom(classCode).settings.get();
+    let settingsResponse = await SongServerAPI().classrooms.find(classCode).settings.get();
     if (!settingsResponse.success) {
         console.error("Failed to fetch class settings");
         return;
     }
     let settings = settingsResponse.data;
     console.log(settings);
-
     let tokens = tokensResponse.data;
-
-    tokensDiv.textContent = tokens;
-    likesDiv.textContent = likes;
-
+    tokensDiv.textContent = tokens + "";
+    likesDiv.textContent = likes + "";
     let submissionsIcon = submissionsEnabledDiv.children[0];
     let submissionsTokensIcon = submissionsRequireTokensDiv.children[0];
-
     if (settings.allowSongSubmissions) {
         submissionsIcon.classList.add("fa-circle-check");
         submissionsIcon.classList.remove("fa-circle-xmark");
@@ -44,7 +37,6 @@ async function refreshStudentInfo() {
         submissionsIcon.classList.add("fa-circle-xmark");
         submissionsIcon.classList.remove("fa-circle-check");
     }
-    
     if (settings.submissionsRequireTokens) {
         submissionsTokensIcon.classList.add("fa-circle-check");
         submissionsTokensIcon.classList.remove("fa-circle-xmark");
@@ -53,16 +45,9 @@ async function refreshStudentInfo() {
         submissionsTokensIcon.classList.add("fa-circle-xmark");
         submissionsTokensIcon.classList.remove("fa-circle-check");
     }
-
 }
-
-/** @param {HTMLElement} container
- * @param {number} position
- * @param {string} title
- * @param {boolean} liked
- * @returns {HTMLDivElement}
- */
- function createPlaylistItem(container, position, title, liked) {
+// @ts-ignore
+function createPlaylistItem(container, position, title, liked) {
     let playlistItem = document.createElement("div");
     playlistItem.classList.add("playlist-item");
     playlistItem.setAttribute("data-student", "");
@@ -97,52 +82,50 @@ async function refreshStudentInfo() {
     playlistItem.getElementsByClassName("song-title")[0].textContent = title.replace(/\&quot;/gi, '"').replace(/\&#39;/gi, "'").replace(/\&amp;/gi, "&");
     return playlistItem;
 }
-
+// @ts-ignore
 let playlistContainer = document.getElementById("playlist-container");
-
+// @ts-ignore
 function refreshPlaylist() {
-    SongServerAPI(2).classroom(classCode).settings.get().then((settingsData) => {
-        if (!settingsData.success) {
+    SongServerAPI().classrooms.find(classCode).settings.get().then((sData) => {
+        let settingsData;
+        if (!sData.success) {
             console.error("Failed to fetch settings data");
-            settingsData.data = {
+            // @ts-ignore
+            data = {
                 "likesEnabled": false,
                 "priorityEnabled": false
-            }
+            };
         }
-
-        SongServerAPI(2).classroom(classCode).playlist.songs.get().then((data) => {
+        else {
+            settingsData = sData.data;
+        }
+        SongServerAPI().classrooms.find(classCode).playlist.songs.list().then((data) => {
             if (!data.success) {
                 playlistContainer.innerHTML = `<div id="playlist-container-empty">
                 You are not allowed to view the playlist.
             </div>`;
                 return;
             }
-
             console.log(settingsData);
-
-            if (!settingsData.data.likesEnabled) {
+            if (!settingsData.likesEnabled) {
                 playlistContainer.setAttribute("data-likes-hidden", "");
             }
             else {
                 playlistContainer.removeAttribute("data-likes-hidden");
             }
-
-            if (!settingsData.data.priorityEnabled) {
+            if (!settingsData.priorityEnabled) {
                 playlistContainer.setAttribute("data-priority-hidden", "");
             }
             else {
                 playlistContainer.removeAttribute("data-priority-hidden");
             }
-    
             playlistContainer.innerHTML = `<div id="playlist-container-empty" style="display: none">
             Your playlist is empty!
         </div>`;
-    
             if (data.data.length === 0) {
                 console.log("No songs found :(");
                 document.getElementById("playlist-container-empty").style.display = "block";
             }
-    
             data.data.forEach((song, index) => {
                 let item = createPlaylistItem(playlistContainer, song.position, song.title, song.is_liked);
                 /** @type {HTMLDivElement} */
@@ -155,14 +138,13 @@ function refreshPlaylist() {
                 }
                 item.getElementsByClassName("song-likes")[0].addEventListener("click", async () => {
                     window.overlayManager.show("loading");
-                    let req = await SongServerAPI(2).classroom(classCode).playlist.songs.likeSong(index);
+                    let req = await SongServerAPI().classrooms.find(classCode).playlist.songs.find(index).like();
                     if (!req.success) {
                         alert("Failed to like song: " + req.message);
                         window.overlayManager.hide();
                         return;
                     }
                     window.overlayManager.hide();
-    
                     refreshPlaylist();
                     refreshStudentInfo();
                 });
@@ -170,6 +152,5 @@ function refreshPlaylist() {
         });
     });
 }
-
 refreshPlaylist();
 refreshStudentInfo();

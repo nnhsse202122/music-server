@@ -19,16 +19,6 @@ export function getStudent(classroom: Classroom, email: string): StudentInClass 
     throw new Error("KeyNotFoundException: Failed to find student with email '" + email + "'");
 }
 
-export function getStudentV2(classroom: ClassroomV2, email: string): StudentInClass {
-    for (let i = 0; i < classroom.students.length; i) {
-        let student = classroom.students[i];
-        if (student.email === email) {
-            return student;
-        }
-    }
-    throw new Error("KeyNotFoundException: Failed to find student with email '" + email + "'");
-}
-
 export function getStudentFromUser(classroom: Classroom, user: User): StudentInClass {
     return getStudent(classroom, user.email);
 }
@@ -91,28 +81,8 @@ export async function removeAllStudents(classroom: Classroom, classroomDB: Class
     return new RemovedAllStudentsInfo(classroom, int(failedCount));
 }
 
-export async function removeAllStudentsV2(classroom: ClassroomV2, classroomDB: ClassroomV2DataBase, userDB: UserDataBase): Promise<RemovedAllStudentsInfo<ClassroomV2>> {
-    let students = classroom.students;
-    let failedCount = 0;
-    for (let index = 0; index < students.length; index++) {
-        let student = students[index];
-
-        let removedStudentInfo = await removeStudentFromClassroomV2(classroom, classroomDB, userDB, student);
-        classroom = removedStudentInfo.updatedClassroom;
-        if (!removedStudentInfo.success) {
-            failedCount++;
-        }
-    }
-
-    return new RemovedAllStudentsInfo<ClassroomV2>(classroom, int(failedCount));
-}
-
 export function removeStudentFromClassroom(classroom: Classroom, classroomDB: ClassroomDataBase, userDB: UserDataBase, student: StudentInClass): Promise<RemovedStudentInfo> {
     return removeStudentFromEmail(classroom, classroomDB, userDB, student.email);
-}
-
-export function removeStudentFromClassroomV2(classroom: ClassroomV2, classroomDB: ClassroomV2DataBase, userDB: UserDataBase, student: StudentInClass): Promise<RemovedStudentInfo<ClassroomV2>> {
-    return removeStudentFromEmailV2(classroom, classroomDB, userDB, student.email);
 }
 
 export async function removeStudentFromEmail(classroom: Classroom, classroomDB: ClassroomDataBase, userDB: UserDataBase, userEmail: string): Promise<RemovedStudentInfo> {
@@ -131,6 +101,53 @@ export async function removeStudentFromEmail(classroom: Classroom, classroomDB: 
     return await removeStudent(classroom, classroomDB, userDB, user);
 }
 
+export async function removeStudent(classroom: Classroom, classroomDB: ClassroomDataBase, userDB: UserDataBase, user: User): Promise<RemovedStudentInfo> {
+    if (user.type !== Role.Student) {
+        return new RemovedStudentInfo(classroom, user, false);
+    }
+
+    classroom.students = classroom.students.filter((u) => u.email !== user.email);
+    user.classes = user.classes.filter((c) => c.code !== classroom.code);
+
+    let success: boolean = await classroomDB.set(classroom.code, classroom);
+    success = await userDB.set(user.email, user) && success;
+    
+    return new RemovedStudentInfo(classroom, user, success);
+}
+
+/*
+
+
+export function getStudentV2(classroom: ClassroomV2, email: string): StudentInClass {
+    for (let i = 0; i < classroom.students.length; i) {
+        let student = classroom.students[i];
+        if (student.email === email) {
+            return student;
+        }
+    }
+    throw new Error("KeyNotFoundException: Failed to find student with email '" + email + "'");
+}
+
+export async function removeAllStudentsV2(classroom: ClassroomV2, classroomDB: ClassroomV2DataBase, userDB: UserDataBase): Promise<RemovedAllStudentsInfo<ClassroomV2>> {
+    let students = classroom.students;
+    let failedCount = 0;
+    for (let index = 0; index < students.length; index++) {
+        let student = students[index];
+
+        let removedStudentInfo = await removeStudentFromClassroomV2(classroom, classroomDB, userDB, student);
+        classroom = removedStudentInfo.updatedClassroom;
+        if (!removedStudentInfo.success) {
+            failedCount++;
+        }
+    }
+
+    return new RemovedAllStudentsInfo<ClassroomV2>(classroom, int(failedCount));
+}
+
+export function removeStudentFromClassroomV2(classroom: ClassroomV2, classroomDB: ClassroomV2DataBase, userDB: UserDataBase, student: StudentInClass): Promise<RemovedStudentInfo<ClassroomV2>> {
+    return removeStudentFromEmailV2(classroom, classroomDB, userDB, student.email);
+}
+
 export async function removeStudentFromEmailV2(classroom: ClassroomV2, classroomDB: ClassroomV2DataBase, userDB: UserDataBase, userEmail: string): Promise<RemovedStudentInfo<ClassroomV2>> {
     if (!await userDB.contains(userEmail)) {
         return new RemovedStudentInfo<ClassroomV2>(classroom, {
@@ -147,20 +164,6 @@ export async function removeStudentFromEmailV2(classroom: ClassroomV2, classroom
     return await removeStudentV2(classroom, classroomDB, userDB, user);
 }
 
-export async function removeStudent(classroom: Classroom, classroomDB: ClassroomDataBase, userDB: UserDataBase, user: User): Promise<RemovedStudentInfo> {
-    if (user.type !== Role.Student) {
-        return new RemovedStudentInfo(classroom, user, false);
-    }
-
-    classroom.students = classroom.students.filter((u) => u.email !== user.email);
-    user.classes = user.classes.filter((c) => c.code !== classroom.code);
-
-    let success: boolean = await classroomDB.set(classroom.code, classroom);
-    success = await userDB.set(user.email, user) && success;
-    
-    return new RemovedStudentInfo(classroom, user, success);
-}
-
 export async function removeStudentV2(classroom: ClassroomV2, classroomDB: ClassroomV2DataBase, userDB: UserDataBase, user: User): Promise<RemovedStudentInfo<ClassroomV2>> {
     if (user.type !== Role.Student) {
         return new RemovedStudentInfo<ClassroomV2>(classroom, user, false);
@@ -174,3 +177,4 @@ export async function removeStudentV2(classroom: ClassroomV2, classroomDB: Class
     
     return new RemovedStudentInfo<ClassroomV2>(classroom, user, success);
 }
+*/
