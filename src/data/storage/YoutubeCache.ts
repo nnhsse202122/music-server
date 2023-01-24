@@ -348,26 +348,31 @@ export default class YoutubeCache {
         }
 
         this.logger.debug("Not in cache, fetching from youtube...");
-        let foundVideos = await youtube("v3").videos.list({
-            "part": ["snippet", "status", "contentDetails"],
-            "id": [id],
-            "key": this.apiKey
-        });
-        if (foundVideos.data.items != null) {
-            this.logger.debug("Successfully fetched...");
-            let firstVideo = foundVideos.data.items[0];
-            let data: RawVideoCache = {
-                author: firstVideo.snippet!.channelTitle!,
-                etag: firstVideo.etag!,
-                thumbnail: firstVideo.snippet!.thumbnails!.default!.url!,
-                expiresAt: long(Date.now() + VIDEO_EXPIRE_MS),
-                duration: firstVideo.contentDetails!.duration!,
-                id: firstVideo.id!,
-                title: firstVideo.snippet!.title!
-            };
+        try {
+            let foundVideos = await youtube("v3").videos.list({
+                "part": ["snippet", "status", "contentDetails"],
+                "id": [id],
+                "key": this.apiKey
+            });
+            if (foundVideos.data.items != null) {
+                this.logger.debug("Successfully fetched...");
+                let firstVideo = foundVideos.data.items[0];
+                let data: RawVideoCache = {
+                    author: firstVideo.snippet!.channelTitle!,
+                    etag: firstVideo.etag!,
+                    thumbnail: firstVideo.snippet!.thumbnails!.default!.url!,
+                    expiresAt: long(Date.now() + VIDEO_EXPIRE_MS),
+                    duration: firstVideo.contentDetails!.duration!,
+                    id: firstVideo.id!,
+                    title: firstVideo.snippet!.title!
+                };
 
-            this.logger.debug("Saved: " + await this._videoDB.put(data.id, data));
-            return new VideoCache(data, this._videoDB).toJSON();
+                this.logger.debug("Saved: " + await this._videoDB.put(data.id, data));
+                return new VideoCache(data, this._videoDB).toJSON();
+            }
+        }
+        catch (err) {
+            this.logger.warn("Error whilst fetching video from youtube: " + err);
         }
         return null;
     }
@@ -407,43 +412,48 @@ export default class YoutubeCache {
         }
 
         this.logger.debug("Not in cache, fetching from youtube...");
-        let searchedVideos = await youtube("v3").search.list({
-            "q": query,
-            "videoCategoryId": "10", // 10 is music category. 
-                                     // Look at https://developers.google.com/youtube/v3/docs/videoCategories/list
-                                     // for more info
-            "type": ["video"],
-            "part": ["snippet"],
-            "videoEmbeddable": "true",
-            "maxResults": 3,
-            "key": this.apiKey
-        });
+        try {
+            let searchedVideos = await youtube("v3").search.list({
+                "q": query,
+                "videoCategoryId": "10", // 10 is music category. 
+                                        // Look at https://developers.google.com/youtube/v3/docs/videoCategories/list
+                                        // for more info
+                "type": ["video"],
+                "part": ["snippet"],
+                "videoEmbeddable": "true",
+                "maxResults": 3,
+                "key": this.apiKey
+            });
 
-        let results: YoutubeVideo[] = [];
-        if (searchedVideos.data.items != null) {
-            for (let index = 0; index < searchedVideos.data.items.length; index++) {
-                let searchedVideo = searchedVideos.data.items[index];
-                let fetchedVideo = await this.fetch(searchedVideo.id!.videoId!);
-                if (fetchedVideo != null) {
-                    results.push(fetchedVideo);
+            let results: YoutubeVideo[] = [];
+            if (searchedVideos.data.items != null) {
+                for (let index = 0; index < searchedVideos.data.items.length; index++) {
+                    let searchedVideo = searchedVideos.data.items[index];
+                    let fetchedVideo = await this.fetch(searchedVideo.id!.videoId!);
+                    if (fetchedVideo != null) {
+                        results.push(fetchedVideo);
+                    }
                 }
+
+                let data: RawSearchCache = {
+                    "count": int(results.length),
+                    "etag": searchedVideos.data.etag!,
+                    "expiresAt": long(Date.now() + SEARCH_EXPIRE_MS),
+                    "query": query,
+                    "results": results.map((r) => r.id)
+                };
+
+                await this._searchDB.add(data.query, data);
+
+                return {
+                    "count": data.count,
+                    "results": results,
+                    "query": data.query
+                };
             }
-
-            let data: RawSearchCache = {
-                "count": int(results.length),
-                "etag": searchedVideos.data.etag!,
-                "expiresAt": long(Date.now() + SEARCH_EXPIRE_MS),
-                "query": query,
-                "results": results.map((r) => r.id)
-            };
-
-            await this._searchDB.add(data.query, data);
-
-            return {
-                "count": data.count,
-                "results": results,
-                "query": data.query
-            };
+        }
+        catch (err) {
+            this.logger.warn("Failed to fetch search from youtube: " + err);
         }
         return null;
     }
