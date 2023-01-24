@@ -1,15 +1,6 @@
+"use strict";
 // handles all overlay models
-/** @extends OverlayModelBase */
 class JoinClassOverlayModel extends OverlayModelBase {
-    /** @private */
-    _classCodeInput = undefined;
-    /** @private */
-    _joinErrorText = undefined;
-    /** @private */
-    _joinButton = undefined;
-    /** @private */
-    _cancelButton = undefined;
-    /** @public */
     constructor(overlay) {
         super(overlay, "join-class-model");
         this._classCodeInput = null;
@@ -17,19 +8,11 @@ class JoinClassOverlayModel extends OverlayModelBase {
         this._joinButton = null;
         this._cancelButton = null;
     }
-    /** @protected
-     * @param {HTMLDivElement} titleDiv
-     * @returns {void}
-     */
     instantiateTitle(titleDiv) {
         let titleSpan = document.createElement("span");
         titleSpan.textContent = "Join Classroom";
         titleDiv.appendChild(titleSpan);
     }
-    /** @protected
-     * @param {HTMLDivElement} bodyDiv
-     * @returns {void}
-     */
     instantiateBody(bodyDiv) {
         let bodyContent = document.createElement("div");
         this._classCodeInput = document.createElement("input");
@@ -47,10 +30,6 @@ class JoinClassOverlayModel extends OverlayModelBase {
         bodyDiv.appendChild(bodyContent);
         bodyDiv.appendChild(this._joinErrorText);
     }
-    /** @protected
-     * @param {HTMLDivElement} actionsDiv
-     * @returns {void}
-     */
     instantiateActions(actionsDiv) {
         this._joinButton = document.createElement("button");
         this._joinButton.classList.add("action");
@@ -65,30 +44,21 @@ class JoinClassOverlayModel extends OverlayModelBase {
         actionsDiv.appendChild(this._joinButton);
         actionsDiv.appendChild(this._cancelButton);
     }
-    /** @public
-     * @returns {void}
-     */
     onShow() {
         setTimeout(() => this._classCodeInput.focus(), 0);
     }
-    /** @private
-     * @returns {void}
-     */
     _onCancelButtonClick() {
         this._classCodeInput.value = "";
         this._joinErrorText.textContent = "";
         this.overlay.hide();
     }
-    /** @private
-     * @returns {Promise<void>}
-     */
     async _onJoinButtonClick() {
         let code = this._classCodeInput.value.trim();
         if (code.length === 0) {
             this._joinErrorText.textContent = "A class code is required";
             return;
         }
-        let data = await SongServerAPI(2).classroom(code).students.join();
+        let data = await SongServerAPI().classrooms.find(code).students.join();
         if (data.success) {
             window.location.reload();
         }
@@ -97,38 +67,20 @@ class JoinClassOverlayModel extends OverlayModelBase {
         }
     }
 }
-/** @extends OverlayModelBase */
 class DeleteSongFromPlaylistOverlayModel extends OverlayModelBase {
-    /** @private */
-    _deleteButton = undefined;
-    /** @private */
-    _cancelButton = undefined;
-    /** @public */
     constructor(overlay) {
         super(overlay, "are-you-sure-song");
         this._deleteButton = null;
         this._cancelButton = null;
     }
-    /** @protected
-     * @param {HTMLDivElement} titleDiv
-     * @returns {void}
-     */
     instantiateTitle(titleDiv) {
         let titleSpan = document.createElement("span");
         titleSpan.textContent = "Are You Sure?";
         titleDiv.appendChild(titleSpan);
     }
-    /** @protected
-     * @param {HTMLDivElement} bodyDiv
-     * @returns {void}
-     */
     instantiateBody(bodyDiv) {
         bodyDiv.textContent = "This will remove this song from the playlist. This can't be undone.";
     }
-    /** @protected
-     * @param {HTMLDivElement} actionsDiv
-     * @returns {void}
-     */
     instantiateActions(actionsDiv) {
         this._deleteButton = document.createElement("button");
         this._deleteButton.classList.add("action");
@@ -143,57 +95,48 @@ class DeleteSongFromPlaylistOverlayModel extends OverlayModelBase {
         actionsDiv.appendChild(this._cancelButton);
         actionsDiv.appendChild(this._deleteButton);
     }
-    /** @private
-     * @returns {Promise<void>}
-     */
     async _onDeleteButtonClicked() {
         this.overlay.show("loading");
-        let req = await SongServerAPI(2).classroom(classCode).playlist.songs.delete(this.getData("song-index"));
-        let currentSongReq = await SongServerAPI(2).classroom(classCode).playlist.currentSong.get();
-        if (req.success && currentSongReq.success) {
-            window.playlistController.refresh(req.data.songs, currentSongReq.data);
+        let req = await SongServerAPI().classrooms.find(classCode).playlist.songs.find(this.getData("song-index")).delete();
+        let currentSongReq = await SongServerAPI().classrooms.find(classCode).playlist.songs.currentSong.get();
+        if (req.success) {
+            let valid = false;
+            let songs;
+            let songData;
+            if (currentSongReq.success) {
+                valid = true;
+                songs = req.data.songs;
+                songData = currentSongReq.data;
+            }
+            else if (!currentSongReq.success && currentSongReq.id === "api.classroom.playlist.current_song.none") {
+                valid = true;
+                songs = req.data.songs;
+                songData = null;
+            }
+            if (valid && songs && songData) {
+                window.playlistController.refresh(songs, songData);
+            }
         }
         this.overlay.hide();
     }
-    /** @private
-     * @returns {void}
-     */
     _onCancelButtonClicked() {
         this.overlay.hide();
     }
 }
-/** @extends OverlayModelBase */
 class DeleteAllStudentsOverlayModel extends OverlayModelBase {
-    /** @private */
-    _deleteButton = undefined;
-    /** @private */
-    _cancelButton = undefined;
-    /** @public */
     constructor(overlay) {
         super(overlay, "are-you-sure-students");
         this._deleteButton = null;
         this._cancelButton = null;
     }
-    /** @protected
-     * @param {HTMLDivElement} titleDiv
-     * @returns {void}
-     */
     instantiateTitle(titleDiv) {
         let titleSpan = document.createElement("span");
         titleSpan.textContent = "Are You Sure?";
         titleDiv.appendChild(titleSpan);
     }
-    /** @protected
-     * @param {HTMLDivElement} bodyDiv
-     * @returns {void}
-     */
     instantiateBody(bodyDiv) {
         bodyDiv.textContent = "This will remove all students from your classroom! This can't be undone.";
     }
-    /** @protected
-     * @param {HTMLDivElement} actionsDiv
-     * @returns {void}
-     */
     instantiateActions(actionsDiv) {
         this._deleteButton = document.createElement("button");
         this._deleteButton.classList.add("action");
@@ -208,57 +151,33 @@ class DeleteAllStudentsOverlayModel extends OverlayModelBase {
         actionsDiv.appendChild(this._cancelButton);
         actionsDiv.appendChild(this._deleteButton);
     }
-    /** @private
-     * @returns {Promise<void>}
-     */
     async _onDeleteButtonClicked() {
         this.overlay.show("loading");
-        let response = await SongServerAPI(2).classroom(classCode).students.removeAll();
+        let response = await SongServerAPI().classrooms.find(classCode).students.removeAll();
         if (!response.success) {
             throw new Error(response.message);
         }
         displayStudents([]);
         this.overlay.hide();
     }
-    /** @private
-     * @returns {void}
-     */
     _onCancelButtonClicked() {
         this.overlay.hide();
     }
 }
-/** @extends OverlayModelBase */
 class DeleteStudentOverlayModel extends OverlayModelBase {
-    /** @private */
-    _deleteButton = undefined;
-    /** @private */
-    _cancelButton = undefined;
-    /** @public */
     constructor(overlay) {
         super(overlay, "are-you-sure-student");
         this._deleteButton = null;
         this._cancelButton = null;
     }
-    /** @protected
-     * @param {HTMLDivElement} titleDiv
-     * @returns {void}
-     */
     instantiateTitle(titleDiv) {
         let titleSpan = document.createElement("span");
         titleSpan.textContent = "Are You Sure?";
         titleDiv.appendChild(titleSpan);
     }
-    /** @protected
-     * @param {HTMLDivElement} bodyDiv
-     * @returns {void}
-     */
     instantiateBody(bodyDiv) {
         bodyDiv.textContent = "This will remove all songs submitted by this student and remove them from your class.";
     }
-    /** @protected
-     * @param {HTMLDivElement} actionsDiv
-     * @returns {void}
-     */
     instantiateActions(actionsDiv) {
         this._deleteButton = document.createElement("button");
         this._deleteButton.classList.add("action");
@@ -273,12 +192,9 @@ class DeleteStudentOverlayModel extends OverlayModelBase {
         actionsDiv.appendChild(this._cancelButton);
         actionsDiv.appendChild(this._deleteButton);
     }
-    /** @private
-     * @returns {Promise<void>}
-     */
     async _onDeleteButtonClicked() {
         this.overlay.show("loading");
-        let response = await SongServerAPI(2).classroom(classCode).students.find(this.getData("email")).remove();
+        let response = await SongServerAPI().classrooms.find(classCode).students.find(this.getData("email")).remove();
         if (!response.success) {
             this.overlay.hide();
             throw new Error(response.message);
@@ -291,72 +207,39 @@ class DeleteStudentOverlayModel extends OverlayModelBase {
         }
         this.overlay.hide();
     }
-    /** @private
-     * @returns {void}
-     */
     _onCancelButtonClicked() {
         this.overlay.hide();
     }
 }
-/** @extends OverlayModelBase */
 class LoadingOverlayModel extends OverlayModelBase {
-    /** @public */
     constructor(overlay) {
         super(overlay, "loading");
     }
-    /** @protected
-     * @param {HTMLDivElement} titleDiv
-     * @returns {void}
-     */
     instantiateTitle(titleDiv) {
         let titleSpan = document.createElement("span");
         titleSpan.textContent = "Loading";
         titleDiv.appendChild(titleSpan);
     }
-    /** @protected
-     * @param {HTMLDivElement} bodyDiv
-     * @returns {void}
-     */
     instantiateBody(bodyDiv) {
         bodyDiv.innerHTML = `<i class="fa-solid fa-spinner"></i>`;
     }
-    /** @protected
-     * @param {HTMLDivElement} actionsDiv
-     * @returns {void}
-     */
     instantiateActions(actionsDiv) {
         //
     }
 }
-/** @extends OverlayModelBase */
 class SettingsSavedOverlayModel extends OverlayModelBase {
-    /** @private */
-    _closeButton = undefined;
-    /** @public */
     constructor(overlay) {
         super(overlay, "settings-saved");
         this._closeButton = null;
     }
-    /** @protected
-     * @param {HTMLDivElement} titleDiv
-     * @returns {void}
-     */
     instantiateTitle(titleDiv) {
         let titleSpan = document.createElement("span");
         titleSpan.textContent = "Saved";
         titleDiv.appendChild(titleSpan);
     }
-    /** @protected
-     * @param {HTMLDivElement} bodyDiv
-     * @returns {void}
-     */
     instantiateBody(bodyDiv) {
         bodyDiv.innerHTML = `Your settings have been saved!`;
     }
-    /** @protected
-     * @param {HTMLDivElement} actionsDiv
-     * @returns {void}
-     */
     instantiateActions(actionsDiv) {
         this._closeButton = document.createElement("button");
         this._closeButton.classList.add("action");
@@ -365,32 +248,11 @@ class SettingsSavedOverlayModel extends OverlayModelBase {
         this._closeButton.innerHTML = `<i class="fa-solid fa-check"></i>`;
         actionsDiv.appendChild(this._closeButton);
     }
-    /** @private
-     * @returns {void}
-     */
     _onCloseButtonClicked() {
         this.overlay.hide();
     }
 }
-/** @extends OverlayModelBase */
 class CreateClassOverlayModel extends OverlayModelBase {
-    /** @private */
-    _submissionsEnabledCheckbox = undefined;
-    /** @private */
-    _submissionsRequireTokensCheckbox = undefined;
-    /** @private */
-    _joinableCheckbox = undefined;
-    /** @private */
-    _playlistVisibleCheckbox = undefined;
-    /** @private */
-    _classNameInput = undefined;
-    /** @private */
-    _createErrorText = undefined;
-    /** @private */
-    _createButton = undefined;
-    /** @private */
-    _cancelButton = undefined;
-    /** @public */
     constructor(overlay) {
         super(overlay, "create-class-model");
         this._classNameInput = null;
@@ -402,19 +264,11 @@ class CreateClassOverlayModel extends OverlayModelBase {
         this._joinableCheckbox = null;
         this._playlistVisibleCheckbox = null;
     }
-    /** @protected
-     * @param {HTMLDivElement} titleDiv
-     * @returns {void}
-     */
     instantiateTitle(titleDiv) {
         let titleSpan = document.createElement("span");
         titleSpan.textContent = "Create Classroom";
         titleDiv.appendChild(titleSpan);
     }
-    /** @protected
-     * @param {HTMLDivElement} bodyDiv
-     * @returns {void}
-     */
     instantiateBody(bodyDiv) {
         let bodyContent = document.createElement("div");
         this._classNameInput = document.createElement("input");
@@ -439,12 +293,6 @@ class CreateClassOverlayModel extends OverlayModelBase {
         bodyDiv.appendChild(bodyContent);
         bodyDiv.appendChild(this._createErrorText);
     }
-    /** @private
-     * @param {HTMLDivElement} container
-     * @param {string} title
-     * @param {string} id
-     * @returns {HTMLInputElement}
-     */
     instantiateSettingCheckbox(container, title, id) {
         let settingsItemDiv = document.createElement("div");
         settingsItemDiv.classList.add("settings-item");
@@ -460,10 +308,6 @@ class CreateClassOverlayModel extends OverlayModelBase {
         container.appendChild(settingsItemDiv);
         return checkbox;
     }
-    /** @protected
-     * @param {HTMLDivElement} actionsDiv
-     * @returns {void}
-     */
     instantiateActions(actionsDiv) {
         this._createButton = document.createElement("button");
         this._createButton.classList.add("action");
@@ -478,9 +322,6 @@ class CreateClassOverlayModel extends OverlayModelBase {
         actionsDiv.appendChild(this._createButton);
         actionsDiv.appendChild(this._cancelButton);
     }
-    /** @public
-     * @returns {void}
-     */
     onShow() {
         this._joinableCheckbox.checked = false;
         this._playlistVisibleCheckbox.checked = false;
@@ -488,24 +329,18 @@ class CreateClassOverlayModel extends OverlayModelBase {
         this._submissionsRequireTokensCheckbox.checked = false;
         setTimeout(() => this._classNameInput.focus(), 0);
     }
-    /** @private
-     * @returns {void}
-     */
     _onCancelButtonClick() {
         this._classNameInput.value = "";
         this._createErrorText.textContent = "";
         this.overlay.hide();
     }
-    /** @private
-     * @returns {Promise<void>}
-     */
     async _onCreateButtonClick() {
         let name = this._classNameInput.value.trim();
         if (name.length === 0) {
             this._createErrorText.textContent = "A class code is required";
             return;
         }
-        let data = await SongServerAPI(2).createClassroom({
+        let data = await SongServerAPI().classrooms.create({
             "name": name,
             "joinable": this._joinableCheckbox.checked,
             "allowSongSubmissions": this._submissionsEnabledCheckbox.checked,
@@ -520,42 +355,22 @@ class CreateClassOverlayModel extends OverlayModelBase {
         }
     }
 }
-/** @extends OverlayModelBase */
 class SubmitSongStudentOverlay extends OverlayModelBase {
-    /** @private */
-    _submitButton;
-    /** @private */
-    _cancelButton;
-
-    /** @public */
     constructor(overlay) {
         super(overlay, "submit-song-student-model");
         this._submitButton = null;
         this._cancelButton = null;
     }
-    /** @protected
-     * @param {HTMLDivElement} titleDiv
-     * @returns {void}
-     */
     instantiateTitle(titleDiv) {
         let titleSpan = document.createElement("span");
         titleSpan.textContent = "Submit Song";
         titleDiv.appendChild(titleSpan);
     }
-    /** @protected
-     * @param {HTMLDivElement} bodyDiv
-     * @returns {void}
-     */
     instantiateBody(bodyDiv) {
         let bodyContent = document.createElement("span");
         bodyContent.textContent = "Please confirm this song is 100% CLEAN: The song must not include obsecene language or inappropriate themes.";
-
         bodyDiv.appendChild(bodyContent);
     }
-    /** @protected
-     * @param {HTMLDivElement} actionsDiv
-     * @returns {void}
-     */
     instantiateActions(actionsDiv) {
         this._submitButton = document.createElement("button");
         this._submitButton.classList.add("action");
@@ -570,15 +385,10 @@ class SubmitSongStudentOverlay extends OverlayModelBase {
         actionsDiv.appendChild(this._submitButton);
         actionsDiv.appendChild(this._cancelButton);
     }
-
-    /** @private
-     * @returns {Promise<void>}
-     */
     async _onSubmitButtonClick() {
         this.overlay.hide();
         this.overlay.show("loading");
-
-        let req = await SongServerAPI(2).classroom(classCode).playlist.songs.add({
+        let req = await SongServerAPI().classrooms.find(classCode).playlist.songs.add({
             "id": this.getData("id"),
             "source": this.getData("source")
         });
@@ -592,50 +402,26 @@ class SubmitSongStudentOverlay extends OverlayModelBase {
             refreshStudentInfo();
         }
     }
-
-    /** @private
-     * #returns {void}
-     */
     _onCancelButtonClick() {
         this.overlay.hide();
     }
 }
-/** @extends OverlayModelBase */
 class SubmitSongTeacherOverlay extends OverlayModelBase {
-    /** @private */
-    _submitButton;
-    /** @private */
-    _cancelButton;
-
-    /** @public */
     constructor(overlay) {
         super(overlay, "submit-song-teacher-model");
         this._submitButton = null;
         this._cancelButton = null;
     }
-    /** @protected
-     * @param {HTMLDivElement} titleDiv
-     * @returns {void}
-     */
     instantiateTitle(titleDiv) {
         let titleSpan = document.createElement("span");
         titleSpan.textContent = "Submit Song";
         titleDiv.appendChild(titleSpan);
     }
-    /** @protected
-     * @param {HTMLDivElement} bodyDiv
-     * @returns {void}
-     */
     instantiateBody(bodyDiv) {
         let bodyContent = document.createElement("span");
         bodyContent.textContent = "Add this song to the playlist?";
-
         bodyDiv.appendChild(bodyContent);
     }
-    /** @protected
-     * @param {HTMLDivElement} actionsDiv
-     * @returns {void}
-     */
     instantiateActions(actionsDiv) {
         this._submitButton = document.createElement("button");
         this._submitButton.classList.add("action");
@@ -650,73 +436,46 @@ class SubmitSongTeacherOverlay extends OverlayModelBase {
         actionsDiv.appendChild(this._submitButton);
         actionsDiv.appendChild(this._cancelButton);
     }
-
-    /** @private
-     * @returns {Promise<void>}
-     */
     async _onSubmitButtonClick() {
         this.overlay.hide();
         this.overlay.show("loading");
-
-        let req = await SongServerAPI(2).classroom(classCode).playlist.songs.add({
+        let req = await SongServerAPI().classrooms.find(classCode).playlist.songs.add({
             "id": this.getData("id"),
             "source": this.getData("source")
         });
         if (!req.success) {
-            this.overlay.show("submit-song-fail-model", { message: data.message });
+            this.overlay.show("submit-song-fail-model", { message: req.message });
         }
         else {
             this.overlay.show("submit-song-success-model");
             SongSearchManager.resetCurrent();
-            let currentSongReq = await SongServerAPI(2).classroom(classCode).playlist.currentSong.get();
+            let currentSongReq = await SongServerAPI().classrooms.find(classCode).playlist.songs.currentSong.get();
             if (!currentSongReq.success) {
-                this.overlay.show("submit-song-fail-model", { message: data.message });
+                this.overlay.show("submit-song-fail-model", { message: currentSongReq.message });
+                return;
             }
-
             window.playlistController.refresh(req.data, currentSongReq.data);
         }
     }
-
-    /** @private
-     * @returns {void}
-     */
     _onCancelButtonClick() {
         this.overlay.hide();
     }
 }
-/** @extends OverlayModelBase */
 class SubmitSongFailOverlayModel extends OverlayModelBase {
-    /** @private */
-    _closeButton = undefined;
-    /** @private */
-    _text = undefined;
-    /** @public */
     constructor(overlay) {
         super(overlay, "submit-song-fail-model");
         this._closeButton = null;
         this._text = null;
     }
-    /** @protected
-     * @param {HTMLDivElement} titleDiv
-     * @returns {void}
-     */
     instantiateTitle(titleDiv) {
         let titleSpan = document.createElement("span");
         titleSpan.textContent = "Submission Failed";
         titleDiv.appendChild(titleSpan);
     }
-    /** @protected
-     * @param {HTMLDivElement} bodyDiv
-     * @returns {void}
-     */
     instantiateBody(bodyDiv) {
         this._text = document.createElement("span");
         bodyDiv.appendChild(this._text);
     }
-    /** @protected
-     * @param {HTMLDivElement} actionsDiv
-     * @returns {void}
-     */
     instantiateActions(actionsDiv) {
         this._closeButton = document.createElement("button");
         this._closeButton.classList.add("action");
@@ -725,50 +484,26 @@ class SubmitSongFailOverlayModel extends OverlayModelBase {
         this._closeButton.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
         actionsDiv.appendChild(this._closeButton);
     }
-    /** @private
-     * @returns {void}
-     */
     _onCloseButtonClicked() {
         this.overlay.hide();
     }
-
-    /** @public
-     * @override
-     * @returns {void}
-     */
     onShow() {
         this._text.textContent = this.getData("message");
     }
 }
-/** @extends OverlayModelBase */
 class SubmitSongSuccessOverlayModel extends OverlayModelBase {
-    /** @private */
-    _closeButton = undefined;
-    /** @public */
     constructor(overlay) {
         super(overlay, "submit-song-success-model");
         this._closeButton = null;
     }
-    /** @protected
-     * @param {HTMLDivElement} titleDiv
-     * @returns {void}
-     */
     instantiateTitle(titleDiv) {
         let titleSpan = document.createElement("span");
         titleSpan.textContent = "Submission Success";
         titleDiv.appendChild(titleSpan);
     }
-    /** @protected
-     * @param {HTMLDivElement} bodyDiv
-     * @returns {void}
-     */
     instantiateBody(bodyDiv) {
         bodyDiv.textContent = "The song has been added to the playlist";
     }
-    /** @protected
-     * @param {HTMLDivElement} actionsDiv
-     * @returns {void}
-     */
     instantiateActions(actionsDiv) {
         this._closeButton = document.createElement("button");
         this._closeButton.classList.add("action");
@@ -777,42 +512,23 @@ class SubmitSongSuccessOverlayModel extends OverlayModelBase {
         this._closeButton.innerHTML = `<i class="fa-solid fa-check"></i>`;
         actionsDiv.appendChild(this._closeButton);
     }
-    /** @private
-     * @returns {void}
-     */
     _onCloseButtonClicked() {
         this.overlay.hide();
     }
 }
-/** @extends OverlayModelBase */
 class ReloginOverlayModel extends OverlayModelBase {
-    /** @private */
-    _confirmButton = undefined;
-    /** @public */
     constructor(overlay) {
         super(overlay, "relogin-model");
         this._confirmButton = null;
     }
-    /** @protected
-     * @param {HTMLDivElement} titleDiv
-     * @returns {void}
-     */
     instantiateTitle(titleDiv) {
         let titleSpan = document.createElement("span");
         titleSpan.textContent = "Authorization Expired";
         titleDiv.appendChild(titleSpan);
     }
-    /** @protected
-     * @param {HTMLDivElement} bodyDiv
-     * @returns {void}
-     */
     instantiateBody(bodyDiv) {
         bodyDiv.textContent = "You must login again to perform this action. Click the checkmark below to login again...";
     }
-    /** @protected
-     * @param {HTMLDivElement} actionsDiv
-     * @returns {void}
-     */
     instantiateActions(actionsDiv) {
         this._confirmButton = document.createElement("button");
         this._confirmButton.classList.add("action");
@@ -821,52 +537,28 @@ class ReloginOverlayModel extends OverlayModelBase {
         this._confirmButton.innerHTML = `<i class="fa-solid fa-check"></i>`;
         actionsDiv.appendChild(this._confirmButton);
     }
-    /** @private
-     * @returns {void}
-     */
     _onCancelButtonClick() {
         this.overlay.hide();
     }
-    /** @private
-     * @returns {void}
-     */
     _onConfirmButtonClick() {
         this.overlay.hide();
         window.location.reload();
     }
 }
-/** @extends OverlayModelBase */
 class DeleteClassOverlayModel extends OverlayModelBase {
-    /** @private */
-    _deleteButton = undefined;
-    /** @private */
-    _cancelButton = undefined;
-    /** @public */
     constructor(overlay) {
         super(overlay, "are-you-sure-class");
         this._deleteButton = null;
         this._cancelButton = null;
     }
-    /** @protected
-     * @param {HTMLDivElement} titleDiv
-     * @returns {void}
-     */
     instantiateTitle(titleDiv) {
         let titleSpan = document.createElement("span");
         titleSpan.textContent = "Are You Sure?";
         titleDiv.appendChild(titleSpan);
     }
-    /** @protected
-     * @param {HTMLDivElement} bodyDiv
-     * @returns {void}
-     */
     instantiateBody(bodyDiv) {
         bodyDiv.textContent = "This will permanently delete the class. Are you sure you want to do this? This cannot be undone.";
     }
-    /** @protected
-     * @param {HTMLDivElement} actionsDiv
-     * @returns {void}
-     */
     instantiateActions(actionsDiv) {
         this._deleteButton = document.createElement("button");
         this._deleteButton.classList.add("action");
@@ -881,26 +573,20 @@ class DeleteClassOverlayModel extends OverlayModelBase {
         actionsDiv.appendChild(this._cancelButton);
         actionsDiv.appendChild(this._deleteButton);
     }
-    /** @private
-     * @returns {Promise<void>}
-     */
     async _onDeleteButtonClicked() {
         this.overlay.show("loading");
-        let req = await SongServerAPI(2).classroom(classCode).delete();
-        let currentSongReq = await SongServerAPI(2).classroom(classCode).playlist.currentSong.get();
+        let req = await SongServerAPI().classrooms.find(classCode).delete();
+        let currentSongReq = await SongServerAPI().classrooms.find(classCode).playlist.songs.currentSong.get();
         if (req.success && currentSongReq.success) {
-            window.playlistController.refresh(req.data.songs, currentSongReq.data);
+            window.playlistController.refresh([], currentSongReq.data);
         }
         this.overlay.hide();
     }
-    /** @private
-     * @returns {void}
-     */
     _onCancelButtonClicked() {
         this.overlay.hide();
     }
 }
-var overlayManager = new Overlay();
+var overlayManager = new OverlayManager();
 overlayManager.addOverlay(JoinClassOverlayModel);
 overlayManager.addOverlay(CreateClassOverlayModel);
 overlayManager.addOverlay(DeleteSongFromPlaylistOverlayModel);

@@ -9,7 +9,7 @@
 
 .header {
     background-color: var(--nav-bg-color);
-    height: 75px;
+    height: var(--nav-height);
 
     --nav-item-count: 1;
     --nav-title-size: max(30%, 250px);
@@ -19,7 +19,7 @@
     grid-template-columns: var(--nav-title-size) calc(100% - var(--nav-title-size));
     padding: 0px var(--nav-padding);
 
-    position: sticky;
+    position: fixed;
     left: 0px;
     right: 0px;
     top: 0px;

@@ -1,15 +1,6 @@
-
-/** */
+"use strict";
+/// <reference path="../../types/youtube.d.ts"/>
 class YTPlayer {
-    /** @private */
-    _paused = undefined;
-    /** @private */
-    _buffering = undefined;
-    /** @private */
-    _ended = undefined;
-    /** @private */
-    _player = undefined;
-    /** @public */
     constructor() {
         // load iframe api thingy
         let loader = document.createElement("script");
@@ -20,21 +11,15 @@ class YTPlayer {
         this._ended = false;
         this._player = null;
     }
-    /** @public */
     get paused() {
         return this._paused;
     }
-    /** @public */
     get buffering() {
         return this._buffering;
     }
-    /** @public */
     get ended() {
         return this._ended;
     }
-    /** @public
-     * @returns {void}
-     */
     togglePause() {
         console.log("Toggle pause!");
         if (!this._buffering) {
@@ -47,9 +32,6 @@ class YTPlayer {
             }
         }
     }
-    /** @param {YT.EventArgs} event
-     * @returns {void}
-     */
     _onPlayerStateChange(event) {
         console.log("playerStateChange!");
         console.log(event);
@@ -74,7 +56,6 @@ class YTPlayer {
             this._ended = false;
         }
     }
-    /** @returns {void} */
     init() {
         this._player = new YT.Player("player", {
             height: "300",
@@ -110,24 +91,15 @@ class YTPlayer {
     }
     /**
      * Loads a video from a video ID into the video player.
-     * @param {string} videoID  The video ID
-     * @public
-     * @returns {void}
+     * @param videoID  The video ID
      */
     loadVideo(videoID) {
         this._buffering = true;
         this._player?.loadVideoById(videoID);
     }
-    /** @public
-     * @param {number} volume
-     * @returns {void}
-     */
     setVolume(volume) {
         this._player?.setVolume(volume);
     }
-    /** @public
-     * @returns {number}
-     */
     getVolume() {
         let getVolFn = this._player?.getVolume;
         if (getVolFn != null)
@@ -140,7 +112,3 @@ var player = new YTPlayer();
 function onYouTubeIframeAPIReady() {
     window.player.init();
 }
-
-
-
-

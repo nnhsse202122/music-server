@@ -10,6 +10,7 @@ import pathUtil from "path";
 import DataBaseManager from "./data/storage/DataBaseManager";
 import SongSource from "./data/playlists/SongSource";
 import APIController from "./api/APIController";
+import { getAsAPIError } from "./util/api/APIErrorList";
 
 var DISABLE_WITH_MESSAGE: string | null = null;
 
@@ -169,11 +170,10 @@ export default class ServerInstance {
                 let requestPath = req.path;
                 if (!requestPath.startsWith("/")) requestPath = "/" + requestPath;
                 if (requestPath.startsWith("/api")) {
-                    res.contentType("application/json").send(JSON.stringify({
-                        "code": 0,
-                        "message": "Unknown API Endpoint/Route",
-                        "success": false
-                    }));
+                    
+                    res.contentType("application/json").send(JSON.stringify(getAsAPIError("api.route.not_found", {
+                        "route": requestPath.slice(4)
+                    })));
                     return;
                 }
                 next();

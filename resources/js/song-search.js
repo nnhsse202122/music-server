@@ -1,28 +1,8 @@
+"use strict";
 class SongSearchManager {
-
-    /** @private */
-    m_isTeacher;
-    /** @private */
-    m_container;
-    /** @private */
-    m_results;
-    /** @private */
-    m_search;
-
-    /** @private
-     * @static */
-    static s_current;
-    /** @public
-     * @static
-     * @type {SongSearchManager}
-     */
     static get current() {
         return SongSearchManager.s_current;
     }
-
-    /** @public
-     * @param {boolean} isTeacher 
-     */
     constructor(isTeacher) {
         SongSearchManager.s_current = this;
         this.m_isTeacher = isTeacher;
@@ -32,8 +12,7 @@ class SongSearchManager {
             if (ev.key == "Enter") {
                 this.search();
             }
-        })
-
+        });
         this.m_container = document.getElementById("song-search-results");
         this.m_results = [];
         let children = this.m_container.getElementsByClassName("search-result");
@@ -41,17 +20,9 @@ class SongSearchManager {
             this.m_results.push(new SongSearchResult(this, children[index]));
         }
     }
-
-    /** @public
-     * @type {boolean}
-     */
     get isTeacher() {
         return this.m_isTeacher;
     }
-
-    /** @public
-     * @returns {Promise<void>}
-     */
     async search() {
         overlayManager.show("loading");
         this.m_results.forEach((result) => result.hide());
@@ -68,48 +39,16 @@ class SongSearchManager {
             this.m_results[index].show(song.id, "youtube", song.title, song.thumbnail, song.author, song.duration);
         }
     }
-
-    /** @public
-     * @returns {void}
-     */
     reset() {
         this.m_search.value = "";
         this.m_results.forEach((result) => result.hide());
     }
-
-    /** @public
-     * @static
-     * @returns {void}
-     */
     static resetCurrent() {
         this.current.reset();
     }
 }
-
+SongSearchManager.s_current = null;
 class SongSearchResult {
-    /** @private */
-    _songTitle;
-    /** @private */
-    _songAuthor;
-    /** @private */
-    _songDuration;
-    /** @private */
-    _div;
-    /** @private */
-    _addSongButton;
-    /** @private */
-    _songLinkButton;
-    /** @private */
-    _imageTemp;
-    /** @private */
-    _image;
-    /** @private */
-    _manager;
-
-    /** @public
-     * @param {SongSearchManager} manager 
-     * @param {HTMLDivElement} div 
-     */
     constructor(manager, div) {
         this._div = div;
         this._songTitle = div.getElementsByClassName("song-title")[0];
@@ -123,26 +62,12 @@ class SongSearchResult {
         this._manager = manager;
         this._div.style.display = "none";
     }
-
-    /** @public
-     * @returns {void}
-     */
     hide() {
         this._div.style.display = "none";
         this._div.setAttribute("data-song-id", "");
         this._div.setAttribute("data-song-source", "");
         this._songTitle.textContent = "";
     }
-
-    /** @public
-     * @param {string} id 
-     * @param {string} source 
-     * @param {string} title 
-     * @param {string|null} thumbnail 
-     * @param {string} author 
-     * @param {string} duration 
-     * @returns {void}
-     */
     show(id, source, title, thumbnail, author, duration) {
         this._image.src = thumbnail;
         this._imageTemp.style.display = thumbnail == null ? "block" : "none";
@@ -154,14 +79,11 @@ class SongSearchResult {
         this._songTitle.textContent = title.replace(/\&quot;/gi, '"').replace(/\&#39;/gi, "'").replace(/\&amp;/gi, "&");
         this._songLinkButton.children[0].setAttribute("href", `/songs/${source}/${id}`);
     }
-
-    /** @private */
     _onAddSongClick() {
         let data = {
             "id": this._div.getAttribute("data-song-id"),
             "source": this._div.getAttribute("data-song-source")
         };
-
         overlayManager.show("submit-song-" + (this._manager.isTeacher ? "teacher" : "student") + "-model", data);
     }
 }

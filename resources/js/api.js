@@ -1,50 +1,31 @@
-const SongServer = {
-    "API": {
-        "SongModificationType": {
-            "NONE": 0,
-            "ADDED": 1,
-            "MOVED": 2,
-            "DELETED": 3,
-            "0": "NONE",
-            "1": "ADDED",
-            "2": "MOVED",
-            "3": "DELETED",
-        },
-        "APIResponseErrorCode": {
-            "REQUEST_ERROR": 0,
-            "INVALID": 1,
-            "0": "REQUEST_ERROR",
-            "1": "INVALID"
-        }
-    }
-}
-
-/** @param {SongServer.API.SongModificationType} type
- * @returns {"none" | "addition" | "moved" | "deleted"}
- */
-function convertSongModificationTypeToString(type) {
-    if (type === SongServer.API.SongModificationType.NONE) {
-        return "none";
-    }
-    else if (type === SongServer.API.SongModificationType.ADDED) {
-        return "addition";
-    }
-    else if (type === SongServer.API.SongModificationType.MOVED) {
-        return "moved";
-    }
-    else if (type === SongServer.API.SongModificationType.DELETED) {
-        return "deleted";
-    }
-    throw new TypeError("invalid modification type");
-}
-// @ts-ignore
-const SongServerAPI = (apiVersion = 1) => {
+"use strict";
+/// <reference path="../../types/api.d.ts"/>
+// const SongServer = {
+//     "API": {
+//         "SongModificationType": {
+//             "NONE": 0,
+//             "ADDED": 1,
+//             "MOVED": 2,
+//             "DELETED": 3,
+//             "0": "NONE",
+//             "1": "ADDED",
+//             "2": "MOVED",
+//             "3": "DELETED",
+//         },
+//         "APIResponseErrorCode": {
+//             "REQUEST_ERROR": 0,
+//             "INVALID": 1,
+//             "0": "REQUEST_ERROR",
+//             "1": "INVALID"
+//         }
+//     }
+// }
+const SongServerAPI = (apiVersion = 2) => {
     let cookies = document.cookie.split(";").reduce((obj, cookie) => {
         let parts = cookie.split("=", 2);
         obj[parts[0].trim()] = parts[1];
         return obj;
     }, {});
-
     async function handleReq(method, url, authorization, body) {
         let authInfo = undefined;
         if (authorization !== undefined) {
@@ -77,6 +58,7 @@ const SongServerAPI = (apiVersion = 1) => {
         };
         let response;
         try {
+            // @ts-ignore
             let res = await fetch(url, req);
             response = await res.json();
             console.group("API Response");
@@ -84,16 +66,20 @@ const SongServerAPI = (apiVersion = 1) => {
             console.debug(response);
             if (res.status == 401) {
                 setTimeout(() => {
-                    overlayManager.show("relogin-model");
+                    window.overlayManager.show("relogin-model");
                 }, 0);
             }
             console.groupEnd();
         }
         catch (err) {
             response = {
-                "message": new String(err),
                 "success": false,
-                "code": SongServer.API.APIResponseErrorCode.REQUEST_ERROR
+                "id": "api.request.error.internal",
+                "message": "An internal error occurred while processing the request:\n" + err,
+                "parameters": {
+                    "error": "" + err
+                },
+                "status": 0
             };
         }
         return response;
@@ -119,111 +105,149 @@ const SongServerAPI = (apiVersion = 1) => {
         return await handleReq("PUT", createUrl(url), authorization, body);
     }
     return {
-        "classroom": function (code) {
-            return {
-                "delete": async (auth = null) => {
-                    return await deleteReq(`/classrooms/${code}`, auth);
-                },
-                "students": {
-                    "find": (email) => {
-                        return {
-                            "remove": async (auth = null) => {
-                                return await deleteReq(`/classrooms/${code}/students/${email}`, auth);
+        "classrooms": {
+            "create": (body, auth = null) => {
+                return postReq("/classrooms", auth, body);
+            },
+            "find": (code) => {
+                return {
+                    "delete": (auth = null) => {
+                        return deleteReq(`/classrooms/${code}`, auth);
+                    },
+                    "get": (auth = null) => {
+                        return getReq(`/classrooms/${code}`, auth);
+                    },
+                    "playlist": {
+                        "songs": {
+                            "find": (index) => {
+                                return {
+                                    "like": (auth = null) => {
+                                        return postReq(`/classrooms/${code}/playlist/songs/likes`, auth, { "index": index });
+                                    },
+                                    "prioritize": (auth = null) => {
+                                        return postReq(`/classrooms/${code}/playlist/songs/prioritize`, auth, { "index": index });
+                                    },
+                                    "delete": (auth = null) => {
+                                        return deleteReq(`/classrooms/${code}/playlist/songs`, auth, {
+                                            "index": index
+                                        });
+                                    },
+                                };
                             },
-                            "tokens": {
-                                "get": async (auth = null) => {
-                                    return await getReq(`/classrooms/${code}/students/${email}/tokens`, auth);
+                            "add": (body, auth = null) => {
+                                return postReq(`/classrooms/${code}/playlist/songs`, auth, body);
+                            },
+                            "currentSong": {
+                                "get": (auth = null) => {
+                                    return getReq(`/classrooms/${code}/playlist/current-song`, auth);
                                 },
-                                "set": async (tokens, auth = null) => {
-                                    return await postReq(`/classrooms/${code}/students/${email}/tokens`, auth, {
-                                        "tokens": tokens
-                                    });
+                                "set": (index, auth = null) => {
+                                    return postReq(`/classrooms/${code}/playlist/current-song/`, auth, { "index": index });
                                 }
                             },
-                            "likes": {
-                                "get": async (auth = null) => {
-                                    return await getReq(`/classrooms/${code}/students/${email}/likes`, auth);
-                                },
-                                "set": async (likes, auth = null) => {
-                                    return await postReq(`/classrooms/${code}/students/${email}/likes`, auth, {
-                                        "likes": likes
-                                    });
-                                }
+                            "list": (auth = null) => {
+                                return getReq(`/classrooms/${code}/playlist/songs`, auth);
                             }
-                        };
-                    },
-                    "join": async (auth = null) => {
-                        return postReq(`/classrooms/${code}/students/`, auth);
-                    },
-                    "list": async (auth = null) => {
-                        return await getReq(`/classrooms/${code}/students/`, auth);
-                    },
-                    "removeAll": async (auth = null) => {
-                        return await deleteReq(`/classrooms/${code}/students/`, auth);
-                    }
-                },
-                "settings": {
-                    "get": async (auth = null) => {
-                        return await getReq(`/classrooms/${code}/settings/`, auth);
-                    },
-                    "update": async (newSettings, auth = null) => {
-                        return await patchReq(`/classrooms/${code}/settings/`, auth, newSettings);
-                    },
-                    "set": async (newSettings, auth = null) => {
-                        return await postReq(`/classrooms/${code}/settings/`, auth, newSettings);
-                    }
-                },
-                "playlist": {
-                    "get": async (auth = null) => {
-                        return await getReq(`/classrooms/${code}/playlist/`, auth);
-                    },
-                    "currentSong": {
-                        "get": async (auth = null) => {
-                            return await getReq(`/classrooms/${code}/playlist/current-song/`, auth);
                         },
-                        "set": async (index, auth = null) => {
-                            return await postReq(`/classrooms/${code}/playlist/current-song/`, auth, { "index": index });
+                        "nextSong": (auth = null) => {
+                            return postReq(`/classrooms/${code}/playlist/next-song/`, auth);
+                        },
+                        "previousSong": (auth = null) => {
+                            return postReq(`/classrooms/${code}/playlist/previous-song/`, auth);
+                        },
+                        "shuffle": (auth = null) => {
+                            return postReq(`/classrooms/${code}/playlist/shuffle/`, auth);
                         }
                     },
-                    "nextSong": async (auth = null) => {
-                        return await postReq(`/classrooms/${code}/playlist/next-song/`, auth);
+                    "settings": {
+                        "get": (auth = null) => {
+                            return getReq(`/classrooms/${code}/settings`, auth);
+                        },
+                        "set": (body, auth = null) => {
+                            return postReq(`/classrooms/${code}/settings`, auth, body);
+                        },
+                        "update": (body, auth = null) => {
+                            return putReq(`/classrooms/${code}/settings`, auth, body);
+                        }
                     },
-                    "previousSong": async (auth = null) => {
-                        return await postReq(`/classrooms/${code}/playlist/previous-song/`, auth);
-                    },
-                    "shuffle": async (auth = null) => {
-                        return await postReq(`/classrooms/${code}/playlist/shuffle/`, auth);
-                    },
-                    "songs": {
-                        "get": async (auth = null) => {
-                            return await getReq(`/classrooms/${code}/playlist/songs`, auth);
+                    "students": {
+                        "find": (email) => {
+                            return {
+                                "remove": (auth = null) => {
+                                    return deleteReq(`/classrooms/${code}/students/${email}`, auth);
+                                },
+                                "tokens": {
+                                    "get": (auth = null) => {
+                                        return getReq(`/classrooms/${code}/students/${email}/tokens`, auth);
+                                    },
+                                    "set": (tokens, auth = null) => {
+                                        return postReq(`/classrooms/${code}/students/${email}/tokens`, auth, {
+                                            "tokens": tokens
+                                        });
+                                    }
+                                },
+                                "likes": {
+                                    "get": (auth = null) => {
+                                        return getReq(`/classrooms/${code}/students/${email}/likes`, auth);
+                                    },
+                                    "set": (likes, auth = null) => {
+                                        return postReq(`/classrooms/${code}/students/${email}/likes`, auth, {
+                                            "likes": likes
+                                        });
+                                    }
+                                }
+                            };
                         },
-                        "move": async (oldIndex, newIndex, auth = null) => {
-                            return await putReq(`/classrooms/${code}/playlist/songs`, auth, {
-                                "oldIndex": oldIndex,
-                                "newIndex": newIndex
-                            });
+                        "join": (auth = null) => {
+                            return postReq(`/classrooms/${code}/students/`, auth);
                         },
-                        "likeSong": async (index, auth = null) => {
-                            return await postReq(`/classrooms/${code}/playlist/songs/likes`, auth, { "index": index });
+                        "list": (auth = null) => {
+                            return getReq(`/classrooms/${code}/students/`, auth);
                         },
-                        "prioritizeSong": async (index, auth = null) => {
-                            return await postReq(`/classrooms/${code}/playlist/songs/prioritize`, auth, { "index": index });
-                        },
-                        "add": async (song, auth = null) => {
-                            return await postReq(`/classrooms/${code}/playlist/songs`, auth, song);
-                        },
-                        "delete": async (index, auth = null) => {
-                            return await deleteReq(`/classrooms/${code}/playlist/songs`, auth, {
-                                "index": index
-                            });
-                        },
-                    },
-                }
-            };
+                        "removeAll": (auth = null) => {
+                            return deleteReq(`/classrooms/${code}/students/`, auth);
+                        }
+                    }
+                };
+            },
+            "list": (auth = null) => {
+                return getReq("/classrooms", auth);
+            }
         },
-        "createClassroom": async (body, auth = null) => {
-            return await postReq(`/classrooms`, auth, body);
+        "authorization": {
+            "auth": (body) => {
+                return Promise.resolve({
+                    "success": false,
+                    "id": "api.not_implemented",
+                    "message": "Not implemented",
+                    "status": 0,
+                    "parameters": {}
+                });
+            }
+        },
+        "users": {
+            "me": () => {
+                return {
+                    "get": (auth = null) => {
+                        return getReq("/users/@me", auth);
+                    }
+                };
+            },
+            "find": (email) => {
+                return {
+                    "get": (auth = null) => {
+                        return getReq(`/users/${email}`, auth);
+                    }
+                };
+            }
+        },
+        "beans": {
+            "get": () => {
+                return getReq("/beans", undefined);
+            },
+            "set": (body) => {
+                return postReq("/beans", undefined, body);
+            }
         },
         "youtube": {
             "search": async (query, auth = null) => {
@@ -235,7 +259,3 @@ const SongServerAPI = (apiVersion = 1) => {
         }
     };
 };
-
-
-
-

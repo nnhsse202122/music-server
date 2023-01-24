@@ -11,3 +11,7 @@ body {
     margin: 0px;
     padding: 0px;
 }
+
+main {
+    margin-top: var(--nav-height);
+}

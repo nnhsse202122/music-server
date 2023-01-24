@@ -1,49 +1,21 @@
-
+"use strict";
 /** */
 class SidebarButton {
-    /** @public */
-    button = undefined;
-    /** @public */
-    model = undefined;
-    /** @public */
-    id = undefined;
-    /** @private */
-    _callback = undefined;
-    /** @private */
-    _controller = undefined;
-    /** @private */
-    _active = undefined;
     /**
      * Initializes a new sidebar button
-     * @param {string} id The ID of the element for the button
-     * @param {SidebarController} controller The controller for this button
-     * @param {() => any} callback A function called whenever this sidebar button is enabled.
+     * @param id The ID of the element for the button
+     * @param controller The controller for this button
+     * @param callback A function called whenever this sidebar button is enabled.
      */
     constructor(id, controller, callback) {
-        /** @type {HTMLButtonElement} */
         this.button = document.getElementById(id);
-        /** @type {HTMLDivElement} */
         this.model = document.getElementById(id + "-model");
-        /** @type {string} */
         this.id = id;
-        /**
-         * @private
-         * @type {() => any}
-         */
         this._callback = callback;
-        /**
-         * @private
-         * @type {SidebarController}
-         */
         this._controller = controller;
-        /**
-         * @private
-         * @type {boolean}
-         */
         this._active = false;
         this.button.addEventListener("click", () => this._controller.toggle(this.id));
     }
-    /** @returns {void} */
     enable() {
         if (this._active)
             return;
@@ -52,7 +24,6 @@ class SidebarButton {
         this.model.classList.add("active");
         this._callback();
     }
-    /** @returns {void} */
     disable() {
         if (!this._active)
             return;
@@ -60,7 +31,6 @@ class SidebarButton {
         this.button.classList.remove("active");
         this.model.classList.remove("active");
     }
-    /** @returns {void} */
     toggle() {
         if (this._active) {
             this.disable();
@@ -70,30 +40,21 @@ class SidebarButton {
         }
     }
 }
-/** */
 class SidebarController {
-    /** @private */
-    _buttons = undefined;
     constructor() {
-        /**
-         * @private
-         * @type {SidebarButton[]}
-         */
         this._buttons = [];
     }
     /**
      * Adds a button to the controller.
-     * @param {string} id  The ID of the button
-     * @param {() => any} callback  The callback to be called.
-     * @returns {void}
+     * @param id  The ID of the button
+     * @param callback  The callback to be called.
      */
     addButton(id, callback) {
         this._buttons.push(new SidebarButton(id, this, callback));
     }
     /**
      * Toggles a specific sidebar button.
-     * @param {string} id  The ID of the button to toggle
-     * @returns {void}
+     * @param id  The ID of the button to toggle
      */
     toggle(id) {
         for (let index = 0, length = this._buttons.length; index < length; index++) {
@@ -127,6 +88,7 @@ let removeAllStudentsYesButton = document.getElementById("remove-all-students-ye
 let removeAllStudentsNoButton = document.getElementById("remove-all-students-no");
 let revertSettingsButton = document.getElementById("revert-settings");
 let saveSettingsButton = document.getElementById("save-settings");
+// @ts-ignore
 let playlistContainer = document.getElementById("playlist-container");
 classSubmitEnabledCheckbox.addEventListener("change", () => {
     updateSettings();
@@ -174,7 +136,7 @@ controller.addButton("delete", () => {
 /** @returns {Promise<void>} */
 async function revertSettings() {
     window.overlayManager.show("loading");
-    let response = await SongServerAPI(2).classroom(classCode).settings.get();
+    let response = await SongServerAPI().classrooms.find(classCode).settings.get();
     if (!response.success) {
         window.overlayManager.hide();
         window.alert("Error whilst fetching settings: " + response.message);
@@ -187,15 +149,15 @@ async function revertSettings() {
     classPlaylistVisibleCheckbox.checked = response.data.playlistVisible;
     classLikesEnabledCheckbox.checked = response.data.likesEnabled;
     classPriorityEnabledCheckbox.checked = response.data.priorityEnabled;
-    classPriorityCostInput.value = response.data.priorityCost;
-    classLikeCountVisibilityCheckbox.chcked = response.data.likesVisible;
+    classPriorityCostInput.value = response.data.priorityCost.toString();
+    classLikeCountVisibilityCheckbox.checked = response.data.likesVisible;
     updateSettings();
     window.overlayManager.hide();
 }
 /** @returns {Promise<void>} */
 async function saveSettings() {
     window.overlayManager.show("loading");
-    let response = await SongServerAPI(2).classroom(classCode).settings.set({
+    let response = await SongServerAPI().classrooms.find(classCode).settings.set({
         "name": classNameInput.value,
         "allowSongSubmissions": classSubmitEnabledCheckbox.checked,
         "submissionsRequireTokens": classSubmitTokensCheckbox.checked,
@@ -222,20 +184,15 @@ deleteNoButton.addEventListener("click", () => {
     controller.toggle("overview");
 });
 deleteYesButton.addEventListener("click", async () => {
-    let result = await SongServerAPI(2).classroom(classCode).delete();
+    let result = await SongServerAPI().classrooms.find(classCode).delete();
     if (result.success) {
         goBack();
     }
 });
-
-
 /**
- *
- * @param {SongServer.API.StudentInfo[]} students  Students
- * @returns {void}
+ * @param students  Students
  */
- function displayStudents(students) {
-    /** @type {HTMLTableElement} */
+function displayStudents(students) {
     let table = document.getElementById("student-table");
     /** @type {HTMLDivElement} */
     let noStudentsFound = document.getElementById("no-student-text");
@@ -259,7 +216,7 @@ deleteYesButton.addEventListener("click", async () => {
         removeIcon.classList.add("fa-solid", "fa-user-xmark");
         removeButton.appendChild(removeIcon);
         removeButton.addEventListener("click", () => {
-            window.overlayManager.show("are-you-sure-student", { "email": student.email});
+            window.overlayManager.show("are-you-sure-student", { "email": student.email });
         });
         tdRemove.appendChild(removeButton);
         tdName.textContent = student.name;
@@ -267,14 +224,14 @@ deleteYesButton.addEventListener("click", async () => {
         let tokenCountText = document.createElement("input");
         tokenCountText.classList.add("token-count");
         tokenCountText.type = "number";
-        tokenCountText.value = new String(student.tokens);
+        tokenCountText.value = String(student.tokens);
         tokenCountText.addEventListener("change", async () => {
-            let response = await SongServerAPI(2).classroom(classCode).students.find(student.email).tokens.set(Math.max(parseInt(tokenCountText.value), 0));
+            let response = await SongServerAPI().classrooms.find(classCode).students.find(student.email).tokens.set(Math.max(parseInt(tokenCountText.value), 0));
             if (!response.success) {
                 window.alert("Failed to set tokens from user: " + response.message);
                 throw new Error(response.message);
             }
-            tokenCountText.value = new String(response.data);
+            tokenCountText.value = String(response.data);
         });
         let decrementTokenButtonIcon = document.createElement("i");
         decrementTokenButtonIcon.classList.add("fa-solid", "fa-minus");
@@ -282,12 +239,12 @@ deleteYesButton.addEventListener("click", async () => {
         decrementTokenButton.appendChild(decrementTokenButtonIcon);
         decrementTokenButton.classList.add("decrement-token");
         decrementTokenButton.addEventListener("click", async () => {
-            let response = await SongServerAPI(2).classroom(classCode).students.find(student.email).tokens.set(Math.max(parseInt(tokenCountText.value) - 1, 0));
+            let response = await SongServerAPI().classrooms.find(classCode).students.find(student.email).tokens.set(Math.max(parseInt(tokenCountText.value) - 1, 0));
             if (!response.success) {
                 window.alert("Failed to set tokens from user: " + response.message);
                 throw new Error(response.message);
             }
-            tokenCountText.value = new String(response.data);
+            tokenCountText.value = String(response.data);
         });
         let incrementTokenButtonIcon = document.createElement("i");
         incrementTokenButtonIcon.classList.add("fa-solid", "fa-plus");
@@ -295,30 +252,29 @@ deleteYesButton.addEventListener("click", async () => {
         incrementTokenButton.appendChild(incrementTokenButtonIcon);
         incrementTokenButton.classList.add("increment-token");
         incrementTokenButton.addEventListener("click", async () => {
-            let response = await SongServerAPI(2).classroom(classCode).students.find(student.email).tokens.set(parseInt(tokenCountText.value) + 1);
+            let response = await SongServerAPI().classrooms.find(classCode).students.find(student.email).tokens.set(parseInt(tokenCountText.value) + 1);
             if (!response.success) {
                 window.alert("Failed to set tokens from user: " + response.message);
                 throw new Error(response.message);
             }
-            tokenCountText.value = new String(response.data);
+            tokenCountText.value = String(response.data);
         });
         tokensContainer.appendChild(decrementTokenButton);
         tokensContainer.appendChild(tokenCountText);
         tokensContainer.appendChild(incrementTokenButton);
         tdTokens.appendChild(tokensContainer);
-        
         let likesContainer = document.createElement("div");
         let likeCountText = document.createElement("input");
         likeCountText.classList.add("like-count");
         likeCountText.type = "number";
-        likeCountText.value = new String(student.likes);
+        likeCountText.value = String(student.likes);
         likeCountText.addEventListener("change", async () => {
-            let response = await SongServerAPI(2).classroom(classCode).students.find(student.email).lkikes.set(Math.max(parseInt(likeCountText.value), 0));
+            let response = await SongServerAPI().classrooms.find(classCode).students.find(student.email).likes.set(Math.max(parseInt(likeCountText.value), 0));
             if (!response.success) {
                 window.alert("Failed to set tokens from user: " + response.message);
                 throw new Error(response.message);
             }
-            likeCountText.value = new String(response.data);
+            likeCountText.value = String(response.data);
         });
         let decrementLikeButtonIcon = document.createElement("i");
         decrementLikeButtonIcon.classList.add("fa-solid", "fa-minus");
@@ -326,12 +282,12 @@ deleteYesButton.addEventListener("click", async () => {
         decrementLikeButton.appendChild(decrementLikeButtonIcon);
         decrementLikeButton.classList.add("decrement-token");
         decrementLikeButton.addEventListener("click", async () => {
-            let response = await SongServerAPI(2).classroom(classCode).students.find(student.email).likes.set(Math.max(parseInt(likeCountText.value) - 1, 0));
+            let response = await SongServerAPI().classrooms.find(classCode).students.find(student.email).likes.set(Math.max(parseInt(likeCountText.value) - 1, 0));
             if (!response.success) {
                 window.alert("Failed to set tokens from user: " + response.message);
                 throw new Error(response.message);
             }
-            likeCountText.value = new String(response.data);
+            likeCountText.value = String(response.data);
         });
         let incrementLikeButtonIcon = document.createElement("i");
         incrementLikeButtonIcon.classList.add("fa-solid", "fa-plus");
@@ -339,12 +295,12 @@ deleteYesButton.addEventListener("click", async () => {
         incrementLikeButton.appendChild(incrementLikeButtonIcon);
         incrementLikeButton.classList.add("increment-token");
         incrementLikeButton.addEventListener("click", async () => {
-            let response = await SongServerAPI(2).classroom(classCode).students.find(student.email).likes.set(parseInt(likeCountText.value) + 1);
+            let response = await SongServerAPI().classrooms.find(classCode).students.find(student.email).likes.set(parseInt(likeCountText.value) + 1);
             if (!response.success) {
                 window.alert("Failed to set tokens from user: " + response.message);
                 throw new Error(response.message);
             }
-            likeCountText.value = new String(response.data);
+            likeCountText.value = String(response.data);
         });
         likesContainer.appendChild(decrementLikeButton);
         likesContainer.appendChild(likeCountText);
@@ -370,7 +326,7 @@ removeAllStudentsButton.addEventListener("click", () => {
 /** @returns {Promise<void>} */
 async function loadStudents() {
     window.overlayManager.show("loading");
-    let response = await SongServerAPI(2).classroom(classCode).students.list();
+    let response = await SongServerAPI().classrooms.find(classCode).students.list();
     if (!response.success) {
         window.overlayManager.hide();
         throw new Error(response.message);
@@ -462,15 +418,10 @@ function onSongDrop(ev, index) {
 }
 /** @extends PlaylistControllerBase */
 class TeacherPlaylistController extends PlaylistControllerBase {
-    /** @private */
-    _currentSong = undefined;
-    /** @private */
-    playlistSongs = undefined;
-    /** @private */
-    _playing = undefined;
     /** @public */
     constructor() {
         super(playlistContainer);
+        this._currentSong = null;
         this._playing = false;
         this.playlistSongs = [];
         document.getElementById("volume-slider").addEventListener("change", (ev) => {
@@ -497,11 +448,6 @@ class TeacherPlaylistController extends PlaylistControllerBase {
             }
         });
     }
-    /** @public
-     * @param {SongServer.API.ClassSongInfo[]} songs
-     * @param {SongServer.API.CurrentSong} currentSong
-     * @returns {Promise<void>}
-     */
     async refresh(songs, currentSong) {
         let curSong = this.currentSong;
         console.groupCollapsed("Song Refresh");
@@ -537,16 +483,16 @@ class TeacherPlaylistController extends PlaylistControllerBase {
         }
         console.groupEnd();
     }
-    /** @public */
     get currentSong() {
-        if (this._currentSong == null) return null;
-
+        if (this._currentSong == null)
+            return null;
         if (!this._currentSong.from_priority) {
             return this.playlistSongs[this._currentSong.position - 1];
         }
+        // @ts-ignore
         return new PriorityPlaylistSong(this._currentSong, this);
     }
-    /** 
+    /**
      * @public
      * @param {SongServer.API.CurrentSong} song
      */
@@ -554,10 +500,6 @@ class TeacherPlaylistController extends PlaylistControllerBase {
         console.log(song);
         this._currentSong = song;
     }
-
-    /** @protected
-     * @returns {void}
-     */
     _togglePlayback() {
         window.player.togglePause();
     }
@@ -565,23 +507,12 @@ class TeacherPlaylistController extends PlaylistControllerBase {
     get isStudent() { return false; }
     /** @public */
     get isTeacher() { return true; }
-    /** @protected
-     * @returns {boolean}
-     */
     canTogglePlayback() {
         return true;
     }
-    /** @protected
-     * @param {PlaylistSongBase} song
-     * @returns {boolean}
-     */
     canChangeToSong(song) {
         return true;
     }
-    /** @protected
-     * @param {PlaylistSongBase} song
-     * @returns {void}
-     */
     async _playSong(song) {
         let newSong = this.currentSong;
         console.log(newSong);
@@ -591,7 +522,6 @@ class TeacherPlaylistController extends PlaylistControllerBase {
         window.player.loadVideo(song.songID);
         newSong?.setSelected();
     }
-    /** @public */
     get playable() {
         let playable = false;
         for (let index = 0; index < this.playlistSongs.length; index++) {
@@ -602,103 +532,67 @@ class TeacherPlaylistController extends PlaylistControllerBase {
         }
         return playable;
     }
-    /** @public
-     * @returns {void}
-     */
     refreshVolume() {
         let vol = window.player.getVolume();
         document.getElementById("volume-slider").value = vol.toString();
         this._updateVolumeLabel(vol);
     }
-    /** @private
-     * @param {number} value
-     * @returns {void}
-     */
     _updateVolumeLabel(value) {
         document.getElementById("volume-slider-label").textContent = value + "%";
     }
-    /** @public
-     * @returns {void}
-     */
     onPaused() {
         this.currentSong?.pause();
         let iElement = document.getElementById("playback-btn").children[0];
         iElement.classList.remove("fa-pause");
         iElement.classList.add("fa-play");
     }
-    /** @public
-     * @returns {void}
-     */
     onResume() {
         this.currentSong?.play();
         let iElement = document.getElementById("playback-btn").children[0];
         iElement.classList.remove("fa-play");
         iElement.classList.add("fa-pause");
     }
-    /** @public
-     * @returns {void}
-     */
     onBuffering() {
         this.currentSong?.buffer();
     }
-    /** @public
-     * @param {number} volume
-     * @returns {void}
-     */
     setVolume(volume) {
         window.player.setVolume(volume);
     }
-    /** @public
-     * @returns {void}
-     */
     togglePlayback() {
         window.player.togglePause();
     }
-    /** @public
-     * @returns {void}
-     */
     async nextSong() {
         this.currentSong?.onSongChange();
-        let nextSongResponse = await SongServerAPI(2).classroom(classCode).playlist.nextSong();
+        let nextSongResponse = await SongServerAPI().classrooms.find(classCode).playlist.nextSong();
         if (!nextSongResponse.success) {
             console.log(nextSongResponse);
             throw new Error(nextSongResponse.message);
         }
-
         this.setCurrentSong(nextSongResponse.data);
-        
         let nextSong = this.currentSong;
         if (!this.playable)
             return;
-        
         this.currentSong?.play();
         if (nextSong != null)
             this._playSong(nextSong);
     }
-    /** @public
-     * @returns {void}
-     */
     async previousSong() {
         this.currentSong?.onSongChange();
-        let previousSongResponse = await SongServerAPI(2).classroom(classCode).playlist.previousSong();
+        let previousSongResponse = await SongServerAPI().classrooms.find(classCode).playlist.previousSong();
         if (!previousSongResponse.success) {
             console.log(previousSongResponse);
             throw new Error(previousSongResponse.message);
         }
-
         this.setCurrentSong(previousSongResponse.data);
-        
         let previousSong = this.currentSong;
         if (!this.playable)
             return;
-        
         this.currentSong?.play();
         if (previousSong != null)
             this._playSong(previousSong);
     }
-
     async shuffle() {
-        let res = await SongServerAPI(2).classroom(classCode).playlist.shuffle();
+        let res = await SongServerAPI().classrooms.find(classCode).playlist.shuffle();
         if (res.success) {
             refreshPlaylist();
         }
@@ -710,15 +604,9 @@ class TeacherPlaylistSong extends PlaylistSongBase {
     constructor(song, index, controller) {
         super(song, index, controller);
     }
-    /** @protected
-     * @returns {void}
-     */
     onDetailsButtonClicked() {
         this.itemElement.toggleAttribute("data-show-details");
     }
-    /** @protected
-     * @returns {Promise<void>}
-     */
     async onPlaybackButtonClicked() {
         if (this.controller.songIndex != this.index || this.state === PlaylistSongState.NOT_STARTED) {
             this.controller.changeSong(this);
@@ -727,27 +615,22 @@ class TeacherPlaylistSong extends PlaylistSongBase {
             this.controller.togglePlayback();
         }
     }
-
     setSelected() {
         this.itemElement.setAttribute("data-selected", "");
     }
-    
     onSongChange() {
         super.onSongChange();
         this.itemElement.removeAttribute("data-selected");
     }
-    /** @protected
-     * @returns {Promise<void>}
-     */
     async onRemoveButtonClicked() {
         window.overlayManager.show("are-you-sure-song", { "song-index": this.index });
     }
 }
 var playlistController = new TeacherPlaylistController();
-/** @returns {Promise<void>} */
+// @ts-ignore
 async function refreshPlaylist() {
-    let songs = await SongServerAPI(2).classroom(classCode).playlist.songs.get();
-    let currentSong = await SongServerAPI(2).classroom(classCode).playlist.currentSong.get();
+    let songs = await SongServerAPI().classrooms.find(classCode).playlist.songs.list();
+    let currentSong = await SongServerAPI().classrooms.find(classCode).playlist.songs.currentSong.get();
     if (songs.success && currentSong.success) {
         console.log(currentSong);
         window.playlistController?.refresh(songs.data, currentSong.data);
@@ -769,11 +652,8 @@ else {
 }
 revertSettings();
 refreshPlaylist();
-
 document.getElementById("player-visibility-button").addEventListener("click", () => {
     document.getElementsByClassName("player-container")[0].classList.toggle("hidden");
 });
-
-
-
+// @ts-ignore
 var songSearchManager = new SongSearchManager(true);

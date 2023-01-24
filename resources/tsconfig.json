@@ -1,0 +1,27 @@
+{
+    "compilerOptions": {
+        "strict": true,
+        "module": "CommonJS",
+        "jsx": "preserve",
+        "outDir": "./js",
+        "rootDir": "./ts",
+        "removeComments": false,
+        "esModuleInterop": true,
+        "sourceMap": false,
+        "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
+        "allowJs": false,
+        "lib": [
+            "ES2021",
+            "DOM",
+        ],
+        "downlevelIteration": true,
+        "moduleResolution": "classic",
+        "target": "ES2021",
+        "typeRoots": []
+    },
+    "exclude": [
+        "js",
+        "temp-js"
+    ]
+}

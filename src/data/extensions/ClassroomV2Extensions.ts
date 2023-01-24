@@ -8,7 +8,7 @@ import ClassroomV2 from "../classrooms/ClassroomV2";
 import ClassroomV2DataBase from "../storage/ClassroomV2DataBase";
 
 export function getStudent(classroom: ClassroomV2, email: string): StudentInClass {
-    for (let i = 0; i < classroom.students.length; i) {
+    for (let i = 0; i < classroom.students.length; i++) {
         let student = classroom.students[i];
         if (student.email === email) {
             return student;
@@ -112,3 +112,4 @@ export async function removeStudent(classroom: ClassroomV2, classroomDB: Classro
     
     return new RemovedStudentInfo(classroom, user, success);
 }
+
