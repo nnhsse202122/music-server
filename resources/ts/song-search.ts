@@ -42,6 +42,7 @@ class SongSearchManager {
         overlayManager.hide();
         if (!response.success) {
             console.error("Failed to search:" + JSON.stringify(response));
+            overlayManager.show("search-song-fail-model");
             return;
         }
         let data = response.data;

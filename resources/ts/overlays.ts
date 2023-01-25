@@ -100,7 +100,7 @@ class DeleteSongFromPlaylistOverlayModel extends OverlayModelBase {
         actionsDiv.appendChild(this._cancelButton);
         actionsDiv.appendChild(this._deleteButton);
     }
-    
+
     private async _onDeleteButtonClicked() {
         this.overlay.show("loading");
         let req = await SongServerAPI().classrooms.find(classCode).playlist.songs.find(this.getData("song-index")).delete();
@@ -556,6 +556,34 @@ class SubmitSongSuccessOverlayModel extends OverlayModelBase {
         this.overlay.hide();
     }
 }
+class SearchSongFailOverlayModel extends OverlayModelBase {
+    private _closeButton: HTMLButtonElement;
+    public constructor(overlay: OverlayManager) {
+        super(overlay, "search-song-fail-model");
+        this._closeButton = null!;
+    }
+    protected override instantiateTitle(titleDiv: HTMLDivElement) {
+        let titleSpan = document.createElement("span");
+        titleSpan.textContent = "Submission Failed";
+        titleDiv.appendChild(titleSpan);
+    }
+    protected override instantiateBody(bodyDiv: HTMLDivElement) {
+        let text = document.createElement("span");
+        text.textContent = "Failed to search for song";
+        bodyDiv.appendChild(text);
+    }
+    protected override instantiateActions(actionsDiv: HTMLDivElement) {
+        this._closeButton = document.createElement("button");
+        this._closeButton.classList.add("action");
+        this._closeButton.classList.add("no");
+        this._closeButton.addEventListener("click", () => this._onCloseButtonClicked());
+        this._closeButton.innerHTML = `<i class="fa-solid fa-xmark"></i>`;
+        actionsDiv.appendChild(this._closeButton);
+    }
+    private _onCloseButtonClicked() {
+        this.overlay.hide();
+    }
+}
 class ReloginOverlayModel extends OverlayModelBase {
     private _confirmButton: HTMLButtonElement;
     public constructor(overlay: OverlayManager) {
@@ -642,3 +670,4 @@ overlayManager.addOverlay(SubmitSongTeacherOverlay);
 overlayManager.addOverlay(SubmitSongFailOverlayModel);
 overlayManager.addOverlay(SubmitSongSuccessOverlayModel);
 overlayManager.addOverlay(ReloginOverlayModel);
+overlayManager.addOverlay(SearchSongFailOverlayModel);
